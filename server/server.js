@@ -1,7 +1,6 @@
-//TODO: package.json
-
 var connect = require('connect')
 var util = require('util')
+var io = require('socket.io')
 
 var router = connect.router(function(app) {
 	app.get('/', function(req, res, next) {
@@ -15,21 +14,33 @@ var router = connect.router(function(app) {
 	})
 })
 
-var server = connect.createServer()
+var server = connect(
 	//automagically logs request & response details
-	.use(connect.logger())
+	connect.logger(),
 
 	//uses the mime type to auto-parse certain body data,
 	//most notably json
-	.use(connect.bodyParser())
+	connect.bodyParser(),
 
-	.use(router)
+	router,
 
 	//serves all files in the static directory from '/'
 	//i.e. static/penis.cock -> www.website.com/penis.cock
-	.use(connect.static(__dirname + '/static'))
+	connect.static(__dirname + '/static')
 
-	//listen on everyone's favorite port ;)
-	.listen(6969)
+)
+
+server.listen(6969) //listen on everyone's favorite port ;)
 
 util.log('server listening on port 6969... hotly')
+
+var socket = io.listen(server)
+
+socket.on('connection', function(client) {
+  client.on('message', function(message) {
+    util.log('message gotten: ' + message)
+  })
+  client.on('disconnect', function() {
+    util.log('client disconnected! what a douche!')
+  })
+})
