@@ -2,21 +2,69 @@
 	<head>
     <!DOCTYPE html>
 		<title>webgl junk, brah</title>
+    <script id="simple.vert.glsl" type="x-shader/x-vertex">
+		  attribute vec3 aPositionIn;
+      void main(void) {
+        gl_Position = vec4(aPositionIn, 1);
+			}
+		</script>
+		<script id="simple.frag.glsl" type="x-shader/x-fragment">
+		  void main(void) {
+        gl_FragColor = vec4(1.0);
+			}
+		</script>
+
 		<script src="/jquery-1.5.1.min.js"></script>
     <script src="/glMatrix-0.9.5.min.js"></script>
     <script src="/webglib.js"></script>
-    <script>
-      /*
-      $(function(){
-        var canvas = document.getElementById('gl_canvas');
-        var gl = canvas.getContext("experimental-webgl")
-        gl.viewportWidth = canvas.width
-        gl.viewportHeight = canvas.height
-      })
-      */
+		<script src="/webgl-utils.js"></script>
+		<script src="/shapes.js"></script>
+    <script type="text/javascript">
+      function start() {
+        var gl = initWebGL();
+				var simple = loadShaderProgram(gl, "simple");
+				gl.useProgram(simple);
+
+				gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+				var mesh = makeSphereMesh(5);
+				renderMesh(gl, mesh);
+				alert(gl.getError());
+			}
+
+			function initWebGL() {
+				var gl = setupWebGL('gl_canvas');
+				gl.clearDepth(1.0);
+				gl.clearColor(0.15, 0.15, 0.15, 0.15);
+				gl.enable(gl.DEPTH_TEST);
+				gl.viewport(500, 500);
+
+				return gl;
+			}
+
+			function loadAssets(gl) {
+        
+			}
+
+			function renderMesh(gl, mesh) {
+			  //Pull buffers out of mesh and pass them to webgl
+				var vertexBuff = gl.createBuffer();
+				gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuff);
+				gl.bufferData(gl.ARRAY_BUFFER, mesh.verticies, gl.STATIC_DRAW);
+				gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
+
+				var indexBuff = gl.createBuffer();
+				gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuff);
+				gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, mesh.indicies, gl.STATIC_DRAW);
+				gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+
+				gl.enableVertexAttribArray(0);
+				gl.enableVertexAttribArray(1);
+
+				gl.drawElements(gl.TRIANGLES, mesh.indicies, gl.UNSIGNED_SHORT, 0);
+			}
     </script>
 	</head>
-	<body>
+	<body onload="start()">
 		<h1>WebGL tests</h1>
 		<canvas id="gl_canvas" width="500" height="500" style="border:none;"></canvas>
 	</body>
