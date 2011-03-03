@@ -1,132 +1,39 @@
 <html>
 	<head>
-    <!DOCTYPE html>
+        <!DOCTYPE html>
 		<title>webgl junk, brah</title>
-    <script id="simple.vert.glsl" type="x-shader/x-vertex">
-		  attribute vec3 aVertexPosition;
-      uniform mat4 uMVMatrix;
-			uniform mat4 uPMatrix;
+        <script id="simple.vert.glsl" type="x-shader/x-vertex">
+            attribute vec3 aVertexPosition;
+            uniform mat4 uMVMatrix;
+            uniform mat4 uPMatrix;
 
-      void main(void) {
-        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1);
-			}
-		</script>
-		<script id="simple.frag.glsl" type="x-shader/x-fragment">
-		  void main(void) {
-        gl_FragColor = vec4(1.0);
-			}
-		</script>
+            void main(void) {
+                gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1);
+            }
+        </script>
+        <script id="simple.frag.glsl" type="x-shader/x-fragment">
+            void main(void) {
+                gl_FragColor = vec4(1.0);
+            }
+        </script>
 
 		<script src="webgl-debug.js"></script>
 		<script src="/jquery-1.5.1.min.js"></script>
-    <script src="/glMatrix-0.9.5.min.js"></script>
-    <script src="/webglib.js"></script>
+        <script src="/glMatrix-0.9.5.min.js"></script>
+        <script src="/webglib.js"></script>
 		<script src="/webgl-utils.js"></script>
 		<script src="/shapes.js"></script>
-    <script type="text/javascript">
-      $(function() {
-        start();
-			});
-
-      function start() {
-        var gl = initWebGL();
-				var simple = loadShaderProgram(gl, "simple");
-				gl.useProgram(simple);
-
-				gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-				//var mesh = makeSphereMesh(5);
-				//renderMesh(gl, mesh);
-				renderTriangle(gl, simple);
-			}
-
-			function initWebGL() {
-				var gl = setupWebGL('gl_canvas', true);
-				//var canvas = document.getElementById('gl_canvas');
-        //var gl = canvas.getContext("experimental-webgl");
-        //gl.viewportWidth = canvas.width;
-        //gl.viewportHeight = canvas.height;
-
-				gl.clearDepth(1.0);
-				gl.clearColor(0.15, 0.15, 0.15, 0.15);
-				gl.enable(gl.DEPTH_TEST);
-				gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-        return gl;
-      }
-
-        function loadAssets(gl) {
-          
-        }
-
-			function renderTriangle(gl, simple) {
-        simple.vertexPositionAttribute = gl.getAttribLocation(simple, "aVertexPosition");
-        gl.enableVertexAttribArray(simple.vertexPositionAttribute);
-   
-        simple.pMatrixUniform = gl.getUniformLocation(simple, "uPMatrix");
-        simple.mvMatrixUniform = gl.getUniformLocation(simple, "uMVMatrix");
-
-
-triangleVertexPositionBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
-  var vertices = [
-   0.0,  1.0,  0.0,
-   -1.0, -1.0,  0.0,
-  1.0, -1.0,  0.0
-  ];
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-  triangleVertexPositionBuffer.itemSize = 3;
-  triangleVertexPositionBuffer.numItems = 3;
-
-
-var mvMatrix = mat4.create();
-var pMatrix = mat4.create();
-
-  gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
- 
-   mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
-  
-  mat4.identity(mvMatrix);
- 
-   mat4.translate(mvMatrix, [-1.5, 0.0, -7.0]);
-   gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
-   gl.vertexAttribPointer(simple.vertexPositionAttribute, triangleVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
- 
- gl.uniformMatrix4fv(simple.pMatrixUniform, false, pMatrix);
- gl.uniformMatrix4fv(simple.mvMatrixUniform, false, mvMatrix);
-
-
-   gl.drawArrays(gl.TRIANGLES, 0, triangleVertexPositionBuffer.numItems);
-	 
-  
-        //var verts = gl.createBuffer();
-				//gl.bindBuffer(gl.ARRAY_BUFFER, verts);
-        //gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
-				//gl.bufferData(gl.ARRAY_BUFFER,
-				//    [0.0, 0.0, 0.0, 0.5, 0.5, 0.0, 1.0, 0.0, 0.0], gl.STATIC_DRAW);
-				//gl.drawArrays(gl.TRIANGLES, 0, 3);
-
-			}
-
-			function renderMesh(gl, mesh) {
-			  //Pull buffers out of mesh and pass them to webgl
-				var vertexBuff = gl.createBuffer();
-				gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuff);
-				gl.bufferData(gl.ARRAY_BUFFER, mesh.verticies, gl.STATIC_DRAW);
-				gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
-
-				var indexBuff = gl.createBuffer();
-				gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuff);
-				gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, mesh.indices, gl.STATIC_DRAW);
-				gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
-
-          gl.enableVertexAttribArray(0);
-          gl.enableVertexAttribArray(1);
-
-          gl.drawElements(gl.TRIANGLES, mesh.indicies, gl.UNSIGNED_SHORT, 0);
-        }
-      })
-    </script>
+        <script src="/webgl.js"></script>
+        <script src="/bob.js"></script>
+        <script type="text/javascript">
+            $(function() {
+                WGL.start();
+                /*
+                var canvas = document.getElementById("gl_canvas")
+                webGLStart(canvas);
+                */
+            });
+        </script>
 	</head>
 	<body>
 		<h1>WebGL tests</h1>

@@ -1,5 +1,5 @@
 /* Mesh:
- *  Float32Array verticies;
+ *  Float32Array vertices;
  *  Float32Array normals;
  *  Float32Array texCoords;
  *  Uint8Array indices;
@@ -9,8 +9,8 @@
  */
 
 function makeSphereMesh(radius) {
-  var step = 10 * Math.PI / 180; //5 degrees at a time
-  var verts_per_ring = 5 * Math.PI / step;
+  var step = 10.0 * Math.PI / 180.0; //5 degrees at a time
+  var verts_per_ring = 5.0 * Math.PI / step;
 
   var verts = [];
   var indices = [];
@@ -50,7 +50,9 @@ function makeSphereMesh(radius) {
   indices.push(end, end+1, end+verts_per_ring);
 
   var mesh = {};
-  mesh.verticies = new Float32Array(verts);
+  mesh.vertices = new Float32Array(verts);
   mesh.indices = new Uint16Array(indices);
+  //mesh.vertices = verts;
+  //mesh.indices = indices;
   return mesh;
 }

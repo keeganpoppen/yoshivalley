@@ -71,43 +71,52 @@ var TextureDelegate = function(texture_paths) {
 }
 
 function setupWebGL(canvas, debug) {
-  var canvas = document.getElementById(canvas);
-  var gl = WebGLUtils.setupWebGL(canvas);
-	gl.viewportWidth = canvas.width;
-	gl.viewportHeight = canvas.height;
-  if(debug) gl = WebGLDebugUtils.makeDebugContext(gl);
-	return gl;
+    var gl = WebGLUtils.setupWebGL(canvas);
+    if(debug) gl = WebGLDebugUtils.makeDebugContext(gl);
+
+    gl.viewportWidth = canvas.width;
+    gl.viewportHeight = canvas.height;
+
+    return gl;
 }
 
 function loadShader(gl, sname) {
-  var shaderScript = document.getElementById(sname);
+    var shaderScript = document.getElementById(sname);
 	if(!shaderScript) return null;
+
 	var shader;
 	if(shaderScript.type === "x-shader/x-fragment") {
-	  shader = gl.createShader(gl.FRAGMENT_SHADER);
-  } else if(shaderScript.type === "x-shader/x-vertex") {
-    shader = gl.createShader(gl.VERTEX_SHADER);
-  } else {
-    return null;
+        shader = gl.createShader(gl.FRAGMENT_SHADER);
+    } else if(shaderScript.type === "x-shader/x-vertex") {
+        shader = gl.createShader(gl.VERTEX_SHADER);
+    } else {
+        return null;
 	}
-  gl.shaderSource(shader, shaderScript.text);
-	gl.compileShader(shader);
+
+    gl.shaderSource(shader, shaderScript.text);
+    gl.compileShader(shader);
+
 	if(!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    alert("Shader did not compile: " + gl.getShaderInfoLog(shader));
+        alert("Shader did not compile: " + gl.getShaderInfoLog(shader));
 		return null;
 	}
-  return shader;
+
+    return shader;
 }
 
 function loadShaderProgram(gl, pname) {
-  var fragmentShader = loadShader(gl, pname + ".frag.glsl");
+    var fragmentShader = loadShader(gl, pname + ".frag.glsl");
 	var vertexShader = loadShader(gl, pname + ".vert.glsl");
 	var program = gl.createProgram();
+
 	gl.attachShader(program, vertexShader);
 	gl.attachShader(program, fragmentShader);
+
 	gl.linkProgram(program);
+
 	if(!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    alert("Shader program fail");
+        alert("Shader program fail");
 	}
+
 	return program;
 }
