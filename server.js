@@ -5,12 +5,10 @@ var io = require('socket.io')
 var router = connect.router(function(app) {
 	app.get('/', function(req, res, next) {
 		res.write("<h1>Hello, there</h1>")
-		res.end()
 	})
 
 	app.get('/keegan', function(req, res, next) {
 		res.write("welcome to keegantown. keegan is awesome.")
-		res.end()
 	})
 })
 
@@ -26,8 +24,16 @@ var server = connect(
 
 	//serves all files in the static directory from '/'
 	//i.e. static/penis.cock -> www.website.com/penis.cock
-	connect.static(__dirname + '/static')
+	connect.static(__dirname + '/static'),
 
+  //kill all forms of caching. muahahaha.
+  function(req, res) {
+    res.setHeader('Cache-Control', 'no-cache, must-revalidate')
+    res.setHeader('Expires', 'Sat, 26 Jul 1997 05:00:00 GMT')
+    res.setHeader('Pragma', 'no-cache')
+    res.setHeader('Last-Modified', 'Sat, 26 Jul 2025 05:00:00 GMT')
+    res.end()
+  }
 )
 
 server.listen(6969) //listen on everyone's favorite port ;)

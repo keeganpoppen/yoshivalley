@@ -40,23 +40,22 @@
 			}
 
 			function initWebGL() {
-				//var gl = setupWebGL('gl_canvas', true);
-				var canvas = document.getElementById('gl_canvas');
-        var gl = canvas.getContext("experimental-webgl");
-        gl.viewportWidth = canvas.width;
-        gl.viewportHeight = canvas.height;
+				var gl = setupWebGL('gl_canvas', true);
+				//var canvas = document.getElementById('gl_canvas');
+        //var gl = canvas.getContext("experimental-webgl");
+        //gl.viewportWidth = canvas.width;
+        //gl.viewportHeight = canvas.height;
 
 				gl.clearDepth(1.0);
 				gl.clearColor(0.15, 0.15, 0.15, 0.15);
 				gl.enable(gl.DEPTH_TEST);
 				gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+        return gl;
+      }
 
-				return gl;
-			}
-
-			function loadAssets(gl) {
-        
-			}
+        function loadAssets(gl) {
+          
+        }
 
 			function renderTriangle(gl, simple) {
         simple.vertexPositionAttribute = gl.getAttribLocation(simple, "aVertexPosition");
@@ -121,11 +120,12 @@ var pMatrix = mat4.create();
 				gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, mesh.indices, gl.STATIC_DRAW);
 				gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
-				gl.enableVertexAttribArray(0);
-				gl.enableVertexAttribArray(1);
+          gl.enableVertexAttribArray(0);
+          gl.enableVertexAttribArray(1);
 
-				gl.drawElements(gl.TRIANGLES, mesh.indicies, gl.UNSIGNED_SHORT, 0);
-			}
+          gl.drawElements(gl.TRIANGLES, mesh.indicies, gl.UNSIGNED_SHORT, 0);
+        }
+      })
     </script>
 	</head>
 	<body>
