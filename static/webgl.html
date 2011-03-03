@@ -10,10 +10,11 @@
 		</script>
 		<script id="simple.frag.glsl" type="x-shader/x-fragment">
 		  void main(void) {
-        gl_FragColor = vec4(1.0);
+        gl_FragColor = vec4(0.5);
 			}
 		</script>
 
+		<script src="webgl-debug.js"></script>
 		<script src="/jquery-1.5.1.min.js"></script>
     <script src="/glMatrix-0.9.5.min.js"></script>
     <script src="/webglib.js"></script>
@@ -28,11 +29,10 @@
 				gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 				var mesh = makeSphereMesh(5);
 				renderMesh(gl, mesh);
-				alert(gl.getError());
 			}
 
 			function initWebGL() {
-				var gl = setupWebGL('gl_canvas');
+				var gl = setupWebGL('gl_canvas', true);
 				gl.clearDepth(1.0);
 				gl.clearColor(0.15, 0.15, 0.15, 0.15);
 				gl.enable(gl.DEPTH_TEST);

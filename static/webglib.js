@@ -70,16 +70,11 @@ var TextureDelegate = function(texture_paths) {
   }
 }
 
-function setupWebGL(canvas) {
+function setupWebGL(canvas, debug) {
   var canvas = document.getElementById('gl_canvas');
   var gl = WebGLUtils.setupWebGL(canvas);
-	var gl_err;
-	for(var attrib in gl) {
-    gl_err.__defineGetter__(attrib, function() {
-      return gl[attrib];
-		});
-	}
-	return gl_err;
+  if(debug) gl = WebGLDebugUtils.makeDebugContext(gl);
+	return gl;
 }
 
 function loadShader(gl, sname) {
