@@ -71,8 +71,10 @@ var TextureDelegate = function(texture_paths) {
 }
 
 function setupWebGL(canvas, debug) {
-  var canvas = document.getElementById('gl_canvas');
+  var canvas = document.getElementById(canvas);
   var gl = WebGLUtils.setupWebGL(canvas);
+	gl.viewportWidth = canvas.width;
+	gl.viewportHeight = canvas.height;
   if(debug) gl = WebGLDebugUtils.makeDebugContext(gl);
 	return gl;
 }
