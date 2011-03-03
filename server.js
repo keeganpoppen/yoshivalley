@@ -43,8 +43,10 @@ util.log('server listening on port 6969... hotly')
 var socket = io.listen(server)
 
 socket.on('connection', function(client) {
-  client.on('message', function(message) {
-    util.log('message gotten: ' + message)
+  client.on('message', function(msg) {
+      if(msg.type == 'accel') {
+        util.log('x: ' + msg.accelX + ', y: ' + msg.accelY + ', z: ' + msg.accelZ) 
+      }
   })
   client.on('disconnect', function() {
     util.log('client disconnected! what a douche!')

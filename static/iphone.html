@@ -1,0 +1,36 @@
+<html>
+    <head>
+        <title>iOS accelerometer test</title>
+		<script src="/jquery-1.5.1.min.js"></script>
+		<script src="/socket.io.js"></script>
+        <script>
+            $(function(){
+                var socket = new io.Socket()
+                socket.on('connect', function() { $('#socket').html('CONNECTED!'); })
+                socket.on('disconnect', function() { $('#socket').html('DISCONNECTED!'); })
+                socket.connect()
+
+                if(typeof window.DeviceMotionEvent === 'undefined') return;
+
+                window.addEventListener('devicemotion', function(e) {
+                    var x = e.accelerationIncludingGravity.x
+                    var y = e.accelerationIncludingGravity.y
+                    var z = e.accelerationIncludingGravity.z
+                    $('#accelerometer').html('x: ' + x + ', y: ' + y + ' z: ' + z); 
+                    socket.send({'type': 'accel', 'accelX': x, 'accelY': y, 'accelZ': z})
+                }, false)
+
+                if(typeof window.DeviceOrientationEvent === 'undefined') return;
+
+                window.addEventListener('deviceorientation', function(e) {
+                    $('#gyro').html('zrot: ' + e.alpha + ', xrot: ' + e.beta + ', yrot: ' + e.gamma)
+                }, false)
+            })
+        </script>
+    </head>
+    <body>
+        <div id="socket"></div>
+        <div id="accelerometer"></div>
+        <div id="gyro"></div>
+    </body>
+</html>
