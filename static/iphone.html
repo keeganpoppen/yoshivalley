@@ -4,10 +4,75 @@
 		<script src="/jquery-1.5.1.min.js"></script>
 		<script src="/socket.io.js"></script>
         <script>
+            function get_sdev(vals) {
+                var mean = 0.0
+                for(var i = 0; i < vals.length; ++i) mean += vals[i]
+                mean /= vals.length
+                
+                var sdev = 0.0
+                for(var i = 0; i < vals.length; ++i) sdev += Math.pow(vals[i] - mean, 2.0)
+                sdev /= vals.length
+                sdev = Math.pow(sdev, 0.5)
+
+                var small = vals[0]
+                var large = vals[0]
+                for(var i = 1; i < vals.length; ++i) {
+                    if(vals[i] > large) large = vals[i]
+                    if(vals[i] < small) small = vals[i]
+                }
+
+                $('#latency').html('small: ' + small + ', large: ' + large + ', mean: ' + mean + ', sdev: ' + sdev)
+
+                return {'small': small, 'large': large, 'mean': mean, 'sdev': sdev, 'n': vals.length, 'xbar_dev': (sdev/Math.sqrt(vals.length))}
+            }
+
             $(function(){
+                //var latencies = {}
+                var latencies = []
+
+                var num_rec = 0
+                var NUM_TIMING_PACKETS = 20
+
                 var socket = new io.Socket()
-                socket.on('connect', function() { $('#socket').html('CONNECTED!'); })
+                socket.on('connect', function() {
+                    $('#socket').html('CONNECTED!');
+
+                    for(var i = 0; i < NUM_TIMING_PACKETS; ++i) {
+                        var packet = { 'type':'timer', 'start_time': Date.now(), 'id': i }
+                        socket.send(packet)
+                        //latencies[packet.id] = packet
+                    }
+                })
                 socket.on('disconnect', function() { $('#socket').html('DISCONNECTED!'); })
+
+                socket.on('message', function(msg) {
+                    if(msg.type == 'timer') {
+                        msg.end_time = Date.now()
+
+                        var latency = msg.end_time - msg.start_time
+
+                        //$('#latency').html('latency: ' + latency)
+
+                        //latencies[msg.id] = msg
+
+                        num_rec++
+                        latencies.push(Date.now() - msg.start_time)
+
+                        if(num_rec == NUM_TIMING_PACKETS) {
+                            /*
+                            var latency_arr = []
+                            for(var l in latencies) {
+                                var lat = latencies[l].end_time - latencies[l].start_time
+                                latency_arr.push(lat) 
+                            }
+                            var sdev_obj = get_sdev(latency_arr)
+                            */
+                            var sdev_obj = get_sdev(latencies)
+                            socket.send({'type': 'lats', 'data': sdev_obj})
+                        }
+                    }
+                })
+
                 socket.connect()
 
                 if(typeof window.DeviceMotionEvent === 'undefined') return;
@@ -32,5 +97,6 @@
         <div id="socket"></div>
         <div id="accelerometer"></div>
         <div id="gyro"></div>
+        <div id="latency"></div>
     </body>
 </html>
