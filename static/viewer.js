@@ -1,7 +1,7 @@
 GLIB.FireWhenReady({
     textures: ["earth.jpg", "sun.jpg", "mars.jpg"],
     shaders: ["planet.frag.glsl", "planet.vert.glsl"],
-    meshes: ["sphere.json"]
+    meshes: []
 }, function(resources) {
     var makeSphere = function(radius, lats, longs) {
         var geometryData = [ ];
@@ -53,8 +53,6 @@ GLIB.FireWhenReady({
         return retval;
     }
     
-    console.log('starting real work, namely the actual game')
-
     var GameModel = {
         camera : {
            fov : 60.0, //Degrees 
@@ -129,7 +127,7 @@ GLIB.FireWhenReady({
         var h = gl.ui.height;
         gl.viewport(0, 0, w, h);
         gl.xform.projection.loadIdentity();
-        gl.xform.projection.perspective(sglDegToRad(GameModel.camera.fov), w/h, 0.1, 100.0);
+        gl.xform.projection.perspective(sglDegToRad(GameModel.camera.fov), w/h, 0.1, 200.0);
         gl.xform.view.loadIdentity();
         gl.xform.view.lookAt(GameModel.camera.position[0],
                              GameModel.camera.position[1],
@@ -152,13 +150,13 @@ GLIB.FireWhenReady({
         gl.xform.model.scale(planet.radius, planet.radius, planet.radius);
 
         sglRenderMeshGLPrimitives(planet.mesh, "index", gl.programs[planet.program], null,
-            /*Uniforms*/ {
-                            ModelMatrix : gl.xform.modelMatrix,
-                            ModelViewPorjectionMatrix : gl.xform.modelViewProjectionMatrix,
-                            planetCenter : planetPosition,
-                            sunCenter : GameModel.sun.position
-                         },
-            /*Samplers*/ {surfaceTexture : planet.texture});
+        /*Uniforms*/ {
+                        ModelMatrix : gl.xform.modelMatrix,
+                        ModelViewPorjectionMatrix : gl.xform.modelViewProjectionMatrix,
+                        planetCenter : planetPosition,
+                        sunCenter : GameModel.sun.position
+                     },
+        /*Samplers*/ {surfaceTexture : planet.texture});
     };
 
     sglRegisterLoadedCanvas("canvas", {
@@ -204,6 +202,7 @@ GLIB.FireWhenReady({
             gl.clearColor(0.0, 0.0, 0.0, 1.0);
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
             gl.enable(gl.DEPTH_TEST);
+            gl.enable(gl.CULL_FACE);
 
             setCamera(gl);
             drawPlanet(gl, GameModel.planets[0]);
@@ -212,7 +211,9 @@ GLIB.FireWhenReady({
             //    drawPlanet(gl, GameModel.planets[planet]);
             //}
 
+            gl.disable(gl.CULL_FACE);
             gl.disable(gl.DEPTH_TEST);
+            
         }
-    }, 60);
+    }, 60.0);
 });
