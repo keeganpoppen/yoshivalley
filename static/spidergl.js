@@ -4336,6 +4336,7 @@ function sglTextureCubeFromData(gl, internalFormat, width, height, sourceFormat,
 		if (sourceType == gl.FLOAT) {
 			tx = new Float32Array(width * height * 4);
 		}
+
 		else {
 			tx = new Uint8Array(width * height * 4);
 		}
@@ -4854,6 +4855,7 @@ function SglProgramUniform(program, info) {
 	}
 	else if (type == gl.INT) {
 		this._func = function (v) { this._prog.gl.uniform1i(this._info.location, v); };
+
 	}
 	else if (type == gl.INT_VEC2) {
 		this._func = function (v) { this._prog.gl.uniform2iv(this._info.location, v); };
@@ -7395,6 +7397,7 @@ function sglGetCanvasContext(canvasID) {
 	if (!canvas) return null;
 
 	var gl = canvas.getContext("experimental-webgl");
+	gl = WebGLDebugUtils.makeDebugContext(gl);
 	if (!gl) return null;
 
 	if (gl.FALSE == undefined) gl.FALSE = 0;
