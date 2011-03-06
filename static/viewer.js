@@ -1,9 +1,10 @@
 $(function() {
-    GLIB.loadResources({
+    GLIB.FireWhenReady({
         textures: ["earth.jpg", "sun.jpg", "mars.jpg"],
         shaders: ["planet.frag.glsl", "planet.vert.glsl"],
         meshes: ["sphere.json"]
     }, function(resources) {
+        console.log('starting real work, namely the actual game')
 
         var GameModel = {
             camera : {
@@ -14,7 +15,9 @@ $(function() {
             sun : {
                 program : "planet", //We'll need a special sun shader
                 texture : "sun.jpg",
-                position : [0.0,0.0,0.0]
+                radius: 20.0,
+                mass: 100.0,
+                position : new SglVec3(0.0,0.0,0.0)
             },
 
             planets : [
@@ -23,6 +26,7 @@ $(function() {
                     texture : "earth.jpg",
                     mass : 30.0, 
                     radius : 10.0,
+                    position: new SglVec3(100.0, 100.0, 0.0),
                     tilt : 5.0, //Degrees
                     rotation : 0.0, //Degrees
                     rotationalVelocity : 8.0, //Degrees per second
@@ -36,6 +40,7 @@ $(function() {
                     texture : "mars.jpg",
                     mass : 10.0,
                     radius : 3.33,
+                    position: new SglVec3(100.0, 0.0, 0.0),
                     tilt : 3.0, 
                     rotation : 0.0,
                     rotationalVelocity : 5.0, 
@@ -44,6 +49,30 @@ $(function() {
                     mesh : {} //Will be set to SGlMesh object
                 }
             ],
+
+            players: [
+                {
+                    program: undefined, //obviously this shouldn't be undefined...
+                    texture: undefined, //...same
+                    mass: 0.1,
+                    radius: 0.5, 
+                    position: new SglVec3(50.0, 50.0, 0.0),
+                    velocity: new SglVec3(0.0, 0.0, 0.0),
+                    thrust_velocity: new SglVec3(0.0, 0.0, 0.0),
+                    acceleration: new SglVec3(0.0, 0.0, 0.0),
+                    cannon_angle: 0.0
+                }
+            ],
+
+            particles: [
+                {
+                    type: 'laser', //presumably this type will indicate which shader to use
+                    position: new SglVec3(2.0, 2.0, 2.0),
+                    velocity: new SglVec3(0.0, 0.0, 0.0),
+                    player: 0 //index of the player who shot the laser
+                }
+            ]
+
         };
 
         var setCamera = function(gl) {
@@ -83,7 +112,7 @@ $(function() {
                 /*Samplers*/ {surfaceTexture : planet.texture});
         };
 
-        sglRegisterCanvas("canvas", {
+        sglRegisterLoadedCanvas("canvas", {
             load: function(gl) {
                 gl.xform = new SglTransformStack();
                 gl.programs = {};
@@ -108,6 +137,9 @@ $(function() {
             },
 
             update: function(gl, dt) {
+                //update the positions and velocities of ... everything!
+                GLIB.Solver.StepTime(GameModel, dt)
+
                 for(var planet in GameModel.planets) {
                     GameModel.planets[planet].rotation +=
                         GameModel.planets[planet].rotationalVelocity * dt;
