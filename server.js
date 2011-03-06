@@ -61,6 +61,8 @@ function broadcast_to_viewers(msg) {
 
 var socket = io.listen(server)
 
+var last_message = Date.now()
+
 socket.on('connection', function(client) {
     //if(client in clients) util.log('WWTF!!!!!')
     
@@ -77,8 +79,15 @@ socket.on('connection', function(client) {
             broadcast_to_viewers({'type': 'player:add', 'player_id': client.sessionId})
 
             client.on('message', function(message) {
+                //util.log('last message was ' + (Date.now() - last_message) + ' ms ago')
+                last_message = Date.now()
+
+                util.log('message gotten from client ' + client.sessionId)
+                util.log(util.inspect(message))
+                /*
                 message.player_id = client.sessionId
                 broadcast_to_viewers(message)
+                */
             })
 
             client.on('disconnect', function(message) {

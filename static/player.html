@@ -1,10 +1,13 @@
 <html>
 	<head>
 		<title>Yoshivalley :: Player Page</title>
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name = "viewport" content = "width=device-width,minimum-scale=1.0,maximum-scale=1.0,height=device-height,initial-scale=1.0,user-scalable=0" />
 		<script src="/jquery-1.5.1.min.js"></script>
 		<script src="/socket.io.js"></script>
 		<script>
             var player_id = -1;
+
 			var socket = new io.Socket();
 			socket.connect();
 			socket.on('connect', function() {
@@ -24,50 +27,161 @@
 				$("#stuff").append('<div>disconnected!</div>')
 			})
 
-            var AccelThrottle = {};
-
+            var GyroThrottle = {};
             (function(){
-                var inputs = []
-                var accept_input = function(input) {
+                var prev_val = [0.0, 0.0, 0.0];
+                var last_sent = prev_val;
 
+                var get_value = function() {
+                    return prev_val
                 }
+
+                function arr_dist(a, b) {
+                    return Math.sqrt(Math.pow(a[0] - b[0], 2) +
+                                     Math.pow(a[1] - b[1], 2) +
+                                     Math.pow(a[2] - b[2], 2))
+                }
+
+                function large_send_deviation(input) {
+                    return (arr_dist(input, last_sent) > 5)
+                }
+
+                function sufficient_move_diff(input) {
+                    return (arr_dist(input, prev_val) > 1)
+                }
+
+                var should_send_given_input = function(input) {
+                    if(!input || input === undefined) return false
+
+                    var should = false
+                    if(sufficient_move_diff(input) || large_send_deviation(input)) {
+                        should = true
+                        last_sent = prev_val
+                    }
+
+                    prev_val = input
+                    return should
+                }
+
+                GyroThrottle.get_value = get_value
+                GyroThrottle.should_send_given_input = should_send_given_input
             })();
 
             /*
              * set up the accelerometer and gyroscope
              */
-            if(typeof window.DeviceMotionEvent === 'undefined') return
+
+            //if(typeof window.DeviceMotionEvent === 'undefined') return
 
             window.addEventListener('devicemotion', function(e) {
                 var x = e.accelerationIncludingGravity.x
                 var y = e.accelerationIncludingGravity.y
                 var z = e.accelerationIncludingGravity.z
 
-                var data = {};
-                data.x = x; data.y = y; data.z = z;
-                socket.send({'type': 'accel:update', 'data': data})
+                /* TODO: don't actually think accel data needs to be sent at all
+                if(AccelThrottle.should_send_given_input([x,y,z]) {
+                    var arr = AccelThrottle.get_value()
+                    var data = {}
+                    data.x = arr[0]; data.y = arr[1]; data.z = arr[2];
+                    socket.send({'type': 'accel:update', 'data': data})
+                }
+                */
             }, false)
 
-            if(typeof window.DeviceOrientationEvent === 'undefined') return
+            //if(typeof window.DeviceOrientationEvent === 'undefined') return
 
             window.addEventListener('deviceorientation', function(e) {
-                var zrot = e.alpha
                 var xrot = e.beta
                 var yrot = e.gamma
-                
-                var data = {}
-                data.zrot = zrot; data.xrot = xrot; data.yrot = yrot;
-                socket.send({'type': 'gyro:update', 'data': data})
+                var zrot = e.alpha
+
+                if(GyroThrottle.should_send_given_input([xrot,yrot,zrot]) && player_id != -1) {
+                    var arr = GyroThrottle.get_value() 
+                    var data = {}
+                    data.xrot = arr[0]; data.yrot = arr[1]; data.zrot = arr[2];
+                    socket.send({'type': 'gyro:update', 'data': data})
+                }
             }, false)
+
+            window.addEventListener('orientationchange', function(e) {
+                var orient = window.orientation
+                if(orient == 0 || orient == 180) {
+                    $("body").removeClass()
+                    $("body").addClass("portrait")
+                } else {
+                    $("body").removeClass()
+                    $("body").addClass("landscape")
+                }
+                setTimeout(function(){window.scrollTo(0,1);},100)
+            })
+
+            $(function(){
+                var orient = window.orientation
+                if(orient == 0 || orient == 180) {
+                    $("body").removeClass()
+                    $("body").addClass("portrait")
+                } else {
+                    $("body").removeClass()
+                    $("body").addClass("landscape")
+                }
+                setTimeout(function(){window.scrollTo(0,1);},100)
+            })
 		</script>
+        <style>
+            * {
+                margin: 0px;
+                padding: 0px;
+            }
+
+            .column {
+                float: left;
+                margin:0px;
+                padding:0px;
+                overflow:hidden;
+                width: 10px;
+                height: 10px;
+            }
+
+            body.portrait {
+                width: 320px;
+                height: 416px;
+            }
+
+            body.landscape {
+                height: 276px;
+                width: 480px;
+            }
+
+            body.portrait .column {
+                height:208px;
+                width:320px;
+                background-color: green;
+            }
+
+            body.landscape .column {
+                height: 276px;
+                width: 240px;
+                background-color: yellow;
+            }
+        </style>
 	</head>
 	<body>
-		<h1>SOCKET TEST</h1>
-        <h2>PLAYER ID: <span id="player_id">(none)</span></h2>
-        <h3>Random junk:</h3>
-		<div id="stuff"></div>
-        <h3>Device data:</h3>
-        <div id= "accel"></div>
-	    <div id="gyro"></div>	
+        <div class="column">
+            <div style="width:100px;height:100px;margin:auto;background-color:blue">
+                CONTROL CENTER
+            </div>
+        </div>
+        <div class="column">
+            <h2>PLAYER ID: <span id="player_id">(none)</span></h2>
+            <h3>Random junk:</h3>
+            <div id="stuff"></div>
+            <h3>Device data:</h3>
+            <div id= "accel"></div>
+            <div id="gyro"></div>	
+            <div style="width:100px;height:100px;margin:auto;background-color:red">
+                FIRE!!!
+            </div>
+        </div>
+        <div style="clear:both"></div>
 	</body>
 </html>
