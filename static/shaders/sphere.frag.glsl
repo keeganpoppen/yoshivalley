@@ -9,7 +9,7 @@ uniform vec3 sunCenter;
 varying vec3 worldPosition;
 varying vec2 texcoord;
 
-const am
+const float ambient = 0.2;
 
 void main(void)
 {
@@ -18,5 +18,5 @@ void main(void)
   
   vec3 color = texture2D(surfaceTexture, texcoord).rgb;
   float rd = max(0.0, dot(L, N)); 
-  gl_FragColor = vec4(rd * color, 1.0);
+  gl_FragColor = vec4(rd * color + ambient * color, 1.0);
 }
