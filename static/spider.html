@@ -1,0 +1,133 @@
+<html>
+    <head>
+        <script type="text/javascript" src="spidergl.js"></script>
+        <script id="SIMPLE_VERTEX_SHADER" type="text/x-vertex"> 
+            #ifdef GL_ES
+            precision highp float;
+            #endif
+             
+            uniform   mat4 u_mvp;
+            uniform   mat4 u_mv;
+            uniform   mat3 u_normalMat;
+             
+            attribute vec3 a_position;
+            attribute vec3 a_normal;
+            attribute vec2 a_texcoord;
+             
+            varying   vec3 normal;
+            varying   vec3 eyePosition;
+            varying   vec2 texcoord;
+             
+            void main(void)
+            {
+                vec4 eyeTemp = u_mv * vec4(a_position, 1.0);
+                eyePosition = eyeTemp.xyz;
+	            gl_Position = u_mvp * vec4(a_position, 1.0);
+                normal = u_normalMat * a_normal;
+                texcoord = a_texcoord;
+            }
+         </script> 
+             
+        <script id="SIMPLE_FRAGMENT_SHADER" type="text/x-fragment"> 
+            #ifdef GL_ES
+            precision highp float;
+            #endif
+
+            uniform sampler2D s_texture;
+             
+            varying vec3 normal;
+            varying vec3 eyePosition;
+            varying vec2 texcoord;
+             
+            void main(void)
+            {
+              vec3 V = normalize(eyePosition);
+              vec3 N = normalize(normal);
+              vec3 color = texture2D(s_texture, texcoord).rgb;
+              float rd = max(0.0, dot(V, N)); 
+              gl_FragColor = vec4(rd * color, 1.0);
+            }
+        </script> 
+        <script type="text/javascript" src="webgl-debug.js" ></script>
+        <script type="text/javascript" src="shapes.js"></script>
+        <script type="text/javascript">
+            function start() {
+                sglRegisterLoadedCanvas("c", {
+                    load: function(gl) {
+		                    /*************************************************************/
+		                    this.xform     = new SglTransformStack();
+		                    this.angle     = 0.0;
+		                    this.primitives = "triangles";
+		                    /*************************************************************/
+                     
+                     
+		                    /*************************************************************/
+		                    var simpleVsrc = sglNodeText("SIMPLE_VERTEX_SHADER");
+		                    var simpleFsrc = sglNodeText("SIMPLE_FRAGMENT_SHADER");
+		                    var simpleProg = new SglProgram(gl, [simpleVsrc], [simpleFsrc]);
+		                    console.log(simpleProg.log);
+		                    this.simpleProg = simpleProg;
+		                    /*************************************************************/
+                     
+                     
+                            var sphere = makeSphere(2, 60, 60);
+
+		                    var box = new SglMeshGL(gl);
+		                    box.addVertexAttribute("position", 3, sphere.vertices);
+                            box.addVertexAttribute("normal", 3, sphere.normals);
+                            box.addVertexAttribute("texcoord", 2, sphere.texCoords);
+		                    box.addIndexedPrimitives("triangles", gl.TRIANGLES, sphere.indices);
+		                    this.boxMesh = box;
+
+                            this.tex = new SglTexture2D(gl, "earth.jpg", {
+                                generateMipmap: true,
+                                minFilter: gl.LINEAR_MIPMAP_LINEAR,
+                                onload: this.ui.requestDraw
+                            });
+                    },
+
+                    update: function(gl, dt) {
+                        this.angle += 90.0 * dt;
+                    },
+
+                    draw: function(gl) {
+                        var w = this.ui.width;
+	                    var h = this.ui.height;
+                     
+	                    gl.clearColor(0.2, 0.2, 0.6, 1.0);
+	                    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
+                     
+	                    gl.viewport(0, 0, w, h);
+                     
+	                    this.xform.projection.loadIdentity();
+	                    this.xform.projection.perspective(sglDegToRad(60.0), w/h, 0.1, 100.0);
+                     
+	                    this.xform.view.loadIdentity();
+	                    this.xform.view.lookAt(0.0, 2.0, 3.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+                     
+	                    this.xform.model.loadIdentity();
+	                    this.xform.model.rotate(sglDegToRad(this.angle), 0.0, 1.0, 0.0);
+	                    this.xform.model.scale(0.5, 0.5, 0.5);
+                     
+	                    gl.enable(gl.DEPTH_TEST);
+	                    gl.enable(gl.CULL_FACE);
+                     
+	                    var boxUniforms = { u_mvp : this.xform.modelViewProjectionMatrix,
+                                            u_normalMat : this.xform.viewSpaceNormalMatrix,
+                                            u_mv : this.xform.modelViewMatrix };
+                        if(this.tex.isValid) {
+                            var samplers = { s_texture : this.tex };
+	                        sglRenderMeshGLPrimitives(this.boxMesh, this.primitives, this.simpleProg, null, boxUniforms, samplers);
+                        }
+                     
+	                    gl.disable(gl.DEPTH_TEST);
+	                    gl.disable(gl.CULL_FACE);
+                    }
+                }, 60.0);
+            }
+        </script>
+    </head>
+    <body onload="start()">
+       <canvas id="c" width="800" height="420"></canvas> 
+    </body>
+<html>
