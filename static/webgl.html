@@ -4,19 +4,37 @@
 		<title>webgl junk, brah</title>
         <script id="simple.vert.glsl" type="x-shader/x-vertex">
             attribute vec3 aVertexPosition;
+            attribute vec3 aNormal;
             uniform mat4 uMVMatrix;
             uniform mat4 uPMatrix;
+            uniform mat3 uNMatrix;
+
+            varying vec4 eyePos;
+            varying vec3 normal;
 
             void main(void) {
-                gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1);
+                normal = uNMatrix * aNormal;
+                eyePos = uMVMatrix * vec4(aVertexPosition, 1);
+                gl_Position = uPMatrix * eyePos;
             }
         </script>
         <script id="simple.frag.glsl" type="x-shader/x-fragment">
+            precision highp float;
+            //varying vec4 eyePos;
+            //varying vec3 normal;
+
             void main(void) {
+                //vec3 eye = eyePos.xyz / eyePos.w;
+                //vec3 V = -normalize(eye);
+                //vec3 N = normalize(normal);
+
+                //float color = max(0.0, dot(V, N));
+                //gl_FragColor = vec4(color);
                 gl_FragColor = vec4(1.0);
             }
         </script>
 
+        <script src="J3DI.js"></script>
 		<script src="webgl-debug.js"></script>
 		<script src="/jquery-1.5.1.min.js"></script>
         <script src="/glMatrix-0.9.5.min.js"></script>

@@ -1,0 +1,102 @@
+<html lang="en">
+    <head>
+        <title>Bob2</title>
+        <script type="text/javascript" src="jquery-1.5.1.min.js"></script>
+        <script type="text/javascript" src="Three.js"></script>
+        <script type="text/javascript" src="webgl-utils.js"></script>
+        <script type="text/javascript">
+            var container
+
+            var camera, scene, renderer;
+
+            var mesh, texture,geometry, material;
+
+            var worldWidth = 128, worldDepth = 128,
+                worldHalfWidth = worldWidth / 2, worldHalfDepth = worldDepth / 2;
+
+            $(function() {
+                init();
+                //animate();
+                render();
+            });
+
+            function init() {
+
+                container = document.getElementById( 'container' );
+
+                camera = new THREE.QuakeCamera( { fov: 60, aspect: window.innerWidth / window.innerHeight, near: 1, far: 20000,
+                        movementSpeed: 10, lookSpeed: 0.004, noFly: false, lookVertical: true } );
+
+                camera.target.position.z = - 100;
+
+                scene = new THREE.Scene();
+                scene.fog = new THREE.FogExp2( 0xaaccff, 0.0007 );
+
+                //var light = new THREE.PointLight( 0xffffff, 2 );
+                //light.position.y = 500;
+                //scene.addLight( light );
+
+                camera.position.y = 200;
+                camera.target.position.y = camera.position.y;
+
+                geometry = new Plane( 20000, 20000, worldWidth - 1, worldDepth - 1 );
+                //geometry = new Sphere(5, 12, 16);
+
+                var i, j, il, jl;
+
+                for ( i = 0, il = geometry.vertices.length; i < il; i ++ ) {
+                    geometry.vertices[ i ].position.z = 35 * Math.sin( i/2 );
+                }
+
+                for( i = 0; i < geometry.uvs.length; i++ ) {
+                    var uvs = geometry.uvs[ i ];
+                    for ( j = 0, jl = uvs.length; j < jl; j++ ) {
+                        uvs[ j ].u *= 5;
+                        uvs[ j ].v *= 5;
+                    }
+                }
+
+                geometry.computeFaceNormals();
+                geometry.computeVertexNormals();
+
+                var texture = ImageUtils.loadTexture( "trees.jpg" );
+                texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+                material = new THREE.MeshBasicMaterial( { color:0x0044ff, opacity:1, map: texture } );
+
+                mesh = new THREE.Mesh( geometry, material );
+                mesh.rotation.x = - 90 * Math.PI / 180;
+                scene.addObject( mesh );
+
+                renderer = new THREE.WebGLRenderer( { clearColor:0xaaccff, clearAlpha: 1 } );
+                renderer.setSize( window.innerWidth, window.innerHeight );
+
+                container.innerHTML = "";
+                container.appendChild( renderer.domElement );
+
+            }
+
+            function animate() {
+                requestAnimFrame(animate);
+                render();
+            }
+
+            function render() {
+                var time = new Date().getTime() * 0.01;
+
+                for ( var i = 0, l = geometry.vertices.length; i < l; i ++ ) {
+                    geometry.vertices[ i ].position.z = 35 * Math.sin( i/5 + (time + i)/7 );
+                }
+
+                //geometry.computeFaceNormals();
+                //geometry.computeVertexNormals();
+
+                mesh.geometry.__dirtyVertices = true;
+                //mesh.geometry.__dirtyNormals = true;
+                renderer.render(scene, camera);
+            }
+        </script>
+    </head>
+    <body>
+        <div id="container"></div>
+    </body>
+</html>

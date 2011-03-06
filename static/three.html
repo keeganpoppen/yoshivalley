@@ -1,0 +1,38 @@
+<html> 
+    <head>
+        <script src="Three.js" type="text/javascript"></script>
+        <script src="webgl-utils.js" type="text/javascript"></script>
+        <script type="text/javascript">
+            /*
+            $(function() {
+                start();
+            });
+            */
+
+            function start() {
+                var renderer = new THREE.WebGLRenderer();
+                renderer.setSize(500, 500);//window.innerWidth, window.innerHeight);
+                document.getElementById('container').appendChild(renderer.domElement);
+                var scene = new THREE.Scene();
+                var camera = new THREE.Camera( 75, window.innerWidth / window.innerHeight, 1, 10000 );
+
+                var material = new THREE.MeshPhongMaterial({color:0x000000, specular: 0xaa5500});
+                var geo = new Sphere(5, 32, 16);
+                var mesh = new THREE.Mesh(geo, material);
+                scene.addObject(mesh);
+
+                function animate() {
+                    window.requestAnimFrame(animate, renderer.domElement);
+                    renderer.render(scene, camera);  
+                };
+
+                //animate();
+                renderer.render(scene, camera);  
+            }
+      
+        </script>
+    </head>
+    <body onload="start()">
+        <div id="container"></div>
+    </body>
+</html>
