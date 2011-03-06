@@ -90,8 +90,6 @@
 
     var renderMesh = function(gl, mesh, shader, angle) {
         gl.clear(gl.COLOR_BUFFER_BIT, gl.DEPTH_BUFFER_BIT);
-        
-        //DIRTY! SETTING MV AND PROJ MATS
         var mvMatrix = mat4.create();
         var pMatrix = mat4.create();
         mat4.perspective(60.0, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);

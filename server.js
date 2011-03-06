@@ -40,13 +40,45 @@ server.listen(6969) //listen on everyone's favorite port ;)
 
 util.log('server listening on port 6969... hotly')
 
+var clients = {};
+
 var socket = io.listen(server)
 
 socket.on('connection', function(client) {
-  client.on('message', function(message) {
-    util.log('message gotten: ' + message)
-  })
-  client.on('disconnect', function() {
-    util.log('client disconnected! what a douche!')
-  })
+    if(client in clients) util.log('WWTF!!!!!')
+
+    clients[client.sessionId] = {'obj': client, 'start': Date.now(), 'num_msg': 0}
+    client.on('message', function(msg) {
+        if(msg.type == 'accel') {
+            //util.log('x: ' + msg.accelX + ', y: ' + msg.accelY + ', z: ' + msg.accelZ) 
+            clients[client.sessionId].num_msg++;
+        } else if(msg.type == 'timer') {
+            msg.server_time = Date.now()
+            client.send(msg)
+        } else {
+            util.log(util.inspect(msg))
+        }
+    })
+    client.on('disconnect', function() {
+        delete clients[client]
+        util.log('client disconnected! what a douche!')
+    })
 })
+
+var print_rates = function() {
+    util.log('printing rates')
+    for(var id in clients) {
+        var obj = clients[id]
+        if(obj === undefined) {
+            util.log('oops... undefined. killing it.')
+            delete clients[id]
+            continue
+        }
+
+        var time_elapsed = Date.now() - obj.start
+        util.log('id: ' + id + ', rate: ' + (obj.num_msg / (time_elapsed/1000.0)))
+    }
+    setTimeout(print_rates, 2000)
+}
+
+print_rates()
