@@ -56,5 +56,5 @@ function makeSphere(radius, lats, longs)
     return retval;
 }
 
-var sphere = makeSphere(2, 60, 60);
+var sphere = makeSphere(1, 30, 30);
 fs.writeFile("sphere.json", JSON.stringify(sphere));
