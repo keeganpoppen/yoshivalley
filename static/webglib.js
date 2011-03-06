@@ -1,16 +1,14 @@
-(function(){
-    var GLIB = {}
+var GLIB = {};
 
+(function(){
     var resources;
     var num_resources;
     var success_callback;
 
     function decrement_resources(){
         --num_resources
-        console.log('resource loaded! down to ' + num_resources)
         if(num_resources == 0) {
-            console.log('calling the success handler with object:')
-            console.log(resources)
+            console.log('done loading resources')
             success_callback(resources)
         }
     }
@@ -25,36 +23,37 @@
 
         for(texture in path_obj.textures) {
             (function(){
-                var tex_name = texture
+                var tex_name = path_obj.textures[texture]
                 var img = new Image()
                 $(img).load(function(){
+                    console.log("loaded texture with name: " + tex_name)
                     resources.textures[tex_name] = img
                     decrement_resources()
                 })
-                img.src = tex_name
-            )()
+                img.src = '/textures/' + tex_name
+            })()
         }
         for(mesh in path_obj.meshes) {
             (function(){
-                var mesh_name = mesh
+                var mesh_name = path_obj.meshes[mesh]
                 $.getJSON('/meshes/' + mesh_name, function(data) {
+                    console.log('loaded mesh with name: ' + mesh_name)
                     resources.meshes[mesh_name] = data
                     decrement_resources()
-                }
-            )()
+                })
+            })()
         }
         for(shader in path_obj.shaders) {
             (function(){
-                var shader_name = shader
-                $.get('/shaders/' + shader_name, {}, function(data) {
+                var shader_name = path_obj.shaders[shader]
+                $.get('/shaders/' + shader_name, function(data) {
+                    console.log('loaded shader with name' + shader_name)
                     resources.shaders[shader_name] = data
                     decrement_resources()
-                }, 'text/plain')
+                })
             })()
         }
     }
 
     GLIB.loadResources = loadResources
-
-    return GLIB;
 })()
