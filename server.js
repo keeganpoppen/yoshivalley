@@ -81,4 +81,4 @@ var print_rates = function() {
     setTimeout(print_rates, 2000)
 }
 
-print_rates()
+//print_rates()
