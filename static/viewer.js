@@ -1,8 +1,10 @@
 GLIB.FireWhenReady({
     textures: ["earth.jpg", "sun.jpg", "mars.jpg"],
-    shaders: ["planet.frag.glsl", "planet.vert.glsl"],
+    shaders: ["spider.frag.glsl", "spider.vert.glsl", "planet.frag.glsl", "planet.vert.glsl"],
     meshes: []
 }, function(resources) {
+    console.log('starting real work, namely the actual game');
+    
     var makeSphere = function(radius, lats, longs) {
         var geometryData = [ ];
         var texCoordData = [ ];
@@ -127,7 +129,7 @@ GLIB.FireWhenReady({
         var h = gl.ui.height;
         gl.viewport(0, 0, w, h);
         gl.xform.projection.loadIdentity();
-        gl.xform.projection.perspective(sglDegToRad(GameModel.camera.fov), w/h, 0.1, 200.0);
+        gl.xform.projection.perspective(sglDegToRad(GameModel.camera.fov), w/h, 0.1, 300.0);
         gl.xform.view.loadIdentity();
         gl.xform.view.lookAt(GameModel.camera.position[0],
                              GameModel.camera.position[1],
@@ -141,18 +143,18 @@ GLIB.FireWhenReady({
     var drawPlanet = function(gl, planet) {
         gl.xform.model.loadIdentity();
         var planetPosition = [];
-        planetPosition[0] = planet.orbitRadius * Math.sin(planet.orbitAngle * Math.PI / 180.0);
+        planetPosition[0] = planet.orbitRadius * Math.sin(sglDegToRad(planet.orbitAngle));
         planetPosition[1] = 0.0;
-        planetPosition[2] = planet.orbitRadius * Math.cos(planet.orbitAngle * Math.PI / 180.0);
+        planetPosition[2] = planet.orbitRadius * Math.cos(sglDegToRad(planet.orbitAngle));
         //gl.xform.model.translate(planetPosition.x, planetPosition.y, planetPosition.z);
-        gl.xform.model.rotate(planet.tilt * Math.PI / 180.0, 1, 0, 0);
-        gl.xform.model.rotate(planet.rotation * Math.PI / 180, 0, 1, 0);
+        gl.xform.model.rotate(sglDegToRad(planet.tilt), 1.0, 0.0, 0.0);
+        gl.xform.model.rotate(sglDegToRad(planet.rotation), 0.0, 1.0, 0.0);
         gl.xform.model.scale(planet.radius, planet.radius, planet.radius);
 
         sglRenderMeshGLPrimitives(planet.mesh, "index", gl.programs[planet.program], null,
         /*Uniforms*/ {
                         ModelMatrix : gl.xform.modelMatrix,
-                        ModelViewPorjectionMatrix : gl.xform.modelViewProjectionMatrix,
+                        ModelViewProjectionMatrix : gl.xform.modelViewProjectionMatrix,
                         planetCenter : planetPosition,
                         sunCenter : GameModel.sun.position
                      },
@@ -164,8 +166,8 @@ GLIB.FireWhenReady({
             gl.xform = new SglTransformStack();
             gl.programs = {};
 
-            gl.programs.planet = new SglProgram(gl, [resources.shaders["planet.vert.glsl"]],
-                                                    [resources.shaders["planet.frag.glsl"]]);
+            gl.programs.planet = new SglProgram(gl, [resources.shaders["spider.vert.glsl"]],
+                                                    [resources.shaders["spider.frag.glsl"]]);
             console.log(gl.programs.planet.log);
 
             var sphereMesh = makeSphere(1, 15, 15);
@@ -178,19 +180,18 @@ GLIB.FireWhenReady({
 
                 //Replace texture string with texture object
                 planet.texture = new SglTexture2D(gl, resources.textures[planet.texture], {
-                    generateMipmap : true,
+                    generateMipmap: true,
                     minFilter: gl.LINEAR_MIPMAP_LINEAR,
-                    onload: this.ui.requestDraw()
+                    onload: this.ui.requestDraw
                 });
             }
 
             gl.ui = this.ui;
-            console.log("Done loading phase of register canvas");
         },
 
         update: function(gl, dt) {
             //update the positions and velocities of ... everything!
-            GLIB.Solver.StepTime(GameModel, dt)
+            //GLIB.Solver.StepTime(GameModel, dt)
 
             for(var planet in GameModel.planets) {
                 GameModel.planets[planet].rotation +=
@@ -213,7 +214,6 @@ GLIB.FireWhenReady({
 
             gl.disable(gl.CULL_FACE);
             gl.disable(gl.DEPTH_TEST);
-            
         }
     }, 60.0);
-});
+});console.log('starting real work, namely the actual game');

@@ -1,6 +1,6 @@
 GLIB.FireWhenReady({
-    textures: ["earth.jpg"],
-    shaders: ["spider.frag.glsl", "spider.vert.glsl"],
+    textures: ["earth.jpg", "sun.jpg", "mars.jpg"],
+    shaders: ["spider.frag.glsl", "spider.vert.glsl", "planet.frag.glsl", "planet.vert.glsl"],
     meshes: []
 }, function(resources) {
     console.log('starting real work, namely the actual game');
@@ -94,6 +94,29 @@ GLIB.FireWhenReady({
                 mesh : {} //Will be set to SGlMesh object
             }
         ],
+        
+        players: [
+            {
+                program: undefined, //obviously this shouldn't be undefined...
+                texture: undefined, //...same
+                mass: 0.1,
+                radius: 0.5, 
+                position: new SglVec3(50.0, 50.0, 0.0),
+                velocity: new SglVec3(0.0, 0.0, 0.0),
+                thrust_velocity: new SglVec3(0.0, 0.0, 0.0),
+                acceleration: new SglVec3(0.0, 0.0, 0.0),
+                cannon_angle: 0.0
+            }
+        ],
+
+        particles: [
+            {
+                type: 'laser', //presumably this type will indicate which shader to use
+                position: new SglVec3(2.0, 2.0, 2.0),
+                velocity: new SglVec3(0.0, 0.0, 0.0),
+                player: 0 //index of the player who shot the laser
+            }
+        ]
     };
     
     var setCamera = function(gl) {
@@ -120,15 +143,18 @@ GLIB.FireWhenReady({
         planetPosition[1] = 0.0;
         planetPosition[2] = planet.orbitRadius * Math.cos(sglDegToRad(planet.orbitAngle));
         //gl.xform.model.translate(planetPosition.x, planetPosition.y, planetPosition.z);
-        gl.xform.model.rotate(sglDegToRad(planet.tilt), 1, 0, 0);
-        gl.xform.model.rotate(sglDegToRad(planet.rotation), 0, 1, 0);
+        gl.xform.model.rotate(sglDegToRad(planet.tilt), 1.0, 0.0, 0.0);
+        gl.xform.model.rotate(sglDegToRad(planet.rotation), 0.0, 1.0, 0.0);
         gl.xform.model.scale(planet.radius, planet.radius, planet.radius);
         
-        sglRenderMeshGLPrimitives(planet.mesh, "index", gl.programs.planet, null,
-            /*Uniforms*/ { u_mvp : gl.xform.modelViewProjectionMatrix,
-                           u_normalMat : gl.xform.viewSpaceNormalMatrix,
-                           u_mv : gl.xform.modelViewMatrix },
-            /*Samplers*/ {s_texture : planet.texture});
+        sglRenderMeshGLPrimitives(planet.mesh, "index", gl.programs[planet.program], null,
+        /*Uniforms*/ {
+                        ModelMatrix : gl.xform.modelMatrix,
+                        ModelViewProjectionMatrix : gl.xform.modelViewProjectionMatrix,
+                        planetCenter : planetPosition,
+                        sunCenter : GameModel.sun.position
+                     },
+        /*Samplers*/ {surfaceTexture : planet.texture});
     };
 
     sglRegisterLoadedCanvas("canvas", {
@@ -136,18 +162,19 @@ GLIB.FireWhenReady({
             gl.xform = new SglTransformStack();
             gl.programs = {};
             
-            gl.programs.planet = new SglProgram(gl, [resources.shaders['spider.vert.glsl']],
-                                                    [resources.shaders['spider.frag.glsl']]);
+            gl.programs.planet = new SglProgram(gl, [resources.shaders['planet.vert.glsl']],
+                                                    [resources.shaders['planet.frag.glsl']]);
             console.log(gl.programs.planet.log);
          
-            var sphereMesh = makeSphere(1, 20, 20);
+            var sphereMesh = makeSphere(1, 15, 15);
             for(var id in GameModel.planets) {
                 var planet = GameModel.planets[id];
                 planet.mesh = new SglMeshGL(gl);
                 planet.mesh.addVertexAttribute("position", 3, sphereMesh.vertices);
-                planet.mesh.addVertexAttribute("normal", 3, sphereMesh.normals);
                 planet.mesh.addVertexAttribute("texcoord", 2, sphereMesh.texCoords);
                 planet.mesh.addIndexedPrimitives("index", gl.TRIANGLES, sphereMesh.indices);
+                
+                //Replace texture string with texture object
                 planet.texture = new SglTexture2D(gl, resources.textures[planet.texture], {
                     generateMipmap: true,
                     minFilter: gl.LINEAR_MIPMAP_LINEAR,
@@ -159,21 +186,30 @@ GLIB.FireWhenReady({
         },
 
         update: function(gl, dt) {
-            GameModel.planets[0].rotation += GameModel.planets[0].rotationalVelocity * dt;
+            //update the positions and velocities of ... everything!
+            //GLIB.Solver.StepTime(GameModel, dt);
+        
+            for(var planet in GameModel.planets) {
+                GameModel.planets[planet].rotation +=
+                    GameModel.planets[planet].rotationalVelocity * dt;
+            }
         },
 
         draw: function(gl) {
             gl.clearColor(0.0, 0.0, 0.0, 1.0);
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
-            
             gl.enable(gl.DEPTH_TEST);
             gl.enable(gl.CULL_FACE);
         
             setCamera(gl);
             drawPlanet(gl, GameModel.planets[0]);
-            
-            gl.disable(gl.DEPTH_TEST);
+            //drawSun(gl)
+            //for(var planet in GameModel.planets) {
+            //    drawPlanet(gl, GameModel.planets[planet]);
+            //}
+
             gl.disable(gl.CULL_FACE);
+            gl.disable(gl.DEPTH_TEST);
         }
     }, 60.0);
 });
