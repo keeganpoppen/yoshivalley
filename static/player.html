@@ -115,6 +115,21 @@
                 setTimeout(function(){window.scrollTo(0,1);},100)
             })
 
+            var prev_angle = 0.0
+            var send_touch_angle = function(e) {
+                e.preventDefault()
+                var control_center = document.getElementById("control_center")
+                var cc = $(control_center)
+                var ev = e.touches[0]
+                var offset = cc.offset()
+                var deviation_x = ev.pageX - offset.left - (cc.width()/2)
+                var deviation_y = ev.pageY - offset.top - (cc.height()/2)
+                var angle = Math.atan2(-deviation_y, deviation_x)
+                prev_angle = angle
+                socket.send({'type': 'cannon:update', 'angle': angle})
+                return false
+            }
+
             $(function(){
                 var orient = window.orientation
                 if(orient == 0 || orient == 180) {
@@ -125,6 +140,18 @@
                     $("body").addClass("landscape")
                 }
                 setTimeout(function(){window.scrollTo(0,1);},100)
+
+                var control_center = document.getElementById("control_center")
+                control_center.addEventListener("touchstart", send_touch_angle, false);
+                control_center.addEventListener("touchmove", send_touch_angle, false);
+
+                document.body.addEventListener("touchstart", function(e){e.preventDefault();},false)
+                document.body.addEventListener("touchmove", function(e){e.preventDefault();},false)
+
+                document.getElementById("fire_button").addEventListener("touchstart", function(){
+                    socket.send({'type': 'laser:fire', 'angle': prev_angle})
+                }, false)
+
             })
 		</script>
         <style>
@@ -167,7 +194,7 @@
 	</head>
 	<body>
         <div class="column">
-            <div style="width:100px;height:100px;margin:auto;background-color:blue">
+            <div id="control_center" style="width:200px;height:200px;vertical-align:middle;margin:auto;background-color:blue">
                 CONTROL CENTER
             </div>
         </div>
@@ -178,7 +205,7 @@
             <h3>Device data:</h3>
             <div id= "accel"></div>
             <div id="gyro"></div>	
-            <div style="width:100px;height:100px;margin:auto;background-color:red">
+            <div style="width:100px;height:100px;margin:auto;background-color:red" id="fire_button">
                 FIRE!!!
             </div>
         </div>
