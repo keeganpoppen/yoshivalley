@@ -188,11 +188,6 @@ function glFunctionArgToString(functionName, argumentIndex, value) {
 function makeDebugContext(ctx, opt_onErrorFunc) {
   init(ctx);
   opt_onErrorFunc = opt_onErrorFunc || function(err, functionName, args) {
-
-        console.log(err);
-        console.log(functionName);
-        console.log(args);
-
         // apparently we can't do args.join(",");
         var argStr = "";
         for (var ii = 0; ii < args.length; ++ii) {
