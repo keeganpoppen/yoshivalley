@@ -1,6 +1,6 @@
 <html>
     <head>
-        <script type="text/javascript" src="spidergl.js"></script>
+        <script type="text/javascript" src="/spidergl.js"></script>
         <script id="SIMPLE_VERTEX_SHADER" type="text/x-vertex"> 
             #ifdef GL_ES
             precision highp float;
@@ -48,8 +48,8 @@
               gl_FragColor = vec4(rd * color, 1.0);
             }
         </script> 
-        <script type="text/javascript" src="webgl-debug.js" ></script>
-        <script type="text/javascript" src="shapes.js"></script>
+        <script type="text/javascript" src="/webgl-debug.js" ></script>
+        <script type="text/javascript" src="/test/shapes.js"></script>
         <script type="text/javascript">
             function start() {
                 sglRegisterLoadedCanvas("c", {
@@ -79,7 +79,7 @@
 		                    box.addIndexedPrimitives("triangles", gl.TRIANGLES, sphere.indices);
 		                    this.boxMesh = box;
 
-                            this.tex = new SglTexture2D(gl, "earth.jpg", {
+                            this.tex = new SglTexture2D(gl, "/textures/earth.jpg", {
                                 generateMipmap: true,
                                 minFilter: gl.LINEAR_MIPMAP_LINEAR,
                                 onload: this.ui.requestDraw

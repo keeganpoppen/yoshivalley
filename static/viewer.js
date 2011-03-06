@@ -36,7 +36,6 @@ $(function() {
                     orbitAngle : 25.0,
                     mesh : {} //Will be set to SGlMesh object
                 },
-                }
             ],
         };
 
@@ -53,8 +52,8 @@ $(function() {
                 console.log(this.programs.planet.log);
 
                 var sphereMesh = resources.meshes["sphere.json"];
-                for(var id : GameModel.planets) {
-                    var planet = GameModel.planet[id];
+                for(var id in GameModel.planets) {
+                    var planet = GameModel.planets[id];
                     planet.mesh = new SglMesh(gl);
                     planet.mesh.addVertexAttribute("position", 3, sphereMesh.vertices); 
                     planet.mesh.addVertexAttribute("texcoord", 3, sphereMesh.vertices); 
@@ -68,13 +67,13 @@ $(function() {
             },
 
             update: function(gl, dt) {
-                for(var planet : GameModel.planets) {
+                for(var planet in GameModel.planets) {
                     GameModel.planets[planet].rotation += rotationalVelocity * dt;
                 }
             },
 
             draw: function(gl) {
-                for(var planet : GameModel.planets) {
+                for(var planet in GameModel.planets) {
                     drawPlanet(gl, GameModel.planets[planet]);
                 }
             }
