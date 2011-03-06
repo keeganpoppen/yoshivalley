@@ -21,9 +21,9 @@ var GLIB = {};
 
         success_callback = callback
 
-        for(texture in path_obj.textures) {
+        for(var i = 0; i < path_obj.textures.length; ++i) {
             (function(){
-                var tex_name = path_obj.textures[texture]
+                var tex_name = path_obj.textures[i]
                 var img = new Image()
                 $(img).load(function(){
                     console.log("loaded texture with name: " + tex_name)
@@ -33,9 +33,9 @@ var GLIB = {};
                 img.src = '/textures/' + tex_name
             })()
         }
-        for(mesh in path_obj.meshes) {
+        for(var i = 0; i < path_obj.meshes.length; ++i) {
             (function(){
-                var mesh_name = path_obj.meshes[mesh]
+                var mesh_name = path_obj.meshes[i]
                 $.getJSON('/meshes/' + mesh_name, function(data) {
                     console.log('loaded mesh with name: ' + mesh_name)
                     resources.meshes[mesh_name] = data
@@ -43,9 +43,9 @@ var GLIB = {};
                 })
             })()
         }
-        for(shader in path_obj.shaders) {
+        for(var i = 0; i < path_obj.shaders.length; ++i) {
             (function(){
-                var shader_name = path_obj.shaders[shader]
+                var shader_name = path_obj.shaders[i]
                 $.get('/shaders/' + shader_name, function(data) {
                     console.log('loaded shader with name' + shader_name)
                     resources.shaders[shader_name] = data
