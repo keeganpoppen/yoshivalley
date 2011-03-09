@@ -1,5 +1,6 @@
 var GLIB = {};
 
+//utility junk
 (function(){
     var resources;
     var num_resources;
@@ -62,43 +63,41 @@ var GLIB = {};
 //needs to be better, it can probably be swapped out, but it seems unimportant
 (function(){
     var Solver = {};
-    Solver.time_step = .01
+    Solver.TimeStep = .01
     Solver.grav_constant = 200.0
     Solver.print_updates = false
 
     var accum = 0
 
     var calculate_gravity = function(massive_pos, massive_mass, small_pos) {
+        if(!massive_pos || massive_pos === undefined)
+            throw "massive object has no position... what?"
+
+        if(!massive_mass || massive_mass === undefined)
+            throw "massive object has no mass... hmmmmm"
+
+        if(!small_pos || small_pos === undefined)
+            throw "don't know where the gravity-bitch is. how would we apply the force?"
+
         var to_vec = massive_pos.clone().add(small_pos.neg)
         var force_mult = (Solver.grav_constant * massive_mass) / to_vec.squaredLength
         return to_vec.mul(new SglVec3(force_mult))
     }
 
-    var calculate_grav_accelerations = function(game_model, player_pos) {
-        var grav_accel = calculate_gravity(game_model.sun.position, game_model.sun.mass, player_pos)
-        for(var i = 0; i < game_model.planets.length; ++i) {
-            var planet = game_model.planets[i]
-            var planet_force = calculate_gravity(planet.position, planet.mass, player_pos)
-            grav_accel = grav_accel.add(planet_force)
-        }
+    var calculate_grav_accelerations = function(grav_bodies, player_pos) {
+        if(!grav_bodies || grav_bodies === undefined)
+            throw "don't have any bodies with which to apply gravity"
+
+        if(!player_pos || player_pos === undefined)
+            throw "player doesn't have any position. guess gravity's not his/her biggest issue..."
+
+        var grav_accel = new SglVec3(0.0)
+        grav_bodies.map(function(grav_body) {
+            var body_accel = calculate_gravity(grav_body.position, grav_body.mass, player_pos)
+            grav_accel = grav_accel.add(body_accel)
+        })
+
         return grav_accel
-    }
-
-    var step_time_once = function(game_model) {
-        var timestep_vec = new SglVec3(Solver.time_step)
-        for(var i = 0; i < game_model.players.length; ++i) {
-            var player = game_model.players[i]
-
-            //figure out the effect of the planets on the player
-            var grav_accel = calculate_grav_accelerations(game_model, player.position)
-            var grav_vel = grav_accel.mul(timestep_vec)
-
-            //update player velocity
-            player.velocity = player.thrust_velocity.add(grav_vel)
-
-            //update player position
-            player.position = player.position.add(player.velocity.mul(timestep_vec))
-        }
     }
 
     var vec_to_string = function(vec) {
@@ -110,24 +109,27 @@ var GLIB = {};
         console.log('velocity: ' + vec_to_string(player.velocity))
     }
 
-    var cum_time = 0 //;)
-    var last_time = 0
+    Solver.StepTime = function(particles, gravity, grav_bodies) {
+        var timestep_vec = new SglVec3(Solver.TimeStep)
 
-    Solver.StepTime = function(game_model, dt) {
-        for(accum += dt; accum > Solver.time_step; accum -= Solver.time_step) {
-            step_time_once(game_model)
-        }
-       
-        cum_time += dt
-        if(cum_time - last_time > 2 && Solver.print_updates){
-            last_time = cum_time
+        particles.map(function(particle) {
+            if(!particle.position || particle.position === undefined)
+                throw "particle has no position? how is it going to move???";
 
-            console.log('time elapsed: ' + cum_time)
-            for(var i = 0; i < game_model.players.length; ++i) {
-                console.log("player " + i + " status:")
-                print_player_status(game_model.players[i])
+            var velocity = particle.velocity || new SglVec3(0.0)
+            var acceleration = particle.acceleration || new SglVec3(0.0)
+
+            if(gravity) {
+                var grav_accel = calculate_grav_accelerations(grav_bodies, particle.position)
+                acceleration = acceleration.add(grav_accel)
             }
-        }
+
+            //integrate the accelerations
+            velocity = velocity.add(acceleration.mul(timestep_vec))
+
+            //update the position by the amount the time step will allow
+            particle.position = particle.position.add(velocity.mul(timestep_vec))
+        })
     }
 
     GLIB.Solver = Solver;
