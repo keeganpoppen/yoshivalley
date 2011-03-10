@@ -74,8 +74,6 @@ var YV = {};
     }
     $.extend(Explosion.prototype, {
         position: new SglVec3(0.0),
-        lifetime: 3.,
-        time_alive: 0.,
         particles: []
     })
 

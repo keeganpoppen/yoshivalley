@@ -66,11 +66,14 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         }
     };
 
-    function renderLasers(gl, model, vertex_loc, tex_loc) {
+    function renderLasers(gl, model, vertex_loc, tex_loc, age_frac_loc, does_age_loc) {
         //set laser texture
         gl.activeTexture(gl.TEXTURE0)
         model.laser.texture.bind()
         gl.uniform1i(tex_loc, 0)
+
+        //lasers don't age, of course
+        gl.uniform1i(does_age_loc, 0);
 
         //render all the lasers
         model.particles.lasers.map(function(laser) {
@@ -96,18 +99,27 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         model.laser.texture.unbind()
     }
 
-    function renderExplosions(gl, model, vertex_loc, tex_loc) {
-        //set laser texture
+    function renderExplosions(gl, model, vertex_loc, tex_loc, age_frac_loc, does_age_loc) {
+        //set explosion / fire texture
         gl.activeTexture(gl.TEXTURE0)
         model.explosion.texture.bind()
         gl.uniform1i(tex_loc, 0)
 
+        //fire ages, fo' sho'
+        gl.uniform1i(does_age_loc, 1);
+
         var vertices = []
+        var age_fracs = []
+        //var ages = []
+        //var lifetimes = []
 
         model.particles.explosions.map(function(explosion) {
             explosion.particles.map(function(particle) {
                 var pos = particle.position
                 vertices.push(pos.x, pos.y, pos.z)
+                age_fracs.push(particle.age/particle.lifetime)
+                //ages.push(particle.age)
+                //lifetimes.push(particle.lifetime)
             })
         })
 
@@ -115,6 +127,23 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         gl.bindBuffer(gl.ARRAY_BUFFER, vert_buffer)
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW)
         gl.vertexAttribPointer(vertex_loc, 3, gl.FLOAT, false, 0, 0)
+
+        var age_frac_buffer = gl.createBuffer()
+        gl.bindBuffer(gl.ARRAY_BUFFER, age_frac_buffer)
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(age_fracs), gl.STATIC_DRAW)
+        gl.vertexAttribPointer(age_frac_loc, 1, gl.FLOAT, false, 0, 0)
+
+        /* CHROME BUG... FUCKERS!!!!!
+        var lifetime_buffer = gl.createBuffer()
+        gl.bindBuffer(gl.ARRAY_BUFFER, lifetime_buffer)
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(lifetimes), gl.STATIC_DRAW)
+        gl.vertexAttribPointer(lifetime_loc, 1, gl.FLOAT, false, 0, 0)
+
+        var age_buffer = gl.createBuffer()
+        gl.bindBuffer(gl.ARRAY_BUFFER, age_buffer)
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(ages), gl.STATIC_DRAW)
+        gl.vertexAttribPointer(age_loc, 1, gl.FLOAT, false, 0, 0)
+        */
         
         gl.drawArrays(gl.POINTS, 0, vertices.length/3)
 
@@ -143,8 +172,14 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         //get position attribute location
         var vertex_loc = gl.getAttribLocation(prog, "a_position")
 
-        renderLasers(gl, model, vertex_loc, tex_loc)
-        renderExplosions(gl, model, vertex_loc, tex_loc)
+        //get attrib locations for particle age & uniform for whether age effects alpha
+        //var lifetime_loc = gl.getAttribLocation(prog, "a_lifetime")
+        //var age_loc = gl.getAttribLocation(prog, "a_age")
+        var age_frac_loc = gl.getAttribLocation(prog, "a_age_frac")
+        var does_age_loc = gl.getUniformLocation(prog, "does_age")
+
+        renderLasers(gl, model, vertex_loc, tex_loc, age_frac_loc, does_age_loc)
+        renderExplosions(gl, model, vertex_loc, tex_loc, age_frac_loc, does_age_loc)
 
         gl.programs.particle.unbind()
 

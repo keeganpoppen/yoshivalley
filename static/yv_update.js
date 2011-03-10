@@ -30,7 +30,9 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         var explosions = model.particles.explosions
         explosions.map(function(explosion) {
             GLIB.Solver.StepTime(explosion.particles)
-            explosion.time_alive += GLIB.Solver.TimeStep
+            explosion.particles.map(function(particle) {
+                particle.age += GLIB.Solver.TimeStep
+            })
         })
 
         //TODO: remove dead explosions and lasers
