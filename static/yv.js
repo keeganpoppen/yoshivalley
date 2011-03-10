@@ -35,7 +35,7 @@ var YV = {};
 
     function UFO(opts) {
         this.program = "ufo";
-        this.position = new SglVec3(0,0,0);
+        this.position = new SglVec3(0.0, 0.0, 0.0);
         this.mass = 0.1;
         this.radius = 5.0; 
         this.velocity = new SglVec3(0.0, 0.0, 0.0);

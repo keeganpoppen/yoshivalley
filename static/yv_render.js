@@ -68,9 +68,12 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
     function renderUFOs(gl, model) {
         model.players.map(function(player) {
+            console.log(player)
             var pos = player.position;
             gl.xform.model.loadIdentity();
             //gl.xform.model.translate(pos.x, pos.y, pos.z);
+            //This rotation necessary to correct for the model's orientation
+            gl.xform.model.rotate(sglDegToRad(-90), 1.0, 0.0, 0.0);
             gl.xform.model.scale(player.radius, player.radius, player.radius);
 
             var sunpos = model.sun.position;
