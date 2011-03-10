@@ -5,10 +5,11 @@ var YV = {};
 
     //all the resources that need to be loaded before the game will work correctly
     YV.Resources = {
-        textures: ["earth.jpg", "sun.jpg", "mars.jpg", "sky2.jpg", "jupiter.jpg"],
+        textures: ["earth.jpg", "sun.jpg", "mars.jpg", "sky2.jpg", "jupiter.jpg", "laser.png"],
         shaders: ["planet.frag.glsl", "planet.vert.glsl",
                   "sun.vert.glsl", "sun.frag.glsl",
-                  "bg.vert.glsl", "bg.frag.glsl"],
+                  "bg.vert.glsl", "bg.frag.glsl",
+                  "laser.vert.glsl", "laser.frag.glsl"],
         meshes: []
     }
 
@@ -100,8 +101,8 @@ var YV = {};
         particles: {
             lasers: [
                 {
-                    position: new SglVec3(2.0, 2.0, 2.0),
-                    velocity: new SglVec3(0.0, 0.0, 0.0),
+                    position: new SglVec3(2.0, 2.0, 0.0),
+                    velocity: new SglVec3(1.0, 0.0, 0.0),
                     player: 0, //index of the player who shot the laser,
                     time_shot: 0    //this is a direction we could go in instead of +vel*dt
                 }
