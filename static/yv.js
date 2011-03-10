@@ -38,6 +38,13 @@ var YV = {};
            position: new SglVec3(100.0, 250.0, 100.0)
         }, 
 
+        background : {
+            program : "bg",
+            texture : "sky2.jpg",
+            repeat : 1.0,
+            mesh : {}
+        },
+
         sun : new Planet({
             program : "sun",
             texture : "sun.jpg",

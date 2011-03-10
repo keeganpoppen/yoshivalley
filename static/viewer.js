@@ -140,8 +140,6 @@ GLIB.FireWhenReady(YV.Resources, function(resources) {
                     minFilter: gl.LINEAR_MIPMAP_LINEAR,
             };
 
-            /*
-
             GameModel.background.mesh = new SglMeshGL(gl);
             GameModel.background.mesh.addVertexAttribute("position", 3, new Float32Array(
                                                                             [-1.0, -1.0, 0.0,
@@ -151,9 +149,6 @@ GLIB.FireWhenReady(YV.Resources, function(resources) {
             GameModel.background.mesh.addIndexedPrimitives("index", gl.TRIANGLES,
                                                             new Uint16Array([0, 1, 2, 2, 3, 0]));
             GameModel.background.texture = new SglTexture2D(gl, resources.textures[GameModel.background.texture], textureOptions);
-
-            */
-            
 
             var sphereMesh = makeSphere(1, 25, 25);
             GameModel.sun.mesh = new SglMeshGL(gl);
@@ -194,7 +189,7 @@ GLIB.FireWhenReady(YV.Resources, function(resources) {
             gl.enable(gl.DEPTH_TEST);
         
             setCamera(gl);
-            //drawBackground(gl, GameModel.background);
+            drawBackground(gl, GameModel.background);
             drawSun(gl, GameModel.sun)
             for(var planet in GameModel.planets) {
                 drawPlanet(gl, GameModel.planets[planet]);
