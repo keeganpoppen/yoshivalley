@@ -58,7 +58,7 @@ var YV = {};
 
         //initialize explosion particles
         //var nParticles = YV.GameModel.particles.laser.numParticles
-        var nParticles = 30
+        var nParticles = 100
         var center = this.position
         for(var i = 0; i < nParticles; ++i) {
             var angle = i * (6.28318531 / nParticles)
@@ -164,9 +164,11 @@ var YV = {};
             ],
 
             explosions: [
+                /*
                 new Explosion({
                     position: new SglVec3(20.0, 0.0, 20.0)
                 })
+                */
             ],
 
             thrusters: [
