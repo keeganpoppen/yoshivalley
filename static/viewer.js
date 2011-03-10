@@ -4,87 +4,16 @@ GLIB.FireWhenReady(YV.Resources, function(resources) {
     //TODO: this is eventually superflous... I'm just lazy
     var GameModel = YV.GameModel;
     
-    var setCamera = function(gl) {
-        var w = gl.ui.width;
-        var h = gl.ui.height;
-
-        var camera = GameModel.camera;
-        var sun = GameModel.sun;
-       
-        gl.viewport(0, 0, w, h);
-        gl.xform.projection.loadIdentity();
-        gl.xform.projection.perspective(sglDegToRad(camera.fov), w/h, 80, 400.0);
-        gl.xform.view.loadIdentity();
-        gl.xform.view.lookAt(camera.position.x,
-                             camera.position.y,
-                             camera.position.z,
-                             sun.position.x,
-                             sun.position.y,
-                             sun.position.z,
-                             0.0, 1.0, 0.0);
-    };
-
-    var drawBackground = function(gl, background) {
-        gl.disable(gl.DEPTH_TEST);
-        sglRenderMeshGLPrimitives(background.mesh, "index", gl.programs[background.program], null,
-            {
-                repeat : background.repeat,
-                aspectRatio : gl.ui.width / gl.ui.height,
-            },
-            {   backgroundTexture : background.texture }, 0, 6);
-        gl.enable(gl.DEPTH_TEST);
-    };
-
-    var drawSun = function(gl, sun) {
-        gl.xform.model.loadIdentity();
-        gl.xform.model.translate(sun.position.x, sun.position.y, sun.position.z);
-        gl.xform.model.rotate(sglDegToRad(sun.rotation), 0.0, 1.0, 0.0);
-        gl.xform.model.scale(sun.radius, sun.radius, sun.radius);
-        sglRenderMeshGLPrimitives(sun.mesh, "index", gl.programs.sun, null,
-        /*Uniforms*/ {
-                        ModelViewProjectionMatrix : gl.xform.modelViewProjectionMatrix,
-                     },
-        /*Samplers*/ {surfaceTexture : sun.texture});
-    };
-    
-    var drawPlanet = function(gl, planet) {
-        gl.xform.model.loadIdentity();
-        var planPos = planet.position;
-        gl.xform.model.translate(planPos.x, planPos.y, planPos.z);
-        gl.xform.model.rotate(sglDegToRad(planet.tilt), 1.0, 0.0, 0.0);
-        gl.xform.model.rotate(sglDegToRad(planet.rotation), 0.0, 1.0, 0.0);
-        gl.xform.model.scale(planet.radius, planet.radius, planet.radius);
-
-        var sun = GameModel.sun;
-        sglRenderMeshGLPrimitives(planet.mesh, "index", gl.programs.planet, null,
-        /*Uniforms*/ {
-                        ModelMatrix : gl.xform.modelMatrix,
-                        ModelViewProjectionMatrix : gl.xform.modelViewProjectionMatrix,
-                        planetCenter : [planPos.x, planPos.y, planPos.z],
-                        sunCenter : [sun.position.x, sun.position.y, sun.position.z]
-                     },
-        /*Samplers*/ {surfaceTexture : planet.texture});
-    };
-
     sglRegisterLoadedCanvas("canvas", {
         load: function(gl) {
             gl.xform = new SglTransformStack();
             gl.programs = {};
             
             //Compile Shaders
-            gl.programs.planet = new SglProgram(gl, [resources.shaders['planet.vert.glsl']],
-                                                    [resources.shaders['planet.frag.glsl']]);
-            console.log(gl.programs.planet.log);
-            gl.programs.sun = new SglProgram(gl, [resources.shaders['sun.vert.glsl']],
-                                                 [resources.shaders['sun.frag.glsl']]);
-            console.log(gl.programs.sun.log);
-            gl.programs.bg = new SglProgram(gl, [resources.shaders['bg.vert.glsl']],
-                                               [resources.shaders['bg.frag.glsl']]);
-            console.log(gl.programs.bg.log);
-
-            gl.programs.laser = new SglProgram(gl, [resources.shaders['laser.vert.glsl']],
-                                                    [resources.shaders['laser.frag.glsl']]);
-            console.log(gl.programs.laser.log);
+            gl.programs.planet = GLIB.compileProgram(gl, resources, 'planet');
+            gl.programs.sun = GLIB.compileProgram(gl, resources, 'sun');
+            gl.programs.bg = GLIB.compileProgram(gl, resources, 'bg');
+            //gl.programs.laser = GLIB.compileProgram(gl, resources, 'laser');
 
             //Create Meshes 
             var textureOptions = {
@@ -140,21 +69,8 @@ GLIB.FireWhenReady(YV.Resources, function(resources) {
         },
 
         draw: function(gl) {
-            gl.clearColor(0.0, 0.0, 0.0, 1.0);
-            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
-            gl.enable(gl.DEPTH_TEST);
-        
-            setCamera(gl);
-            drawBackground(gl, GameModel.background);
-            drawSun(gl, GameModel.sun)
-            for(var planet in GameModel.planets) {
-                drawPlanet(gl, GameModel.planets[planet]);
-            }
-            
-            //TODO: move stuff here
             YV.Render(gl, YV.GameModel)
-
-            gl.disable(gl.DEPTH_TEST);
         }
+
     }, 60.0);
 });

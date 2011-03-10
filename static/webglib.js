@@ -188,6 +188,18 @@ var GLIB = {};
 })();
 
 (function(){
+    GLIB.compileProgram = function(gl, resources, stem) {
+        p = new SglProgram(gl, [resources.shaders[stem + '.vert.glsl']],
+                               [resources.shaders[stem + '.frag.glsl']]);
+        if(!p.isValid) {
+            console.log("Shader program " + stem + " failed to compile");
+            console.log(p.log);
+        }
+        return p;
+    }
+})();
+
+(function(){
     var wait_count = 3
     var resources = {}
     var unready_callback;
