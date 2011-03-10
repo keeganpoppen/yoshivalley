@@ -74,8 +74,8 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         //dumb hack to get point sprites working
         gl.enable(0x8642);
 
-        var prog = gl.programs.laser.handle
-        gl.programs.laser.bind()
+        var prog = gl.programs.particle.handle
+        gl.programs.particle.bind()
 
         //set modelviewprojection matrix
         var modelview_loc = gl.getUniformLocation(prog, "ModelViewProjectionMatrix")
@@ -118,7 +118,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         })
 
         model.laser.texture.unbind()
-        gl.programs.laser.unbind()
+        gl.programs.particle.unbind()
 
         gl.disable(gl.BLEND)
         gl.enable(gl.DEPTH_TEST)

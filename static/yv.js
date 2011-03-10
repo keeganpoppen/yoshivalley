@@ -9,7 +9,7 @@ var YV = {};
         shaders: ["planet.frag.glsl", "planet.vert.glsl",
                   "sun.vert.glsl", "sun.frag.glsl",
                   "bg.vert.glsl", "bg.frag.glsl",
-                  "laser.vert.glsl", "laser.frag.glsl"],
+                  "particle.vert.glsl", "particle.frag.glsl"],
         meshes: []
     }
 
@@ -122,6 +122,12 @@ var YV = {};
 
         particles: {
             lasers: [
+                /*
+                new Laser({
+                    position: new SglVec3(20.0, 0.0, 20.0),
+                    velocity: new SglVec3(1.0, 0.0, 1.0)
+                })
+                */
             ],
 
             explosions: [

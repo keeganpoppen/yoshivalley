@@ -13,7 +13,7 @@ GLIB.FireWhenReady(YV.Resources, function(resources) {
             gl.programs.planet = GLIB.compileProgram(gl, resources, 'planet');
             gl.programs.sun = GLIB.compileProgram(gl, resources, 'sun');
             gl.programs.bg = GLIB.compileProgram(gl, resources, 'bg');
-            gl.programs.laser = GLIB.compileProgram(gl, resources, 'laser');
+            gl.programs.particle = GLIB.compileProgram(gl, resources, 'particle');
 
             //Create Meshes 
             var textureOptions = {
