@@ -1,57 +1,6 @@
 GLIB.FireWhenReady(YV.Resources, function(resources) {
     console.log('starting real work, namely the actual game');
 
-    //TODO: I think this might should go to GLIB
-    var makeSphere = function(radius, lats, longs) {
-        var geometryData = [ ];
-        var texCoordData = [ ];
-        var indexData = [ ];
-
-        for (var latNumber = 0; latNumber <= lats; ++latNumber) {
-            for (var longNumber = 0; longNumber <= longs; ++longNumber) {
-                var theta = latNumber * Math.PI / lats;
-                var phi = longNumber * 2 * Math.PI / longs;
-                var sinTheta = Math.sin(theta);
-                var sinPhi = Math.sin(phi);
-                var cosTheta = Math.cos(theta);
-                var cosPhi = Math.cos(phi);
-
-                var x = cosPhi * sinTheta;
-                var y = cosTheta;
-                var z = sinPhi * sinTheta;
-                var u = 1-(longNumber/longs);
-                var v = latNumber/lats;
-
-                texCoordData.push(u);
-                texCoordData.push(v);
-                geometryData.push(radius * x);
-                geometryData.push(radius * y);
-                geometryData.push(radius * z);
-            }
-        }
-
-        for (var latNumber = 0; latNumber < lats; ++latNumber) {
-            for (var longNumber = 0; longNumber < longs; ++longNumber) {
-                var first = (latNumber * (longs+1)) + longNumber;
-                var second = first + longs + 1;
-                indexData.push(first);
-                indexData.push(second);
-                indexData.push(first+1);
-
-                indexData.push(second);
-                indexData.push(second+1);
-                indexData.push(first+1);
-            }
-        }
-
-        var retval = { };
-        retval.indices = new Uint16Array(indexData);
-        retval.vertices = new Float32Array(geometryData);
-        retval.texCoords = new Float32Array(texCoordData);
-        
-        return retval;
-    }
-
     //TODO: this is eventually superflous... I'm just lazy
     var GameModel = YV.GameModel;
     
@@ -150,7 +99,7 @@ GLIB.FireWhenReady(YV.Resources, function(resources) {
                                                             new Uint16Array([0, 1, 2, 2, 3, 0]));
             GameModel.background.texture = new SglTexture2D(gl, resources.textures[GameModel.background.texture], textureOptions);
 
-            var sphereMesh = makeSphere(1, 25, 25);
+            var sphereMesh = GLIB.MakeSphere(1, 25, 25);
             GameModel.sun.mesh = new SglMeshGL(gl);
             GameModel.sun.mesh.addVertexAttribute("position", 3, sphereMesh.vertices);
             GameModel.sun.mesh.addVertexAttribute("texcoord", 2, sphereMesh.texCoords);

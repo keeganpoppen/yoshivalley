@@ -136,6 +136,58 @@ var GLIB = {};
 })();
 
 (function(){
+    GLIB.MakeSphere = function(radius, lats, longs) {
+        var geometryData = [ ];
+        var texCoordData = [ ];
+        var indexData = [ ];
+
+        for (var latNumber = 0; latNumber <= lats; ++latNumber) {
+            for (var longNumber = 0; longNumber <= longs; ++longNumber) {
+                var theta = latNumber * Math.PI / lats;
+                var phi = longNumber * 2 * Math.PI / longs;
+                var sinTheta = Math.sin(theta);
+                var sinPhi = Math.sin(phi);
+                var cosTheta = Math.cos(theta);
+                var cosPhi = Math.cos(phi);
+
+                var x = cosPhi * sinTheta;
+                var y = cosTheta;
+                var z = sinPhi * sinTheta;
+                var u = 1-(longNumber/longs);
+                var v = latNumber/lats;
+
+                texCoordData.push(u);
+                texCoordData.push(v);
+                geometryData.push(radius * x);
+                geometryData.push(radius * y);
+                geometryData.push(radius * z);
+            }
+        }
+
+        for (var latNumber = 0; latNumber < lats; ++latNumber) {
+            for (var longNumber = 0; longNumber < longs; ++longNumber) {
+                var first = (latNumber * (longs+1)) + longNumber;
+                var second = first + longs + 1;
+                indexData.push(first);
+                indexData.push(second);
+                indexData.push(first+1);
+
+                indexData.push(second);
+                indexData.push(second+1);
+                indexData.push(first+1);
+            }
+        }
+
+        var retval = { };
+        retval.indices = new Uint16Array(indexData);
+        retval.vertices = new Float32Array(geometryData);
+        retval.texCoords = new Float32Array(texCoordData);
+        
+        return retval;
+    };
+})();
+
+(function(){
     var wait_count = 3
     var resources = {}
     var unready_callback;
