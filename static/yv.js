@@ -5,13 +5,14 @@ var YV = {};
 
     //all the resources that need to be loaded before the game will work correctly
     YV.Resources = {
-        textures: ["earth.jpg", "sun.jpg", "mars.jpg", "sky2.jpg", "jupiter.jpg", "laser.png"],
+        textures: ["earth.jpg", "sun.jpg", "mars.jpg", "sky2.jpg", "jupiter.jpg", "laser.png", "fire.png"],
         shaders: ["planet.frag.glsl", "planet.vert.glsl",
                   "sun.vert.glsl", "sun.frag.glsl",
                   "bg.vert.glsl", "bg.frag.glsl",
-                  "laser.vert.glsl", "laser.frag.glsl",
+                  "particle.vert.glsl", "particle.frag.glsl"],
                   "ufo.vert.glsl", "ufo.frag.glsl"],
         meshes: ["ufo.json"]
+        meshes: []
     }
 
     function Planet(opts) {
@@ -43,6 +44,51 @@ var YV = {};
         this.cannon_angle = 0.0;
         $.extend(this, opts || {});
     };
+
+    function Particle(opts) {
+        $.extend(this, opts || {})
+    }
+    $.extend(Particle.prototype, {
+        position: new SglVec3(0.),
+        velocity: new SglVec3(1., 0., 1.),
+        acceleration: new SglVec3(0.),
+        lifetime: 5.,
+        age: 0.
+    })
+
+    function Laser(opts) {
+        this.time_shot = Date.now()
+        $.extend(this, opts || {})
+    }
+    Laser.prototype = Particle.prototype
+    $.extend(Laser.prototype, {
+        shooter: -1,
+        time_shot: 0
+    })
+
+    function Explosion(opts) {
+        $.extend(this, opts || {})
+
+        //initialize explosion particles
+        //var nParticles = YV.GameModel.particles.laser.numParticles
+        var nParticles = 100
+        var center = this.position
+
+        var verts = GLIB.MakeSphericalVerts(7.0, 20, 20)
+        var that = this
+        verts.map(function(vert){
+            that.particles.push(new Particle({
+                position: center.clone(),
+                velocity: vert.clone()
+            }))
+        })
+
+        console.log("made " + verts.length + " verts")
+    }
+    $.extend(Explosion.prototype, {
+        position: new SglVec3(0.0),
+        particles: []
+    })
 
     //the unifying data structure for all the stuff in the game ... whoa
     YV.GameModel = {
@@ -102,18 +148,36 @@ var YV = {};
 
         UFOMesh : {}, //Will get set in load
 
+        //truck for global laser config
+        laser: {
+            length: 7.5,
+            numParticles: 10,
+            texture: "laser.png"    
+        }, 
+
+        explosion: {
+            numParticles: 100,
+            texture: "fire.png"
+        },
+
         particles: {
             lasers: [
-                {
-                    position: new SglVec3(2.0, 2.0, 0.0),
-                    velocity: new SglVec3(1.0, 0.0, 0.0),
-                    player: 0, //index of the player who shot the laser,
-                    time_shot: 0    //this is a direction we could go in instead of +vel*dt
-                }
+                /*
+                new Laser({
+                    position: new SglVec3(20.0, 0.0, 20.0),
+                    velocity: new SglVec3(1.0, 0.0, 1.0)
+                })
+                */
             ],
-            explosions: [
 
+            explosions: [
+                /*
+                new Explosion({
+                    position: new SglVec3(20.0, 0.0, 20.0)
+                })
+                */
             ],
+
             thrusters: [
                 //hmm.... this is slightly problematic-- the balance in between a no-knowledge
                 //particle system and not duplicating effort w.r.t. thruster position, which

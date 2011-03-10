@@ -88,19 +88,124 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         });
     }
 
-    function renderParticles(gl, model) {
-        gl.disable(gl.DEPTH_TEST)
+    function renderLasers(gl, model, vertex_loc, tex_loc, age_frac_loc, does_age_loc) {
+        //set laser texture
+        gl.activeTexture(gl.TEXTURE0)
+        model.laser.texture.bind()
+        gl.uniform1i(tex_loc, 0)
 
+        //lasers don't age, of course
+        gl.uniform1i(does_age_loc, 0);
+
+        //render all the lasers
         model.particles.lasers.map(function(laser) {
-            var start_pos = laser.position.add(laser.velocity.neg)
-            var vertices = [start_pos.x, start_pos.y, start_pos.z]
-            var indices = [0]
+            var len_vec = laser.velocity.normalized.mul(new SglVec3(model.laser.length))
+            var start_pos = laser.position.add(len_vec.mul(new SglVec3(0.5)).neg)
+            var iter_vec = len_vec.mul(new SglVec3(1./model.laser.numParticles))
 
-            vertices = new Float32Array(vertices)
-            indices = new Uint16Array(indices)
+            var vertices = []
 
+            for(var i = 0; i < model.laser.numParticles; ++i) {
+                var pos = start_pos.add(iter_vec.mul(new SglVec3(i)))
+                vertices.push(pos.x, pos.y, pos.z)
+            }
+
+            var vert_buffer = gl.createBuffer()
+            gl.bindBuffer(gl.ARRAY_BUFFER, vert_buffer)
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW)
+            gl.vertexAttribPointer(vertex_loc, 3, gl.FLOAT, false, 0, 0)
+            
+            gl.drawArrays(gl.POINTS, 0, vertices.length/3)
         })
 
+        model.laser.texture.unbind()
+    }
+
+    function renderExplosions(gl, model, vertex_loc, tex_loc, age_frac_loc, does_age_loc) {
+        //set explosion / fire texture
+        gl.activeTexture(gl.TEXTURE0)
+        model.explosion.texture.bind()
+        gl.uniform1i(tex_loc, 0)
+
+        //fire ages, fo' sho'
+        gl.uniform1i(does_age_loc, 1);
+
+        var vertices = []
+        var age_fracs = []
+        //var ages = []
+        //var lifetimes = []
+
+        model.particles.explosions.map(function(explosion) {
+            explosion.particles.map(function(particle) {
+                var pos = particle.position
+                vertices.push(pos.x, pos.y, pos.z)
+                age_fracs.push(particle.age/particle.lifetime)
+                //ages.push(particle.age)
+                //lifetimes.push(particle.lifetime)
+            })
+        })
+
+        var vert_buffer = gl.createBuffer()
+        gl.bindBuffer(gl.ARRAY_BUFFER, vert_buffer)
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW)
+        gl.vertexAttribPointer(vertex_loc, 3, gl.FLOAT, false, 0, 0)
+
+        var age_frac_buffer = gl.createBuffer()
+        gl.bindBuffer(gl.ARRAY_BUFFER, age_frac_buffer)
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(age_fracs), gl.STATIC_DRAW)
+        gl.vertexAttribPointer(age_frac_loc, 1, gl.FLOAT, false, 0, 0)
+
+        /* CHROME BUG... FUCKERS!!!!!
+        var lifetime_buffer = gl.createBuffer()
+        gl.bindBuffer(gl.ARRAY_BUFFER, lifetime_buffer)
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(lifetimes), gl.STATIC_DRAW)
+        gl.vertexAttribPointer(lifetime_loc, 1, gl.FLOAT, false, 0, 0)
+
+        var age_buffer = gl.createBuffer()
+        gl.bindBuffer(gl.ARRAY_BUFFER, age_buffer)
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(ages), gl.STATIC_DRAW)
+        gl.vertexAttribPointer(age_loc, 1, gl.FLOAT, false, 0, 0)
+        */
+        
+        gl.drawArrays(gl.POINTS, 0, vertices.length/3)
+
+        model.explosion.texture.unbind()
+    }
+
+    function renderParticles(gl, model) {
+        gl.disable(gl.DEPTH_TEST)
+        gl.enable(gl.BLEND)
+
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE)
+
+        //dumb hack to get point sprites working
+        gl.enable(0x8642);
+
+        var prog = gl.programs.particle.handle
+        gl.programs.particle.bind()
+
+        //set modelviewprojection matrix
+        var modelview_loc = gl.getUniformLocation(prog, "ModelViewProjectionMatrix")
+        gl.uniformMatrix4fv(modelview_loc, false, new Float32Array(gl.xform.viewProjectionMatrix));
+
+        //get texture location
+        var tex_loc = gl.getUniformLocation(prog, "laserTex")
+
+        //get position attribute location
+        var vertex_loc = gl.getAttribLocation(prog, "a_position")
+
+        //get attrib locations for particle age & uniform for whether age effects alpha
+        //var lifetime_loc = gl.getAttribLocation(prog, "a_lifetime")
+        //var age_loc = gl.getAttribLocation(prog, "a_age")
+        var age_frac_loc = gl.getAttribLocation(prog, "a_age_frac")
+        var does_age_loc = gl.getUniformLocation(prog, "does_age")
+
+        renderLasers(gl, model, vertex_loc, tex_loc, age_frac_loc, does_age_loc)
+        renderExplosions(gl, model, vertex_loc, tex_loc, age_frac_loc, does_age_loc)
+
+        gl.programs.particle.unbind()
+
+        gl.disable(gl.BLEND)
         gl.enable(gl.DEPTH_TEST)
     }
 

@@ -10,6 +10,7 @@ var GLIB = {};
         --num_resources
         if(num_resources == 0) {
             console.log('done loading resources')
+            console.log(resources)
             success_callback(resources)
         }
     }
@@ -148,6 +149,29 @@ var GLIB = {};
 })();
 
 (function(){
+    GLIB.MakeSphericalVerts = function(radius, lats, longs) {
+        var verts = []
+
+        for (var latNumber = 0; latNumber <= lats; ++latNumber) {
+            for (var longNumber = 0; longNumber <= longs; ++longNumber) {
+                var theta = latNumber * Math.PI / lats;
+                var phi = longNumber * 2 * Math.PI / longs;
+                var sinTheta = Math.sin(theta);
+                var sinPhi = Math.sin(phi);
+                var cosTheta = Math.cos(theta);
+                var cosPhi = Math.cos(phi);
+
+                var x = cosPhi * sinTheta;
+                var y = cosTheta;
+                var z = sinPhi * sinTheta;
+
+                verts.push(new SglVec3(x,y,z))
+            }
+        }
+
+        return verts
+    }
+
     GLIB.MakeSphere = function(radius, lats, longs) {
         var geometryData = [ ];
         var texCoordData = [ ];
