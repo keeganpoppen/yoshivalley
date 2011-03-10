@@ -37,8 +37,20 @@ var GLIB = {};
         for(var i = 0; i < path_obj.meshes.length; ++i) {
             (function(){
                 var mesh_name = path_obj.meshes[i]
-                $.getJSON('/meshes/' + mesh_name, function(data) {
-                    console.log('loaded mesh with name: ' + mesh_name)
+                $.getJSON('/meshes/' + mesh_name, function(data, stat) {
+                    console.log('loaded mesh with name ' + mesh_name);
+                    if(data.vertices) {
+                        data.vertices = new Float32Array(data.vertices);
+                    }
+                    if(data.normals) {
+                        data.normals = new Float32Array(data.normals);
+                    }
+                    if(data.texCoords) {
+                        data.texCoords = new Float32Array(data.texCoords);
+                    }
+                    if(data.indices) {
+                        data.indices = new Uint16Array(data.indices);
+                    }
                     resources.meshes[mesh_name] = data
                     decrement_resources()
                 })
@@ -48,7 +60,7 @@ var GLIB = {};
             (function(){
                 var shader_name = path_obj.shaders[i]
                 $.get('/shaders/' + shader_name, function(data) {
-                    console.log('loaded shader with name' + shader_name)
+                    console.log('loaded shader with name ' + shader_name)
                     resources.shaders[shader_name] = data
                     decrement_resources()
                 })
@@ -196,6 +208,23 @@ var GLIB = {};
             console.log(p.log);
         }
         return p;
+    }
+})();
+
+(function(){
+    GLIB.MakeSGLMesh = function(gl, mesh) {
+        var sglMesh = new SglMeshGL(gl);
+        if(mesh.vertices) {
+            sglMesh.addVertexAttribute('position', 3, mesh.vertices);
+        }
+        if(mesh.texCoords) {
+            sglMesh.addVertexAttribute('texcoord', 2, mesh.texCoords);
+        }
+        if(mesh.normals) {
+            sglMesh.addVertexAttribute('normal', 3, mesh.normals);
+        }
+        sglMesh.addIndexedPrimitives('index', gl.TRIANGLES, mesh.indices);
+        return sglMesh;
     }
 })();
 

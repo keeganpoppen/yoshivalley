@@ -9,8 +9,9 @@ var YV = {};
         shaders: ["planet.frag.glsl", "planet.vert.glsl",
                   "sun.vert.glsl", "sun.frag.glsl",
                   "bg.vert.glsl", "bg.frag.glsl",
-                  "laser.vert.glsl", "laser.frag.glsl"],
-        meshes: []
+                  "laser.vert.glsl", "laser.frag.glsl",
+                  "ufo.vert.glsl", "ufo.frag.glsl"],
+        meshes: ["ufo.json"]
     }
 
     function Planet(opts) {
@@ -30,6 +31,17 @@ var YV = {};
         this.rotation = 0.0;
         this.mesh = {};
         $.extend(this,opts || {});
+    };
+
+    function UFO(opts) {
+        this.program = "ufo";
+        this.position = new SglVec3(0,0,0);
+        this.mass = 0.1;
+        this.radius = 5.0; 
+        this.velocity = new SglVec3(0.0, 0.0, 0.0);
+        this.acceleration = new SglVec3(0.0, 0.0, 0.0);
+        this.cannon_angle = 0.0;
+        $.extend(this, opts || {});
     };
 
     //the unifying data structure for all the stuff in the game ... whoa
@@ -85,18 +97,10 @@ var YV = {};
         ],
 
         players: [
-            {
-                program: undefined, //obviously this shouldn't be undefined...
-                texture: undefined, //...same
-                mass: 0.1,
-                radius: 0.5, 
-                position: new SglVec3(50.0, 50.0, 0.0),
-                velocity: new SglVec3(0.0, 0.0, 0.0),
-                thrust_velocity: new SglVec3(0.0, 0.0, 0.0),
-                acceleration: new SglVec3(0.0, 0.0, 0.0),
-                cannon_angle: 0.0
-            }
+            new UFO() 
         ],
+
+        UFOMesh : {}, //Will get set in load
 
         particles: {
             lasers: [

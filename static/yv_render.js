@@ -1,7 +1,7 @@
 if(!YV || YV === undefined) throw "need to load yv.js first!";
 
 (function(){
-    var setCamera = function(gl, camera, sun) {
+    function setCamera(gl, camera, sun) {
         var w = gl.ui.width;
         var h = gl.ui.height;
 
@@ -16,9 +16,9 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
                              sun.position.y,
                              sun.position.z,
                              0.0, 1.0, 0.0);
-    };
+    }
 
-    var renderBackground = function(gl, background) {
+    function renderBackground(gl, background) {
         gl.disable(gl.DEPTH_TEST);
         sglRenderMeshGLPrimitives(background.mesh, "index", gl.programs[background.program], null,
             {
@@ -27,9 +27,9 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
             },
             {   backgroundTexture : background.texture }, 0, 6);
         gl.enable(gl.DEPTH_TEST);
-    };
+    }
 
-    var renderSun = function(gl, sun) {
+    function renderSun(gl, sun) {
         gl.xform.model.loadIdentity();
         gl.xform.model.translate(sun.position.x, sun.position.y, sun.position.z);
         gl.xform.model.rotate(sglDegToRad(sun.rotation), 0.0, 1.0, 0.0);
@@ -39,9 +39,9 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
                         ModelViewProjectionMatrix : gl.xform.modelViewProjectionMatrix,
                      },
         /*Samplers*/ {surfaceTexture : sun.texture});
-    };
+    }
 
-    var renderPlanet = function(gl, sun, planet) {
+    function renderPlanet(gl, sun, planet) {
         gl.xform.model.loadIdentity();
         var planPos = planet.position;
         gl.xform.model.translate(planPos.x, planPos.y, planPos.z);
@@ -57,14 +57,33 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
                         sunCenter : [sun.position.x, sun.position.y, sun.position.z]
                      },
         /*Samplers*/ {surfaceTexture : planet.texture});
-    };
+    }
 
-    var renderPlanets = function(gl, model) {
+    function renderPlanets(gl, model) {
         renderSun(gl, model.sun)
         for(var planet in model.planets) {
             renderPlanet(gl, model.sun, model.planets[planet]);
         }
-    };
+    }
+
+    function renderUFOs(gl, model) {
+        model.players.map(function(player) {
+            var pos = player.position;
+            gl.xform.model.loadIdentity();
+            //gl.xform.model.translate(pos.x, pos.y, pos.z);
+            gl.xform.model.scale(player.radius, player.radius, player.radius);
+
+            var sunpos = model.sun.position;
+            sglRenderMeshGLPrimitives(model.UFOMesh, "index", gl.programs.ufo, null,
+                {
+                    ModelViewProjectionMatrix : gl.xform.modelViewProjectionMatrix,
+                    ModelMatrix : gl.xform.modelMatrix,
+                    NormalMatrix : gl.xform.viewSpaceNormalMatrix,
+                    sunCenter : [sunpos.x, sunpos.y, sunpos.z]
+                },
+            {});
+        });
+    }
 
     function renderParticles(gl, model) {
         gl.disable(gl.DEPTH_TEST)
@@ -89,8 +108,9 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
         setCamera(gl, model.camera, model.sun);
         renderBackground(gl, model.background);
-        renderPlanets(gl, model)
-        renderParticles(gl, model)
+        renderPlanets(gl, model);
+        renderUFOs(gl, model);
+        renderParticles(gl, model);
 
         gl.disable(gl.DEPTH_TEST);
     }

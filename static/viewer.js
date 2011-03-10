@@ -13,6 +13,7 @@ GLIB.FireWhenReady(YV.Resources, function(resources) {
             gl.programs.planet = GLIB.compileProgram(gl, resources, 'planet');
             gl.programs.sun = GLIB.compileProgram(gl, resources, 'sun');
             gl.programs.bg = GLIB.compileProgram(gl, resources, 'bg');
+            gl.programs.ufo = GLIB.compileProgram(gl, resources, 'ufo');
             //gl.programs.laser = GLIB.compileProgram(gl, resources, 'laser');
 
             //Create Meshes 
@@ -25,32 +26,30 @@ GLIB.FireWhenReady(YV.Resources, function(resources) {
             //set up laser texture
             //GameModel.laser.texture = new SglTexture2D(gl, resources.textures[GameModel.laser.texture], textureOptions)
 
-            GameModel.background.mesh = new SglMeshGL(gl);
-            GameModel.background.mesh.addVertexAttribute("position", 3, new Float32Array(
-                                                                            [-1.0, -1.0, 0.0,
-                                                                             1.0, -1.0, 0.0,
-                                                                             1.0, 1.0, 0.0,
-                                                                             -1.0, 1.0, 0.0]));
-            GameModel.background.mesh.addIndexedPrimitives("index", gl.TRIANGLES,
-                                                            new Uint16Array([0, 1, 2, 2, 3, 0]));
-            GameModel.background.texture = new SglTexture2D(gl, resources.textures[GameModel.background.texture], textureOptions);
+            GameModel.background.mesh = GLIB.MakeSGLMesh(gl, {
+                vertices: new Float32Array([-1.0, -1.0, 0.0,
+                                             1.0, -1.0, 0.0,
+                                             1.0, 1.0, 0.0,
+                                            -1.0, 1.0, 0.0]),
+                indices: new Uint16Array([0,1,2,2,3,0])
+            });
+
+            GameModel.background.texture = new SglTexture2D(gl,
+                    resources.textures[GameModel.background.texture], textureOptions);
 
             var sphereMesh = GLIB.MakeSphere(1, 25, 25);
-            GameModel.sun.mesh = new SglMeshGL(gl);
-            GameModel.sun.mesh.addVertexAttribute("position", 3, sphereMesh.vertices);
-            GameModel.sun.mesh.addVertexAttribute("texcoord", 2, sphereMesh.texCoords);
-            GameModel.sun.mesh.addIndexedPrimitives("index", gl.TRIANGLES, sphereMesh.indices);
-            GameModel.sun.texture = new SglTexture2D(gl, resources.textures[GameModel.sun.texture], textureOptions);
+            GameModel.sun.mesh = GLIB.MakeSGLMesh(gl, sphereMesh);//new SglMeshGL(gl);
+            GameModel.sun.texture = new SglTexture2D(gl,
+                    resources.textures[GameModel.sun.texture], textureOptions);
             for(var id in GameModel.planets) {
                 var planet = GameModel.planets[id];
-                planet.mesh = new SglMeshGL(gl);
-                planet.mesh.addVertexAttribute("position", 3, sphereMesh.vertices);
-                planet.mesh.addVertexAttribute("texcoord", 2, sphereMesh.texCoords);
-                planet.mesh.addIndexedPrimitives("index", gl.TRIANGLES, sphereMesh.indices);
-                
+                planet.mesh = GLIB.MakeSGLMesh(gl, sphereMesh);
                 //Replace texture string with texture object
-                planet.texture = new SglTexture2D(gl, resources.textures[planet.texture], textureOptions);
+                planet.texture = new SglTexture2D(gl,
+                        resources.textures[planet.texture], textureOptions);
             }
+
+            GameModel.UFOMesh = GLIB.MakeSGLMesh(gl, resources.meshes['ufo.json']);
             
             gl.ui = this.ui;
 
