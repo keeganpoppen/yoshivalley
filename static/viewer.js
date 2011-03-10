@@ -139,12 +139,19 @@ GLIB.FireWhenReady(YV.Resources, function(resources) {
                                                [resources.shaders['bg.frag.glsl']]);
             console.log(gl.programs.bg.log);
 
+            gl.programs.laser = new SglProgram(gl, [resources.shaders['laser.vert.glsl']],
+                                                    [resources.shaders['laser.frag.glsl']]);
+            console.log(gl.programs.laser.log);
+
             //Create Meshes 
             var textureOptions = {
                     generateMipmap: true,
                     flipY: false,
                     minFilter: gl.LINEAR_MIPMAP_LINEAR,
             };
+
+            //set up laser texture
+            //GameModel.laser.texture = new SglTexture2D(gl, resources.textures[GameModel.laser.texture], textureOptions)
 
             /*
 
