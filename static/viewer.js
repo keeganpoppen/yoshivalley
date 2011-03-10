@@ -100,25 +100,19 @@ GLIB.FireWhenReady(YV.Resources, function(resources) {
     
     var drawPlanet = function(gl, planet) {
         gl.xform.model.loadIdentity();
-        var planetPosition = [];
-        planetPosition[0] = planet.orbitRadius * Math.sin(sglDegToRad(planet.orbitAngle));
-        planetPosition[1] = 0.0;
-        planetPosition[2] = planet.orbitRadius * Math.cos(sglDegToRad(planet.orbitAngle));
-        gl.xform.model.translate(planetPosition[0], planetPosition[1], planetPosition[2]);
+        var planPos = planet.position;
+        gl.xform.model.translate(planPos.x, planPos.y, planPos.z);
         gl.xform.model.rotate(sglDegToRad(planet.tilt), 1.0, 0.0, 0.0);
         gl.xform.model.rotate(sglDegToRad(planet.rotation), 0.0, 1.0, 0.0);
         gl.xform.model.scale(planet.radius, planet.radius, planet.radius);
 
-        //TODO: wtf, man???
         var sun = GameModel.sun;
-        var sunPosition = [sun.position.x, sun.position.y, sun.position.z]; 
-
         sglRenderMeshGLPrimitives(planet.mesh, "index", gl.programs.planet, null,
         /*Uniforms*/ {
                         ModelMatrix : gl.xform.modelMatrix,
                         ModelViewProjectionMatrix : gl.xform.modelViewProjectionMatrix,
-                        planetCenter : planetPosition,
-                        sunCenter : sunPosition
+                        planetCenter : [planPos.x, planPos.y, planPos.z],
+                        sunCenter : [sun.position.x, sun.position.y, sun.position.z]
                      },
         /*Samplers*/ {surfaceTexture : planet.texture});
     };
