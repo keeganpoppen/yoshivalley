@@ -13,52 +13,75 @@ var YV = {};
         meshes: []
     }
 
+    function Planet(opts) {
+        this.__defineGetter__('position', function() {
+            return new SglVec3(this.orbitRadius * Math.sin(sglDegToRad(this.orbitAngle)),
+                       0.0,
+                       this.orbitRadius * Math.cos(sglDegToRad(this.orbitAngle)));
+        });
+        this.program = "planet";
+        this.texture = "jupiter.jpg"; //Default texture
+        this.mass = 0.0; //Default doesn't affect gravity
+        this.radius = 1.0;
+        this.tilt = 0.0;
+        this.rotationalVelocity = 0.0;
+        this.orbitRadius = 0.0;
+        this.orbitAngle = 0.0;
+        this.rotation = 0.0;
+        this.mesh = {};
+        $.extend(this,opts || {});
+    };
+
     //the unifying data structure for all the stuff in the game ... whoa
     YV.GameModel = {
         camera : {
            fov : 60.0, //Degrees 
-           //position : [100.0, 30.0, 100.0] //NOTE: CHANGED!!!
            position: new SglVec3(100.0, 250.0, 100.0)
         }, 
 
-        sun : {
-            program : "sun", //We'll need a special sun shader
+        background : {
+            program : "bg",
+            texture : "sky2.jpg",
+            repeat : 1.0,
+            mesh : {}
+        },
+
+        sun : new Planet({
+            program : "sun",
             texture : "sun.jpg",
             radius: 20.0,
             mass: 100.0,
-            rotation: 0.0,
-            position : new SglVec3(0.0,0.0,0.0),
-            rotationalVelocity: 0.0 //NOTE: CHANGED!!!
-        },
+        }),
 
         planets : [
-            {
-                program : "planet", //Eventually we'll have a special earth shader
+            new Planet({
                 texture : "earth.jpg",
                 mass : 30.0, 
-                radius : 10.0,
-                position: new SglVec3(100.0, 100.0, 0.0),
+                radius : 15.0,
                 tilt : 5.0, //Degrees
-                rotation : 0.0, //Degrees
                 rotationalVelocity : 8.0, //Degrees per second
-                orbitRadius : 30.0,
-                orbitAngle : 15.0, //Degrees
-                mesh : {} //Will be set to SGlMesh object
-            },
+                orbitRadius : 90.0,
+                orbitAngle : 180.0, //Degrees
+            }),
 
-            {
-                program : "planet",
+            new Planet({
                 texture : "mars.jpg",
                 mass : 10.0,
-                radius : 3.33,
-                position: new SglVec3(100.0, 0.0, 0.0),
+                radius : 8.0,
                 tilt : 3.0, 
-                rotation : 0.0,
                 rotationalVelocity : 5.0, 
-                orbitRadius : 45.0,
+                orbitRadius : 80.0,
                 orbitAngle : 25.0,
-                mesh : {} //Will be set to SGlMesh object
-            }
+            }),
+
+            new Planet({
+                texture : "jupiter.jpg",
+                mass : 40.0,
+                radius : 18.0,
+                rotationalVelocity : 6.0,
+                orbitRadius : 140.0,
+                orbitAngle : 125.0,
+            })
         ],
 
         players: [
