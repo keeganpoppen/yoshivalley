@@ -13,7 +13,7 @@ GLIB.FireWhenReady(YV.Resources, function(resources) {
             gl.programs.planet = GLIB.compileProgram(gl, resources, 'planet');
             gl.programs.sun = GLIB.compileProgram(gl, resources, 'sun');
             gl.programs.bg = GLIB.compileProgram(gl, resources, 'bg');
-            //gl.programs.laser = GLIB.compileProgram(gl, resources, 'laser');
+            gl.programs.laser = GLIB.compileProgram(gl, resources, 'laser');
 
             //Create Meshes 
             var textureOptions = {
@@ -23,7 +23,7 @@ GLIB.FireWhenReady(YV.Resources, function(resources) {
             };
 
             //set up laser texture
-            //GameModel.laser.texture = new SglTexture2D(gl, resources.textures[GameModel.laser.texture], textureOptions)
+            GameModel.laser.texture = new SglTexture2D(gl, resources.textures[GameModel.laser.texture], textureOptions)
 
             GameModel.background.mesh = new SglMeshGL(gl);
             GameModel.background.mesh.addVertexAttribute("position", 3, new Float32Array(

@@ -32,6 +32,21 @@ var YV = {};
         $.extend(this,opts || {});
     };
 
+    function Laser(opts) {
+        this.position = new SglVec3(0.0)
+        this.velocity = new SglVec3(1.0, 0.0, 1.0)
+        this.shooter = -1
+        this.time_shot = Date.now()
+        $.extend(this, opts || {})
+    }
+
+    function Explosion(opts) {
+        this.position = new SglVec3(0.0)
+        this.lifetime = 3.
+        this.particles = []
+        $.extend(this, opts || {})
+    }
+
     //the unifying data structure for all the stuff in the game ... whoa
     YV.GameModel = {
         camera : {
@@ -98,18 +113,20 @@ var YV = {};
             }
         ],
 
+        //truck for global laser config
+        laser: {
+            length: 7.5,
+            numParticles: 10,
+            texture: "laser.png"    
+        }, 
+
         particles: {
             lasers: [
-                {
-                    position: new SglVec3(2.0, 2.0, 0.0),
-                    velocity: new SglVec3(1.0, 0.0, 0.0),
-                    player: 0, //index of the player who shot the laser,
-                    time_shot: 0    //this is a direction we could go in instead of +vel*dt
-                }
             ],
-            explosions: [
 
+            explosions: [
             ],
+
             thrusters: [
                 //hmm.... this is slightly problematic-- the balance in between a no-knowledge
                 //particle system and not duplicating effort w.r.t. thruster position, which
