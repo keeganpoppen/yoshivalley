@@ -66,35 +66,13 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         }
     };
 
-    function renderParticles(gl, model) {
-        gl.disable(gl.DEPTH_TEST)
-        gl.enable(gl.BLEND)
-        gl.blendFunc(gl.SRC_ALPHA, gl.ONE)
-
-        //dumb hack to get point sprites working
-        gl.enable(0x8642);
-
-        var prog = gl.programs.particle.handle
-        gl.programs.particle.bind()
-
-        //set modelviewprojection matrix
-        var modelview_loc = gl.getUniformLocation(prog, "ModelViewProjectionMatrix")
-        gl.uniformMatrix4fv(modelview_loc, false, new Float32Array(gl.xform.viewProjectionMatrix));
-
-        if(window.PRINT_SHIT) {
-            console.log(gl.xform.viewProjectionMatrix)
-            //console.log(gl.xform.modelViewProjectionMatrix)
-        }
-
-        //set texture location
-        var tex_loc = gl.getUniformLocation(prog, "laserTex")
+    function renderLasers(gl, model, vertex_loc, tex_loc) {
+        //set laser texture
         gl.activeTexture(gl.TEXTURE0)
         model.laser.texture.bind()
         gl.uniform1i(tex_loc, 0)
 
-        //get position attribute location
-        var vertex_loc = gl.getAttribLocation(prog, "a_position")
-
+        //render all the lasers
         model.particles.lasers.map(function(laser) {
             var len_vec = laser.velocity.normalized.mul(new SglVec3(model.laser.length))
             var start_pos = laser.position.add(len_vec.mul(new SglVec3(0.5)).neg)
@@ -107,8 +85,6 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
                 vertices.push(pos.x, pos.y, pos.z)
             }
 
-            vertices = new Float32Array(vertices)
-
             var vert_buffer = gl.createBuffer()
             gl.bindBuffer(gl.ARRAY_BUFFER, vert_buffer)
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW)
@@ -118,6 +94,62 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         })
 
         model.laser.texture.unbind()
+    }
+
+    function renderExplosions(gl, model, vertex_loc, tex_loc) {
+        //set laser texture
+        gl.activeTexture(gl.TEXTURE0)
+        model.explosion.texture.bind()
+        gl.uniform1i(tex_loc, 0)
+
+        var vertices = []
+
+        model.particles.explosions.map(function(explosion) {
+            explosion.particles.map(function(particle) {
+                var pos = particle.position
+                vertices.push(pos.x, pos.y, pos.z)
+            })
+        })
+
+        if(window.PENIS) {
+            console.log(vertices)
+        }
+
+        var vert_buffer = gl.createBuffer()
+        gl.bindBuffer(gl.ARRAY_BUFFER, vert_buffer)
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW)
+        gl.vertexAttribPointer(vertex_loc, 3, gl.FLOAT, false, 0, 0)
+        
+        gl.drawArrays(gl.POINTS, 0, vertices.length/3)
+
+        model.explosion.texture.unbind()
+    }
+
+    function renderParticles(gl, model) {
+        gl.disable(gl.DEPTH_TEST)
+        gl.enable(gl.BLEND)
+
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE)
+
+        //dumb hack to get point sprites working
+        gl.enable(0x8642);
+
+        var prog = gl.programs.particle.handle
+        gl.programs.particle.bind()
+
+        //set modelviewprojection matrix
+        var modelview_loc = gl.getUniformLocation(prog, "ModelViewProjectionMatrix")
+        gl.uniformMatrix4fv(modelview_loc, false, new Float32Array(gl.xform.viewProjectionMatrix));
+
+        //get texture location
+        var tex_loc = gl.getUniformLocation(prog, "laserTex")
+
+        //get position attribute location
+        var vertex_loc = gl.getAttribLocation(prog, "a_position")
+
+        renderLasers(gl, model, vertex_loc, tex_loc)
+        renderExplosions(gl, model, vertex_loc, tex_loc)
+
         gl.programs.particle.unbind()
 
         gl.disable(gl.BLEND)

@@ -5,7 +5,7 @@ var YV = {};
 
     //all the resources that need to be loaded before the game will work correctly
     YV.Resources = {
-        textures: ["earth.jpg", "sun.jpg", "mars.jpg", "sky2.jpg", "jupiter.jpg", "laser.png"],
+        textures: ["earth.jpg", "sun.jpg", "mars.jpg", "sky2.jpg", "jupiter.jpg", "laser.png", "fire.png"],
         shaders: ["planet.frag.glsl", "planet.vert.glsl",
                   "sun.vert.glsl", "sun.frag.glsl",
                   "bg.vert.glsl", "bg.frag.glsl",
@@ -32,20 +32,48 @@ var YV = {};
         $.extend(this,opts || {});
     };
 
+    function Particle(opts) {
+        $.extend(this, opts || {})
+    }
+    $.extend(Particle.prototype, {
+        position: new SglVec3(0.),
+        velocity: new SglVec3(1., 0., 1.),
+        acceleration: new SglVec3(0.),
+        lifetime: 5.,
+        age: 0.
+    })
+
     function Laser(opts) {
-        this.position = new SglVec3(0.0)
-        this.velocity = new SglVec3(1.0, 0.0, 1.0)
-        this.shooter = -1
         this.time_shot = Date.now()
         $.extend(this, opts || {})
     }
+    Laser.prototype = Particle.prototype
+    $.extend(Laser.prototype, {
+        shooter: -1,
+        time_shot: 0
+    })
 
     function Explosion(opts) {
-        this.position = new SglVec3(0.0)
-        this.lifetime = 3.
-        this.particles = []
         $.extend(this, opts || {})
+
+        //initialize explosion particles
+        //var nParticles = YV.GameModel.particles.laser.numParticles
+        var nParticles = 30
+        var center = this.position
+        for(var i = 0; i < nParticles; ++i) {
+            var angle = i * (6.28318531 / nParticles)
+            this.particles.push(new Particle({
+                position: center.clone(),
+                velocity: new SglVec3(1. * Math.sin(angle), 0.0, 1. * Math.cos(angle))
+            }))
+        }
     }
+    $.extend(Explosion.prototype, {
+        position: new SglVec3(0.0),
+        lifetime: 3.,
+        time_alive: 0.,
+        particles: []
+    })
 
     //the unifying data structure for all the stuff in the game ... whoa
     YV.GameModel = {
@@ -120,6 +148,11 @@ var YV = {};
             texture: "laser.png"    
         }, 
 
+        explosion: {
+            numParticles: 100,
+            texture: "fire.png"
+        },
+
         particles: {
             lasers: [
                 /*
@@ -131,6 +164,9 @@ var YV = {};
             ],
 
             explosions: [
+                new Explosion({
+                    position: new SglVec3(20.0, 0.0, 20.0)
+                })
             ],
 
             thrusters: [

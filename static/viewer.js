@@ -24,6 +24,7 @@ GLIB.FireWhenReady(YV.Resources, function(resources) {
 
             //set up laser texture
             GameModel.laser.texture = new SglTexture2D(gl, resources.textures[GameModel.laser.texture], textureOptions)
+            GameModel.explosion.texture = new SglTexture2D(gl, resources.textures[GameModel.explosion.texture], textureOptions)
 
             GameModel.background.mesh = new SglMeshGL(gl);
             GameModel.background.mesh.addVertexAttribute("position", 3, new Float32Array(
