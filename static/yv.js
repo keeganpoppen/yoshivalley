@@ -60,13 +60,17 @@ var YV = {};
         //var nParticles = YV.GameModel.particles.laser.numParticles
         var nParticles = 100
         var center = this.position
-        for(var i = 0; i < nParticles; ++i) {
-            var angle = i * (6.28318531 / nParticles)
-            this.particles.push(new Particle({
+
+        var verts = GLIB.MakeSphericalVerts(7.0, 20, 20)
+        var that = this
+        verts.map(function(vert){
+            that.particles.push(new Particle({
                 position: center.clone(),
-                velocity: new SglVec3(1. * Math.sin(angle), 0.0, 1. * Math.cos(angle))
+                velocity: vert.clone()
             }))
-        }
+        })
+
+        console.log("made " + verts.length + " verts")
     }
     $.extend(Explosion.prototype, {
         position: new SglVec3(0.0),

@@ -111,10 +111,6 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
             })
         })
 
-        if(window.PENIS) {
-            console.log(vertices)
-        }
-
         var vert_buffer = gl.createBuffer()
         gl.bindBuffer(gl.ARRAY_BUFFER, vert_buffer)
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW)
