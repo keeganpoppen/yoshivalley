@@ -9,17 +9,17 @@ var YV = {};
         shaders: ["planet.frag.glsl", "planet.vert.glsl",
                   "sun.vert.glsl", "sun.frag.glsl",
                   "bg.vert.glsl", "bg.frag.glsl",
-                  "particle.vert.glsl", "particle.frag.glsl"],
+                  "particle.vert.glsl", "particle.frag.glsl",
                   "ufo.vert.glsl", "ufo.frag.glsl"],
-        meshes: ["ufo.json"]
-        meshes: []
+        meshes: ["ufo.json"],
     }
 
     function Planet(opts) {
         this.__defineGetter__('position', function() {
-            return new SglVec3(this.orbitRadius * Math.sin(sglDegToRad(this.orbitAngle)),
-                       0.0,
-                       this.orbitRadius * Math.cos(sglDegToRad(this.orbitAngle)));
+            var planeDist = this.orbitRadius * Math.cos(sglDegToRad(this.azimuth));
+            return new SglVec3(planeDist * Math.sin(sglDegToRad(this.orbitAngle)),
+                               this.orbitRadius * Math.sin(sglDegToRad(this.azimuth)),
+                               planeDist * Math.cos(sglDegToRad(this.orbitAngle)));
         });
         this.program = "planet";
         this.texture = "jupiter.jpg"; //Default texture
@@ -29,6 +29,7 @@ var YV = {};
         this.rotationalVelocity = 0.0;
         this.orbitRadius = 0.0;
         this.orbitAngle = 0.0;
+        this.azimuth = 0.0;
         this.rotation = 0.0;
         this.mesh = {};
         $.extend(this,opts || {});
@@ -36,9 +37,9 @@ var YV = {};
 
     function UFO(opts) {
         this.program = "ufo";
-        this.position = new SglVec3(0.0, 0.0, 0.0);
+        this.position = new SglVec3(50.0, 0.0, -80.0);
         this.mass = 0.1;
-        this.radius = 5.0; 
+        this.radius = 10.0; 
         this.velocity = new SglVec3(0.0, 0.0, 0.0);
         this.acceleration = new SglVec3(0.0, 0.0, 0.0);
         this.cannon_angle = 0.0;
@@ -92,10 +93,12 @@ var YV = {};
 
     //the unifying data structure for all the stuff in the game ... whoa
     YV.GameModel = {
-        camera : {
+        camera : new Planet({ //really just for the position getter
            fov : 60.0, //Degrees 
-           position: new SglVec3(100.0, 250.0, 100.0)
-        }, 
+           orbitRadius : 250.0,
+           orbitAngle : -10.0,
+           azimuth : 70.0
+        }), 
 
         background : {
             program : "bg",
@@ -146,7 +149,8 @@ var YV = {};
             new UFO() 
         ],
 
-        UFOMesh : {}, //Will get set in load
+        UFOMeshDisk : {}, 
+        UFOMeshDome : {}, 
 
         //truck for global laser config
         laser: {

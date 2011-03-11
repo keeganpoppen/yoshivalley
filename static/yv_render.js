@@ -7,7 +7,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
         gl.viewport(0, 0, w, h);
         gl.xform.projection.loadIdentity();
-        gl.xform.projection.perspective(sglDegToRad(camera.fov), w/h, 80, 400.0);
+        gl.xform.projection.perspective(sglDegToRad(camera.fov), w/h, 1, 400.0);
         gl.xform.view.loadIdentity();
         gl.xform.view.lookAt(camera.position.x,
                              camera.position.y,
@@ -68,23 +68,40 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
     function renderUFOs(gl, model) {
         model.players.map(function(player) {
-            console.log(player)
             var pos = player.position;
-            gl.xform.model.loadIdentity();
-            //gl.xform.model.translate(pos.x, pos.y, pos.z);
-            //This rotation necessary to correct for the model's orientation
-            gl.xform.model.rotate(sglDegToRad(-90), 1.0, 0.0, 0.0);
-            gl.xform.model.scale(player.radius, player.radius, player.radius);
-
             var sunpos = model.sun.position;
+
+            //Render Disk
+            gl.xform.model.loadIdentity();
+            gl.xform.model.translate(pos.x, pos.y, pos.z);
+            gl.xform.model.scale(player.radius, 0.3 * player.radius, player.radius);
             sglRenderMeshGLPrimitives(model.UFOMesh, "index", gl.programs.ufo, null,
                 {
-                    ModelViewProjectionMatrix : gl.xform.modelViewProjectionMatrix,
+                    ViewProjectionMatrix : gl.xform.viewProjectionMatrix,
                     ModelMatrix : gl.xform.modelMatrix,
-                    NormalMatrix : gl.xform.viewSpaceNormalMatrix,
-                    sunCenter : [sunpos.x, sunpos.y, sunpos.z]
+                    NormalMatrix : gl.xform.worldSpaceNormalMatrix,
+                    sunCenter : [sunpos.x, sunpos.y, sunpos.z],
+                    color : [1.0, 1.0, 0.0],
+                    halfSphere : false
                 },
             {});
+
+            //Render Dome
+            gl.xform.model.loadIdentity();
+            gl.xform.model.translate(pos.x, pos.y, pos.z);
+            gl.xform.model.scale(0.6 * player.radius, 0.6 * player.radius,
+                    0.6 *player.radius);
+            sglRenderMeshGLPrimitives(model.UFOMesh, "index", gl.programs.ufo, null,
+                {
+                    ViewProjectionMatrix : gl.xform.viewProjectionMatrix,
+                    ModelMatrix : gl.xform.modelMatrix,
+                    NormalMatrix : gl.xform.worldSpaceNormalMatrix,
+                    sunCenter : [sunpos.x, sunpos.y, sunpos.z],
+                    color : [0.0, 1.0, 1.0],
+                    halfSphere : true
+                },
+            {});
+
         });
     }
 

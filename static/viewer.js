@@ -39,19 +39,22 @@ GLIB.FireWhenReady(YV.Resources, function(resources) {
                     resources.textures[GameModel.background.texture], textureOptions);
 
             var sphereMesh = GLIB.MakeSphere(1, 25, 25);
-            GameModel.sun.mesh = GLIB.MakeSGLMesh(gl, sphereMesh);//new SglMeshGL(gl);
+            var SGLsphereMesh = GLIB.MakeSGLMesh(gl, sphereMesh);
+            GameModel.sun.mesh = SGLsphereMesh;
             GameModel.sun.texture = new SglTexture2D(gl,
                     resources.textures[GameModel.sun.texture], textureOptions);
             for(var id in GameModel.planets) {
                 var planet = GameModel.planets[id];
-                planet.mesh = GLIB.MakeSGLMesh(gl, sphereMesh);
+                planet.mesh = SGLsphereMesh;
                 //Replace texture string with texture object
                 planet.texture = new SglTexture2D(gl,
                         resources.textures[planet.texture], textureOptions);
             }
 
-            GameModel.UFOMesh = GLIB.MakeSGLMesh(gl, resources.meshes['ufo.json']);
-            
+            //GameModel.UFOMesh = GLIB.MakeSGLMesh(gl, resources.meshes['ufo.json']);
+            var sphereMeshWithNormals = GLIB.MakeSphere(1, 25, 25, true);
+            var SGLMeshWithNormals = GLIB.MakeSGLMesh(gl, sphereMeshWithNormals); 
+            GameModel.UFOMesh = SGLMeshWithNormals;
             gl.ui = this.ui;
 
             //We want the canvas to resize with the window
@@ -61,6 +64,27 @@ GLIB.FireWhenReady(YV.Resources, function(resources) {
             }
             $(window).resize(resize);
             resize();
+
+            window.onkeypress = function(e) {
+                switch(e.charCode) {
+                case 97: //A
+                    YV.GameModel.camera.orbitAngle -= 5;
+                    break;
+                case 100: //D
+                    YV.GameModel.camera.orbitAngle += 5;
+                    break;
+                case 119: //W
+                    YV.GameModel.camera.azimuth += 5;
+                    break;
+                case 115: //S
+                    YV.GameModel.camera.azimuth -= 5;
+                    break;
+                };
+            }
+
+            window.addEventListener('mousewheel', function(e) {
+                YV.GameModel.camera.orbitRadius -= e.wheelDelta / 20;
+            }, false);
         },
 
         update: function(gl, dt) {

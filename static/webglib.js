@@ -172,10 +172,11 @@ var GLIB = {};
         return verts
     }
 
-    GLIB.MakeSphere = function(radius, lats, longs) {
+    GLIB.MakeSphere = function(radius, lats, longs, addNormals) {
         var geometryData = [ ];
         var texCoordData = [ ];
         var indexData = [ ];
+        var normalData = [];
 
         for (var latNumber = 0; latNumber <= lats; ++latNumber) {
             for (var longNumber = 0; longNumber <= longs; ++longNumber) {
@@ -192,6 +193,9 @@ var GLIB = {};
                 var u = 1-(longNumber/longs);
                 var v = latNumber/lats;
 
+                normalData.push(x);
+                normalData.push(y);
+                normalData.push(z);
                 texCoordData.push(u);
                 texCoordData.push(v);
                 geometryData.push(radius * x);
@@ -218,6 +222,7 @@ var GLIB = {};
         retval.indices = new Uint16Array(indexData);
         retval.vertices = new Float32Array(geometryData);
         retval.texCoords = new Float32Array(texCoordData);
+        if(addNormals) retval.normals = new Float32Array(normalData);
         
         return retval;
     };
