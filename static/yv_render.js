@@ -7,7 +7,8 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
         gl.viewport(0, 0, w, h);
         gl.xform.projection.loadIdentity();
-        gl.xform.projection.perspective(sglDegToRad(camera.fov), w/h, 1, 400.0);
+        gl.xform.projection.perspective(sglDegToRad(camera.fov), w/h,
+                camera.near, camera.far);
         gl.xform.view.loadIdentity();
         gl.xform.view.lookAt(camera.position.x,
                              camera.position.y,

@@ -97,6 +97,8 @@ var YV = {};
            fov : 60.0, //Degrees 
            orbitRadius : 250.0,
            orbitAngle : -10.0,
+           near : 1,
+           far : 500,
            azimuth : 70.0
         }), 
 
