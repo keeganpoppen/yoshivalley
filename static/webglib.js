@@ -281,7 +281,7 @@ var GLIB = {};
         //make sure the resources have been loaded
         GLIB.loadResources(resources_to_load, function(res) {
             console.log('resources loaded!')
-            resources = res
+            $.extend(resources, res)
             dec_wait_count()
         })
 
@@ -289,6 +289,7 @@ var GLIB = {};
         var socket = new io.Socket() 
         socket.on('connect', function() {
             console.log('socket connected!')
+            $.extend(resources, {socket: socket})
             dec_wait_count()
         })
         socket.connect()

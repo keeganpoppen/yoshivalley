@@ -82,12 +82,11 @@ socket.on('connection', function(client) {
                 //util.log('last message was ' + (Date.now() - last_message) + ' ms ago')
                 last_message = Date.now()
 
-                util.log('message gotten from client ' + client.sessionId)
-                util.log(util.inspect(message))
-                /*
+                //util.log('message gotten from client ' + client.sessionId)
+                //util.log(util.inspect(message))
+
                 message.player_id = client.sessionId
                 broadcast_to_viewers(message)
-                */
             })
 
             client.on('disconnect', function(message) {

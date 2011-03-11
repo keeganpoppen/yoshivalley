@@ -85,6 +85,10 @@ GLIB.FireWhenReady(YV.Resources, function(resources) {
             window.addEventListener('mousewheel', function(e) {
                 YV.GameModel.camera.orbitRadius -= e.wheelDelta / 20;
             }, false);
+
+            //set up all the relevant socket callbacks, etc.
+            //right now this is last so that stuff is displaying before sockets start doing shit
+            YV.Connect(resources.socket, GameModel)
         },
 
         update: function(gl, dt) {

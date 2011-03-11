@@ -57,7 +57,7 @@ var YV = {};
         age: 0.
     })
 
-    function Laser(opts) {
+    var Laser = function(opts) {
         this.time_shot = Date.now()
         $.extend(this, opts || {})
     }
@@ -66,6 +66,7 @@ var YV = {};
         shooter: -1,
         time_shot: 0
     })
+    YV.Laser = Laser
 
     function Explosion(opts) {
         $.extend(this, opts || {})
@@ -96,10 +97,12 @@ var YV = {};
         camera : new Planet({ //really just for the position getter
            fov : 60.0, //Degrees 
            orbitRadius : 250.0,
-           orbitAngle : -10.0,
+           //orbitAngle : -10.0,
+           orbitAngle: 0.,
            near : 1,
            far : 500,
-           azimuth : 70.0
+           //azimuth : 70.0
+           azimuth: 89.9
         }), 
 
         background : {
