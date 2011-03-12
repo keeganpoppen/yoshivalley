@@ -67,6 +67,32 @@
                 GyroThrottle.should_send_given_input = should_send_given_input
             })();
 
+            var CannonThrottle = {};
+            (function(){
+                var prev_val = 0.
+                var last_update = Date.now()
+
+                var should_send_given_input = function(input) {
+                    if(!input || input === undefined) return false
+
+                    var should = false
+                    var send_time = Date.now()
+                    if((input - prev_val) > .2 || (send_time - last_update) > 500) {
+                        prev_val = input
+                        last_update = send_time
+                        should = true
+                    }
+                    return should
+                }
+
+                var get_value = function(){
+                    return prev_val
+                }
+
+                CannonThrottle.get_value = get_value
+                CannonThrottle.should_send_given_input = should_send_given_input
+            })();
+
             /*
              * set up the accelerometer and gyroscope
              */
@@ -126,7 +152,9 @@
                 var deviation_y = ev.pageY - offset.top - (cc.height()/2)
                 var angle = Math.atan2(-deviation_y, deviation_x)
                 prev_angle = angle
-                socket.send({'type': 'laser:update', 'angle': angle, 'player_id': player_id})
+                if(CannonThrottle.should_send_given_input(angle)) {
+                    socket.send({'type': 'laser:update', 'angle': angle, 'player_id': player_id})
+                }
                 return false
             }
 

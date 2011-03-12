@@ -63,6 +63,16 @@ var socket = io.listen(server)
 
 var last_message = Date.now()
 
+
+var num_packets = 0
+function print_packet_load(){
+    console.log('num pakets this second: ' + num_packets)
+    num_packets = 0
+    setTimeout(print_packet_load, 1000)
+}
+print_packet_load()
+
+
 socket.on('connection', function(client) {
     //if(client in clients) util.log('WWTF!!!!!')
     
@@ -87,6 +97,8 @@ socket.on('connection', function(client) {
 
                 message.player_id = client.sessionId
                 broadcast_to_viewers(message)
+
+                ++num_packets
             })
 
             client.on('disconnect', function(message) {
@@ -104,6 +116,7 @@ socket.on('connection', function(client) {
 
             client.on('message', function(message) {
                 //TODO: don't actually know if anything should be happening here right now
+                ++num_packets
             })
 
             client.on('disconnect', function() {
