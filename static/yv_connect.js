@@ -12,6 +12,8 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
     }
 
     function handleMessage(message) {
+        if(message.type != 'player:add' && YV.GameModel.players[message.player_id] === undefined)
+            return;
         if(message.type == 'gyro:update') {
             var d = message.data
             //var x = d.xrot; var y = d.yrot; var z = d.zrot;

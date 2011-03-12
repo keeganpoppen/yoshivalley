@@ -48,28 +48,38 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
     function updateProjectiles(model) {
         //update lasers
         var lasers = model.particles.lasers
+        GLIB.Solver.StepTime(lasers)
+
+        var toremove = [];
         $.each(lasers, function(laser_id, laser) {
             laser.age += GLIB.Solver.TimeStep;    
             if(laser.age > 4) { //TODO paramaterize this value
-                lasers.splice(laser_id, 1);
+                toremove.push(laser_id);
             }
         });
-        GLIB.Solver.StepTime(lasers)
+        
 
         checkForPlanetaryIntersection(lasers, model, function(laser_id, planet_id) {
-            lasers.splice(laser_id, 1);
+            toremove.push(laser_id);
         });
 
         //Check for intersections with ufo's, hits if you will
         checkForIntersection(lasers, model.players, function(laser_id, player_id) {
             if(player_id != lasers[laser_id].shooter_id) {
-                console.log("hit!");
-                console.log(lasers[laser_id].shooter_id);
                 //var shooter = model.players[lasers[laser_id].shooter_id];
                 delete model.players[player_id];
-                delete lasers[laser_id];
+                toremove.push(laser_id);
             }
         });
+
+        var tokeep = [];
+        $.each(lasers, function(laser_id, laser) {
+            if($.inArray(laser_id, toremove) < 0) {
+                tokeep.push(laser);
+            }
+        });
+
+        model.particles.lasers = tokeep;
 
         //update explosions
         var explosions = model.particles.explosions
