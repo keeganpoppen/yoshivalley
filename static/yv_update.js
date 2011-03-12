@@ -67,7 +67,10 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         checkForIntersection(lasers, model.players, function(laser_id, player_id) {
             if(player_id != lasers[laser_id].shooter_id) {
                 //var shooter = model.players[lasers[laser_id].shooter_id];
-                delete model.players[player_id];
+                var sunk = model.players[player_id];
+                sunk.lives--;
+                YV.AddExplosion(sunk.position);
+                YV.Respawn(sunk);
                 toremove.push(laser_id);
             }
         });
@@ -83,14 +86,18 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
         //update explosions
         var explosions = model.particles.explosions
+        var tokeep = [];
         explosions.map(function(explosion) {
             GLIB.Solver.StepTime(explosion.particles)
             explosion.particles.map(function(particle) {
                 particle.age += GLIB.Solver.TimeStep
             })
+            explosion.age += GLIB.Solver.TimeStep;
+            if(explosion.age < explosion.lifetime) {
+                tokeep.push(explosion);
+            }
         })
-
-        //TODO: remove dead explosions
+        model.particles.explosions = tokeep;
 
         //TODO:update thrusters
     }

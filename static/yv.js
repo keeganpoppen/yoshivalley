@@ -43,6 +43,7 @@ var YV = {};
         position: new SglVec3(50.0, 0.0, -80.0),
         mass: 10.0,
         radius: 10.0,
+        lives: 3,
         controller: {
             xrot: 0.0,
             yrot: 0.0
@@ -57,6 +58,11 @@ var YV = {};
         cannon_angle: 0.0
     })
     YV.UFO = UFO
+
+    YV.Respawn = function(ufo) {
+        ufo.position = new SglVec3(50.0, 0.0, -80.0);
+        //ufo.velocity = new Sglvec3(0.0, 0.0, 0.0);
+    };
 
     function Particle(opts) {
         $.extend(this, opts || {})
@@ -102,6 +108,8 @@ var YV = {};
     }
     $.extend(Explosion.prototype, {
         position: new SglVec3(0.0),
+        lifetime: Particle.prototype.lifetime,
+        age: 0.0,
         particles: []
     })
 
@@ -192,13 +200,7 @@ var YV = {};
                 */
             ],
 
-            explosions: [
-                /*
-                new Explosion({
-                    position: new SglVec3(20.0, 0.0, 20.0)
-                })
-                */
-            ],
+            explosions: [],
 
             thrusters: [
                 //hmm.... this is slightly problematic-- the balance in between a no-knowledge
@@ -207,6 +209,10 @@ var YV = {};
             ]
         }
     }
+
+    YV.AddExplosion = function(pos) {
+        YV.GameModel.particles.explosions.push(new Explosion({position: new SglVec3(pos)}));
+    };
 
     YV.AddPlayer = function(playerid) {
         YV.GameModel.players[playerid] = new UFO({
