@@ -67,6 +67,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
                 console.log(lasers[laser_id].shooter_id);
                 //var shooter = model.players[lasers[laser_id].shooter_id];
                 delete model.players[player_id];
+                delete lasers[laser_id];
             }
         });
 

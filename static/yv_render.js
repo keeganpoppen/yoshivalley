@@ -77,12 +77,8 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
             //Angle the ufo in the direction of the thrust
             if(player.velocity.length > 0.0) {
-                var from = new SglVec3(0.0, 1.0, 0.0);
-                var to = player.velocity.normalized;
-                var perp = from.cross(to);
-                var max_velocity = 75; //TODO set this to a rational defined value
-                var angle = Math.PI / 2 * (player.velocity.length / max_velocity);
-                gl.xform.model.rotate(angle, perp.x, perp.y, perp.z);
+                gl.xform.model.rotate(-player.controller.yrot/180*Math.PI, 1.0, 0.0, 0.0);
+                gl.xform.model.rotate(-player.controller.xrot/180*Math.PI, 0.0, 0.0, 1.0);
             }
 
             //Render Disk

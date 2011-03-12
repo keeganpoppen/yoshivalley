@@ -41,7 +41,7 @@ var YV = {};
     $.extend(UFO.prototype, {
         program: "ufo",
         position: new SglVec3(50.0, 0.0, -80.0),
-        mass: 0.1,
+        mass: 10.0,
         radius: 10.0,
         controller: {
             xrot: 0.0,

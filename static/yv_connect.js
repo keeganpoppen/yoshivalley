@@ -27,7 +27,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
             var player = model.players[message.player_id]
 
             //console.log("right: " + right + ", up: " + up)
-            var MULT = 50.
+            var MULT = 100.
             var new_control_vel = new SglVec3(MULT * right, 0., -MULT * up);
 
             player.velocity = player.velocity.add(player.control_velocity.neg).add(new_control_vel)
