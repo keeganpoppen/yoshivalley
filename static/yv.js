@@ -196,7 +196,6 @@ var YV = {};
     }
 
     YV.AddPlayer = function(playerid) {
-        console.log("called");
         YV.GameModel.players[playerid] = new UFO({
             //TODO set new player specific values, like a random location and
             //  initial velocity

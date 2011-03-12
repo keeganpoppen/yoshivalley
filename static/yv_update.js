@@ -19,6 +19,24 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         particle_hack.push(model.sun)
 
         GLIB.Solver.StepTime(model.players, true, particle_hack)
+
+        var planetaryObjects = model.planets.slice(0);
+        planetaryObjects.push(model.sun);
+
+        //Check for player colisions with planets
+        $.each(model.players, function(player_id, player) {
+            var playerPos = player.position;
+            $.each(planetaryObjects, function(planet_id, planet) {
+                var distanceVec = playerPos.sub(planet.position);
+                var distance = distanceVec.length + 1; //TODO parametarize this value
+                if(distance < planet.radius + player.radius) {
+                    //Collision!
+                    delete model.players[player_id];
+                }
+            });
+        });
+
+        
     }
 
     function updateProjectiles(model) {
