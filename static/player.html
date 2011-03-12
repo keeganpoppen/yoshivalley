@@ -19,6 +19,10 @@
                 if(message.type == 'init:setid') {
                     player_id = message.player_id
                     $("#player_id").html(player_id)
+
+                } else if(message.type == 'latency_check') {
+                    socket.send(message) //just send 'er right back
+
                 } else {
                     $("#stuff").append('<div>message: ' + message + '</div>')
                 }
