@@ -47,6 +47,11 @@ var YV = {};
             xrot: 0.0,
             yrot: 0.0
         },
+
+        //this is set so that when a new velocity is set, the only part of the actual
+        //velocity of the player that is reset is what the controller component was,
+        //rather than invalidating all other sources of velocity (namely, momentum)
+        control_velocity: new SglVec3(0., 0., 0.),
         velocity: new SglVec3(0.0, 0.0, 0.0),
         acceleration: new SglVec3(0.0, 0.0, 0.0),
         cannon_angle: 0.0

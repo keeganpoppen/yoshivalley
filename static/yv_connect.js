@@ -24,10 +24,15 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
             var right = d.xrot / 60.
             var up = d.yrot / 60.
 
+            var player = model.players[message.player_id]
+
             //console.log("right: " + right + ", up: " + up)
             var MULT = 50.
-            model.players[message.player_id].velocity = new SglVec3(MULT * right, 0., -MULT * up);
-            model.players[message.player_id].controller = $.extend({}, d)
+            var new_control_vel = new SglVec3(MULT * right, 0., -MULT * up);
+
+            player.velocity = player.velocity.add(player.control_velocity.neg).add(new_control_vel)
+            player.control_velocity = new_control_vel
+            player.controller = $.extend({}, d)
 
         } else if(message.type == 'laser:update') { 
             laser_angle = message.angle 
