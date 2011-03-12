@@ -36,15 +36,27 @@ var YV = {};
     };
 
     function UFO(opts) {
-        this.program = "ufo";
-        this.position = new SglVec3(50.0, 0.0, -80.0);
-        this.mass = 0.1;
-        this.radius = 10.0; 
-        this.velocity = new SglVec3(0.0, 0.0, 0.0);
-        this.acceleration = new SglVec3(0.0, 0.0, 0.0);
-        this.cannon_angle = 0.0;
-        $.extend(this, opts || {});
+        $.extend(this, opts || {})
     };
+    $.extend(UFO.prototype, {
+        program: "ufo",
+        position: new SglVec3(50.0, 0.0, -80.0),
+        mass: 0.1,
+        radius: 10.0,
+        controller: {
+            xrot: 0.0,
+            yrot: 0.0
+        },
+
+        //this is set so that when a new velocity is set, the only part of the actual
+        //velocity of the player that is reset is what the controller component was,
+        //rather than invalidating all other sources of velocity (namely, momentum)
+        control_velocity: new SglVec3(0., 0., 0.),
+        velocity: new SglVec3(0.0, 0.0, 0.0),
+        acceleration: new SglVec3(0.0, 0.0, 0.0),
+        cannon_angle: 0.0
+    })
+    YV.UFO = UFO
 
     function Particle(opts) {
         $.extend(this, opts || {})
