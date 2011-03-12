@@ -125,7 +125,7 @@ var GLIB = {};
     Solver.StepTime = function(particles, gravity, grav_bodies) {
         var timestep_vec = new SglVec3(Solver.TimeStep)
 
-        particles.map(function(particle) {
+        $.each(particles, function(particle_id, particle) {
             if(!particle.position || particle.position === undefined)
                 throw "particle has no position? how is it going to move???";
 

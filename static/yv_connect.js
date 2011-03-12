@@ -22,7 +22,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
             //console.log("right: " + right + ", up: " + up)
             var MULT = 50.
-            model.players[0].velocity = new SglVec3(MULT * right, 0., -MULT * up);
+            model.players[message.player_id].velocity = new SglVec3(MULT * right, 0., -MULT * up);
         } else if(message.type == 'laser:update') { 
             laser_angle = message.angle 
             //console.log('new angle: ' + laser_angle)
@@ -42,12 +42,15 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
             //console.log("laser vel: " + laser_vel.x + ", " + laser_vel.y + ", " + laser_vel.z)
 
-            console.log("FIRING A MOTHAFUCKIN LASER!")
+            //console.log("FIRING A MOTHAFUCKIN LASER!")
 
             model.particles.lasers.push(new YV.Laser({
-                position: model.players[0].position,
-                velocity: laser_vel
+                position: model.players[message.player_id].position,
+                velocity: laser_vel,
+                shooter: message.player_id
             }))
+        } else if(message.type == 'player:add') {
+           YV.AddPlayer(message.player_id); 
         }
     }
 

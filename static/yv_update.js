@@ -24,6 +24,13 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
     function updateProjectiles(model) {
         //update lasers
         var lasers = model.particles.lasers
+        for(laser_id = 0; laser_id < lasers.length; laser_id++) {
+            var laser = lasers[laser_id];
+            laser.age += GLIB.Solver.TimeStep;    
+            if(laser.age > 4) {
+                lasers.splice(laser_id, 1);
+            }
+        }
         GLIB.Solver.StepTime(lasers)
 
         //update explosions
@@ -35,7 +42,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
             })
         })
 
-        //TODO: remove dead explosions and lasers
+        //TODO: remove dead explosions
 
         //TODO:update thrusters
     }

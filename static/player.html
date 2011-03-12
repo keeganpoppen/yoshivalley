@@ -99,7 +99,7 @@
                     var arr = GyroThrottle.get_value() 
                     var data = {}
                     data.xrot = arr[0]; data.yrot = arr[1]; data.zrot = arr[2];
-                    socket.send({'type': 'gyro:update', 'data': data})
+                    socket.send({'type': 'gyro:update', 'data': data, 'player_id': player_id})
                 }
             }, false)
 
@@ -126,7 +126,7 @@
                 var deviation_y = ev.pageY - offset.top - (cc.height()/2)
                 var angle = Math.atan2(-deviation_y, deviation_x)
                 prev_angle = angle
-                socket.send({'type': 'laser:update', 'angle': angle})
+                socket.send({'type': 'laser:update', 'angle': angle, 'player_id': player_id})
                 return false
             }
 
@@ -149,8 +149,46 @@
                 document.body.addEventListener("touchmove", function(e){e.preventDefault();},false)
 
                 document.getElementById("fire_button").addEventListener("touchstart", function(){
-                    socket.send({'type': 'laser:fire', 'angle': prev_angle})
+                    socket.send({'type': 'laser:fire', 'angle': prev_angle, 'player_id': player_id})
                 }, false)
+
+
+
+                /* For testing purposes, add call backs for mouse and keyboard events. That way we can test
+                   on a laptop too */
+
+                var xrot = 0.0;
+                var yrot = 0.0;
+                var zrot = 0.0;
+                function sendVelocityUpdate(x, y, z) {
+                    xrot += x;
+                    yrot += y;
+                    zrot += z;
+                    var data = {}
+                    data.xrot = xrot; data.yrot = yrot; data.zrot = zrot;
+                    socket.send({'type': 'gyro:update', 'data': data, 'player_id': player_id})
+                }
+
+                window.addEventListener("keypress", function(e) {
+                    switch(e.keyCode) {
+                    case 32:
+                        socket.send({'type': 'laser:fire', 'angle': prev_angle, 'player_id': player_id});
+                        break;
+                    //WASD keys
+                    case 119: //Up
+                        sendVelocityUpdate(0, 10, 0);    
+                        break;
+                    case 115: //Down
+                        sendVelocityUpdate(0, -10, 0);    
+                        break;
+                    case 100: //Right
+                        sendVelocityUpdate(10, 0, 0);    
+                        break;
+                    case 97: //Left
+                        sendVelocityUpdate(-10, 0, 0);    
+                        break;
+                    }
+                }, false);
 
             })
 		</script>

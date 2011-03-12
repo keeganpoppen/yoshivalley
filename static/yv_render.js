@@ -68,13 +68,25 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
     }
 
     function renderUFOs(gl, model) {
-        model.players.map(function(player) {
+        $.each(model.players, function(player_id, player) {
             var pos = player.position;
             var sunpos = model.sun.position;
 
-            //Render Disk
             gl.xform.model.loadIdentity();
             gl.xform.model.translate(pos.x, pos.y, pos.z);
+
+            //Angle the ufo in the direction of the thrust
+            if(player.velocity.length > 0.0) {
+                var from = new SglVec3(0.0, 1.0, 0.0);
+                var to = player.velocity.normalized;
+                var perp = from.cross(to);
+                var max_velocity = 75; //TODO set this to a rational defined value
+                var angle = Math.PI / 2 * (player.velocity.length / max_velocity);
+                gl.xform.model.rotate(angle, perp.x, perp.y, perp.z);
+            }
+
+            //Render Disk
+            gl.xform.model.push();
             gl.xform.model.scale(player.radius, 0.3 * player.radius, player.radius);
             sglRenderMeshGLPrimitives(model.UFOMesh, "index", gl.programs.ufo, null,
                 {
@@ -86,10 +98,10 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
                     halfSphere : false
                 },
             {});
+            gl.xform.model.pop();
 
             //Render Dome
-            gl.xform.model.loadIdentity();
-            gl.xform.model.translate(pos.x, pos.y, pos.z);
+            gl.xform.model.push();
             gl.xform.model.scale(0.6 * player.radius, 0.6 * player.radius,
                     0.6 *player.radius);
             sglRenderMeshGLPrimitives(model.UFOMesh, "index", gl.programs.ufo, null,
@@ -102,7 +114,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
                     halfSphere : true
                 },
             {});
-
+            gl.xform.model.pop();
         });
     }
 

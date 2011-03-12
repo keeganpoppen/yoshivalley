@@ -64,7 +64,7 @@ var YV = {};
     Laser.prototype = Particle.prototype
     $.extend(Laser.prototype, {
         shooter: -1,
-        time_shot: 0
+        age: 0
     })
     YV.Laser = Laser
 
@@ -91,6 +91,8 @@ var YV = {};
         position: new SglVec3(0.0),
         particles: []
     })
+
+    
 
     //the unifying data structure for all the stuff in the game ... whoa
     YV.GameModel = {
@@ -150,9 +152,7 @@ var YV = {};
             })
         ],
 
-        players: [
-            new UFO() 
-        ],
+        players: {},
 
         UFOMeshDisk : {}, 
         UFOMeshDome : {}, 
@@ -193,6 +193,14 @@ var YV = {};
                 //already really belongs to the player position, etc.
             ]
         }
+    }
+
+    YV.AddPlayer = function(playerid) {
+        console.log("called");
+        YV.GameModel.players[playerid] = new UFO({
+            //TODO set new player specific values, like a random location and
+            //  initial velocity
+        });
     }
     
 })();
