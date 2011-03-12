@@ -96,6 +96,11 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
             {});
             gl.xform.model.pop();
 
+            //render laser timer ring thing
+            gl.xform.model.push()
+            //TODO: the rendering part 
+            gl.xform.model.pop()
+
             //Render Dome
             gl.xform.model.push();
             gl.xform.model.scale(0.6 * player.radius, 0.6 * player.radius,

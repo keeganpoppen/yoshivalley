@@ -13,7 +13,9 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
     }
 
     function handleMessage(message) {
-        if(message.type != 'player:add' && YV.GameModel.players[message.player_id] === undefined)
+        var player = model.players[message.player_id]
+
+        if(message.type != 'player:add' && player === undefined)
             return;
         if(message.type == 'gyro:update') {
             var d = message.data
@@ -26,8 +28,6 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
             var right = d.xrot / 60.
             var up = d.yrot / 60.
-
-            var player = model.players[message.player_id]
 
             //console.log("right: " + right + ", up: " + up)
             var MULT = 100.
@@ -57,6 +57,8 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
             //console.log("laser vel: " + laser_vel.x + ", " + laser_vel.y + ", " + laser_vel.z)
 
             //console.log("FIRING A MOTHAFUCKIN LASER!")
+
+            player.last_shot = Date.now()
 
             model.particles.lasers.push(new YV.Laser({
                 position: model.players[message.player_id].position,
