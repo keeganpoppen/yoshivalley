@@ -3,6 +3,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 (function(){
 
     var model; 
+    var sock;
     var laser_angle = 0.;
 
     function bracketed(min, max, val) {
@@ -63,12 +64,15 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
                 shooter_id: message.player_id
             }))
         } else if(message.type == 'player:add') {
-           YV.AddPlayer(message.player_id); 
+            YV.AddPlayer(message.player_id); 
+        } else if(message.type == 'latency_check') {
+            sock.send(message) //send 'er right back
         }
     }
 
     YV.Connect = function(socket, game_model) {
         model = game_model
+        sock = socket
 
         socket.on('message', handleMessage)
         socket.on('disconnect', function(){alert('socket disconnected! just thought you should know');})

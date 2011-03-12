@@ -66,11 +66,27 @@ var last_message = Date.now()
 
 var num_packets = 0
 function print_packet_load(){
-    console.log('num pakets this second: ' + num_packets)
+    if(num_packets > 0) console.log('num pakets this second: ' + num_packets)
     num_packets = 0
     setTimeout(print_packet_load, 1000)
 }
 print_packet_load()
+
+function get_latencies(){
+    //console.log('tryna get latencies')
+    Object.keys(players).map(function(player_id){
+        var obj = players[player_id]
+        if(obj === undefined) return
+        obj.send({type: 'latency_check', sent: Date.now()})
+    })
+    Object.keys(viewers).map(function(viewer_id){
+        var obj = viewers[viewer_id]
+        if(obj === undefined) return
+        obj.send({type: 'latency_check', sent: Date.now()})
+    })
+    setTimeout(get_latencies, 3000)
+}
+get_latencies()
 
 
 socket.on('connection', function(client) {
@@ -89,6 +105,11 @@ socket.on('connection', function(client) {
             broadcast_to_viewers({'type': 'player:add', 'player_id': client.sessionId})
 
             client.on('message', function(message) {
+                if(message.type == 'latency_check') {
+                    console.log('latency for player ' + client.sessionId + ': ' + (Date.now() - message.sent) + 'ms')
+                    return
+                }
+
                 //util.log('last message was ' + (Date.now() - last_message) + ' ms ago')
                 last_message = Date.now()
 
@@ -115,6 +136,11 @@ socket.on('connection', function(client) {
             }
 
             client.on('message', function(message) {
+                if(message.type == 'latency_check') {
+                    console.log('latency for viewer' + client.sessionId + ': ' + (Date.now() - message.sent) + 'ms')
+                    return
+                }
+
                 //TODO: don't actually know if anything should be happening here right now
                 ++num_packets
             })
