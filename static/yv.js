@@ -73,7 +73,7 @@ var YV = {};
         position: new SglVec3(0.),
         velocity: new SglVec3(1., 0., 1.),
         acceleration: new SglVec3(0.),
-        lifetime: 5.,
+        lifetime: 2.,
         age: 0.
     })
 
@@ -97,7 +97,7 @@ var YV = {};
         var nParticles = 100
         var center = this.position
 
-        var verts = GLIB.MakeSphericalVerts(7.0, 20, 20)
+        var verts = GLIB.MakeSphericalVerts(10.0, 20, 20)
         var that = this
         verts.map(function(vert){
             that.particles.push(new Particle({
