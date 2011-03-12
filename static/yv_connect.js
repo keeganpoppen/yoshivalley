@@ -38,7 +38,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
             //console.log("x: " + x + ", z: " + z)
 
             var laser_vel = new SglVec3(x, 0., z)
-            laser_vel = laser_vel.normalize().mul(new SglVec3(MULT))
+            laser_vel = laser_vel.normalize().mul(new SglVec3(MULT)).mul(new SglVec3(5));
 
             //console.log("laser vel: " + laser_vel.x + ", " + laser_vel.y + ", " + laser_vel.z)
 
@@ -47,7 +47,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
             model.particles.lasers.push(new YV.Laser({
                 position: model.players[message.player_id].position,
                 velocity: laser_vel,
-                shooter: message.player_id
+                shooter_id: message.player_id
             }))
         } else if(message.type == 'player:add') {
            YV.AddPlayer(message.player_id); 

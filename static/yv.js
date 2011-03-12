@@ -63,7 +63,8 @@ var YV = {};
     }
     Laser.prototype = Particle.prototype
     $.extend(Laser.prototype, {
-        shooter: -1,
+        shooter_id: -1,
+        time_shot: 0,
         age: 0
     })
     YV.Laser = Laser
