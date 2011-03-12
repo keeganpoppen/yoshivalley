@@ -127,26 +127,26 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         //lasers don't age, of course
         gl.uniform1i(does_age_loc, 0);
 
+        var vertices = []
+
         //render all the lasers
         model.particles.lasers.map(function(laser) {
             var len_vec = laser.velocity.normalized.mul(new SglVec3(model.laser.length))
             var start_pos = laser.position.add(len_vec.mul(new SglVec3(0.5)).neg)
             var iter_vec = len_vec.mul(new SglVec3(1./model.laser.numParticles))
 
-            var vertices = []
-
             for(var i = 0; i < model.laser.numParticles; ++i) {
                 var pos = start_pos.add(iter_vec.mul(new SglVec3(i)))
                 vertices.push(pos.x, pos.y, pos.z)
             }
-
-            var vert_buffer = gl.createBuffer()
-            gl.bindBuffer(gl.ARRAY_BUFFER, vert_buffer)
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW)
-            gl.vertexAttribPointer(vertex_loc, 3, gl.FLOAT, false, 0, 0)
-            
-            gl.drawArrays(gl.POINTS, 0, vertices.length/3)
         })
+
+        var vert_buffer = gl.createBuffer()
+        gl.bindBuffer(gl.ARRAY_BUFFER, vert_buffer)
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW)
+        gl.vertexAttribPointer(vertex_loc, 3, gl.FLOAT, false, 0, 0)
+        
+        gl.drawArrays(gl.POINTS, 0, vertices.length/3)
 
         model.laser.texture.unbind()
     }

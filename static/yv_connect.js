@@ -14,15 +14,21 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
     function handleMessage(message) {
         if(message.type == 'gyro:update') {
             var d = message.data
-            var x = d.xrot; var y = d.yrot; var z = d.zrot;
+            //var x = d.xrot; var y = d.yrot; var z = d.zrot;
             //console.log("xrot: " + x + ", yrot: " + y + ", zrot: " + z)
 
-            var right = bracketed(-1, 1, (x / 60.));
-            var up = bracketed(-1, 1, (y / 60.));
+            $.each(d, function(rot, angle) {
+                d[rot] = bracketed(-60, 60, angle)
+            })
+
+            var right = d.xrot / 60.
+            var up = d.yrot / 60.
 
             //console.log("right: " + right + ", up: " + up)
             var MULT = 50.
             model.players[message.player_id].velocity = new SglVec3(MULT * right, 0., -MULT * up);
+            model.players[message.player_id].controller = $.extend({}, d)
+
         } else if(message.type == 'laser:update') { 
             laser_angle = message.angle 
             //console.log('new angle: ' + laser_angle)
