@@ -47,6 +47,7 @@ var YV = {};
 
                 blinkPeriod: 0.3,
                 blinkOffPercent: 0.33,
+                shininess: 20.0,
 
                 diskSquishFrac: 0.3,
                 domeRadFrac: 0.6,

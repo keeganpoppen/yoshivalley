@@ -91,12 +91,14 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
                     player.radius, player.radius);
             sglRenderMeshGLPrimitives(model.ufo.mesh, "index", gl.programs.ufo, null,
                 {
-                    ViewProjectionMatrix : gl.xform.viewProjectionMatrix,
+                    ViewMatrix : gl.xform.viewMatrix,
+                    ProjectionMatrix : gl.xform.projectionMatrix,
                     ModelMatrix : gl.xform.modelMatrix,
                     NormalMatrix : gl.xform.worldSpaceNormalMatrix,
                     sunCenter : [sunpos.x, sunpos.y, sunpos.z],
-                    color : [1.0, 1.0, 0.0],
-                    halfSphere : false
+                    color : player.color,
+                    halfSphere : false,
+                    shininess: YV.Constants.ufo.shininess,
                 },
             {});
             gl.xform.model.pop();
@@ -158,12 +160,14 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
                     YV.Constants.ufo.domeRadFrac * player.radius);
             sglRenderMeshGLPrimitives(model.ufo.mesh, "index", gl.programs.ufo, null,
                 {
-                    ViewProjectionMatrix : gl.xform.viewProjectionMatrix,
+                    ViewMatrix : gl.xform.viewMatrix,
+                    ProjectionMatrix : gl.xform.projectionMatrix,
                     ModelMatrix : gl.xform.modelMatrix,
                     NormalMatrix : gl.xform.worldSpaceNormalMatrix,
                     sunCenter : [sunpos.x, sunpos.y, sunpos.z],
-                    color : [0.0, 1.0, 1.0],
-                    halfSphere : true
+                    color : [0.8, 0.8, 0.8],
+                    halfSphere : true,
+                    shininess: YV.Constants.ufo.shininess,
                 },
             {});
             gl.xform.model.pop();

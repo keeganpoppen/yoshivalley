@@ -4,7 +4,8 @@ precision highp float;
  
 uniform mat3 NormalMatrix;
 uniform mat4 ModelMatrix;
-uniform mat4 ViewProjectionMatrix;
+uniform mat4 ViewMatrix;
+uniform mat4 ProjectionMatrix;
 uniform bool halfSphere;
  
 attribute vec3 a_position;
@@ -12,6 +13,7 @@ attribute vec3 a_normal;
  
 varying vec3 normal;
 varying vec3 worldPosition;
+varying vec3 eyePosition;
  
 void main(void)
 {
@@ -21,8 +23,11 @@ void main(void)
     }
     vec4 worldPositionTemp = ModelMatrix * vec4(pos, 1.0);
     worldPosition = worldPositionTemp.xyz;
+
+    vec4 eyePositionTemp = ViewMatrix * worldPositionTemp;
+    eyePosition = eyePositionTemp.xyz;
     
-    gl_Position = ViewProjectionMatrix * vec4(worldPosition, 1.0);
+    gl_Position = ProjectionMatrix * eyePositionTemp;
     
     normal = NormalMatrix * a_normal;
 }
