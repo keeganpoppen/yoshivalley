@@ -56,7 +56,9 @@ var YV = {};
         control_velocity: new SglVec3(0., 0., 0.),
         velocity: new SglVec3(0.0, 0.0, 0.0),
         acceleration: new SglVec3(0.0, 0.0, 0.0),
-        cannon_angle: 0.0
+        cannon_angle: 0.0,
+        last_shot: 0, //time the last shot occurred
+        recharge_time: 3. //time between shots (in seconds)
     })
     YV.UFO = UFO
 
@@ -182,14 +184,13 @@ var YV = {};
 
         players: {},
 
-        UFOMeshDisk : {}, 
-        UFOMeshDome : {}, 
+        ufo: {},
 
         //truck for global laser config
         laser: {
             length: 7.5,
             numParticles: 10,
-            texture: "laser.png"    
+            texture: "laser.png"
         }, 
 
         explosion: {

@@ -76,7 +76,8 @@ var GLIB = {};
 //needs to be better, it can probably be swapped out, but it seems unimportant
 (function(){
     var Solver = {};
-    Solver.TimeStep = .01
+    //Solver.TimeStep = .01
+    Solver.TimeStep = .03
     Solver.grav_constant = 200.0
     Solver.print_updates = false
 

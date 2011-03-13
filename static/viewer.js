@@ -1,4 +1,9 @@
 GLIB.FireWhenReady(YV.Resources, function(resources) {
+    var last_frame_time = Date.now()
+    var last_fps_print = Date.now()
+    var fps_cum = 0.
+    var fps_num = 0
+
     console.log('starting real work, namely the actual game');
 
     //TODO: this is eventually superflous... I'm just lazy
@@ -54,7 +59,7 @@ GLIB.FireWhenReady(YV.Resources, function(resources) {
             //GameModel.UFOMesh = GLIB.MakeSGLMesh(gl, resources.meshes['ufo.json']);
             var sphereMeshWithNormals = GLIB.MakeSphere(1, 25, 25, true);
             var SGLMeshWithNormals = GLIB.MakeSGLMesh(gl, sphereMeshWithNormals); 
-            GameModel.UFOMesh = SGLMeshWithNormals;
+            GameModel.ufo.mesh = SGLMeshWithNormals;
             gl.ui = this.ui;
 
             //We want the canvas to resize with the window
@@ -97,6 +102,18 @@ GLIB.FireWhenReady(YV.Resources, function(resources) {
         },
 
         draw: function(gl) {
+            var cur_time = Date.now()
+            var fps = 1000. / (cur_time - last_frame_time)
+            fps = Math.round(fps * 10) / 10
+            fps_cum += fps
+            ++fps_num
+            if(cur_time > (last_fps_print - 1000)) {
+                var fps = fps_cum / fps_num
+                fps_cum = fps_num = 0
+                $('#framerate').html(fps + 'fps')
+                last_fps_print = cur_time
+            }
+            last_frame_time = cur_time
             YV.Render(gl, YV.GameModel)
         }
 
