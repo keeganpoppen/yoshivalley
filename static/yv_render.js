@@ -120,6 +120,9 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
     }
 
     function renderLasers(gl, model, vertex_loc, tex_loc, age_frac_loc, does_age_loc) {
+        //only ever create one laser buffer
+        if(model.laser.buffer === undefined) model.laser.buffer = gl.createBuffer()
+
         //set laser texture
         gl.activeTexture(gl.TEXTURE0)
         model.laser.texture.bind()
@@ -142,7 +145,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
             }
         })
 
-        var vert_buffer = gl.createBuffer()
+        var vert_buffer = model.laser.buffer
         gl.bindBuffer(gl.ARRAY_BUFFER, vert_buffer)
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW)
         gl.vertexAttribPointer(vertex_loc, 3, gl.FLOAT, false, 0, 0)
@@ -176,12 +179,16 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
             })
         })
 
-        var vert_buffer = gl.createBuffer()
+        if(model.explosion.vert_buffer === undefined) model.explosion.vert_buffer = gl.createBuffer()
+
+        var vert_buffer = model.explosion.vert_buffer
         gl.bindBuffer(gl.ARRAY_BUFFER, vert_buffer)
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW)
         gl.vertexAttribPointer(vertex_loc, 3, gl.FLOAT, false, 0, 0)
 
-        var age_frac_buffer = gl.createBuffer()
+        if(model.explosion.age_frac_buffer === undefined) model.explosion.age_frac_buffer = gl.createBuffer()
+
+        var age_frac_buffer = model.explosion.age_frac_buffer
         gl.bindBuffer(gl.ARRAY_BUFFER, age_frac_buffer)
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(age_fracs), gl.STATIC_DRAW)
         gl.vertexAttribPointer(age_frac_loc, 1, gl.FLOAT, false, 0, 0)

@@ -184,7 +184,7 @@ var YV = {};
         laser: {
             length: 7.5,
             numParticles: 10,
-            texture: "laser.png"    
+            texture: "laser.png"
         }, 
 
         explosion: {
