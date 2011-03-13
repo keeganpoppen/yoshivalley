@@ -357,7 +357,6 @@ var YV = {};
         var newufo = new UFO({
             color: color,
         });
-        console.log(newufo.color);
         setInitialPosAndVel(playerid, newufo);
         YV.GameModel.players[playerid] = newufo;
     }
