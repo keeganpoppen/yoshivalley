@@ -18,8 +18,9 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
             var playerPos = player.position;
             $.each(collection2, function(planet_id, planet) {
                 var distanceVec = playerPos.sub(planet.position);
-                var distance = distanceVec.length; //TODO parametarize this value
-                var playerRadius = (player.radius ? player.radius-1 : 0.0);
+                var distance = distanceVec.length; 
+                var playerRadius = (player.radius ? player.radius - 
+                                    YV.Constants.ufo.collisionEpsilon : 0.0);
                 if(distance < planet.radius + playerRadius) {
                     callback(player_id, planet_id);
                 }
@@ -61,7 +62,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         var toremove = [];
         $.each(lasers, function(laser_id, laser) {
             laser.age += GLIB.Solver.TimeStep;    
-            if(laser.age > 4) { //TODO paramaterize this value
+            if(laser.age > YV.Constants.laser.maxAge) {
                 toremove.push(laser_id);
             }
         });
@@ -112,8 +113,6 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         //TODO:update thrusters
     }
 
-    //function detectCollisions(...){...}
-
     YV.Update = function(dt, model) {
         //immune from accumulator
         updatePlanets(model, dt)
@@ -125,7 +124,6 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
             updateProjectiles(model)
 
-            //detectCollisions()
         }
     }
 

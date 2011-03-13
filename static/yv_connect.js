@@ -23,40 +23,30 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
             //console.log("xrot: " + x + ", yrot: " + y + ", zrot: " + z)
 
             $.each(d, function(rot, angle) {
-                d[rot] = bracketed(-60, 60, angle)
+                d[rot] = bracketed(-YV.Constants.ufo.minMaxAngle,
+                        YV.Constants.ufo.minMaxAngle, angle)
             })
 
-            var right = d.xrot / 60.
-            var up = d.yrot / 60.
+            var right = d.xrot / YV.Constants.ufo.minMaxAngle;
+            var up = d.yrot / YV.Constants.ufo.minMaxAngle;
 
-            //console.log("right: " + right + ", up: " + up)
-            var MULT = 100.
+            var MULT = YV.Constants.ufo.controlVelocityMultiplier;
             var new_control_vel = new SglVec3(MULT * right, 0., -MULT * up);
 
-            player.velocity = player.velocity.add(player.control_velocity.neg).add(new_control_vel)
+            player.velocity =
+                player.velocity.add(player.control_velocity.neg).add(new_control_vel)
             player.control_velocity = new_control_vel
             player.controller = $.extend({}, d)
 
         } else if(message.type == 'laser:update') { 
             laser_angle = message.angle 
-            //console.log('new angle: ' + laser_angle)
-
-        //FIRE ZE MISSILES!!!
         } else if(message.type == 'laser:fire') {
-            var MULT = 20.;
-            //var x = Math.cos(laser_angle)
-            //var z = -Math.sin(laser_angle)
+            var MULT = YV.Constants.laser.velocityMultiplier;
             var x = -Math.sin(laser_angle)
             var z = -Math.cos(laser_angle)
 
-            //console.log("x: " + x + ", z: " + z)
-
             var laser_vel = new SglVec3(x, 0., z)
-            laser_vel = laser_vel.normalize().mul(new SglVec3(MULT)).mul(new SglVec3(5));
-
-            //console.log("laser vel: " + laser_vel.x + ", " + laser_vel.y + ", " + laser_vel.z)
-
-            //console.log("FIRING A MOTHAFUCKIN LASER!")
+            laser_vel = laser_vel.normalize().mul(new SglVec3(MULT));
 
             player.last_shot = Date.now()
 

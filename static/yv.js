@@ -2,6 +2,99 @@
 var YV = {};
 
 (function(){
+    //Put all numerical constants here
+    YV.Constants = {
+        ufo: {
+            mass: 10.0,
+            radius: 10.0,
+            lives: 3,
+            rechargeTime: 3,
+            invulnerablePeriod: 3,
+            initialRadius: 70,
+            initialVelocity: 5,
+
+            collisionEpsilon: 1,
+
+            minMaxAngle: 60.0,
+            controlVelocityMultiplier: 100,
+
+            blinkPeriod: 0.3,
+            blinkOffPercent: 0.33,
+
+            diskSquishFrac: 0.3,
+            domeRadFrac: 0.6,
+        },
+
+        particle: {
+            lifetime: 2
+        },
+
+        explosion: {
+            outwardVelocity: 10.0,
+            vertexDensity: 20
+        },
+
+        camera: {
+            fov: 40.0, //Degrees
+            orbitRadius: 250,
+            orbitAngle: 0.0,
+            near: 1,
+            far: 900,
+            azimuth: 70,
+        },
+
+        planets : {
+            sun: {
+                radius: 20.0,
+                mass: 100.0,
+            },
+
+            earth: {
+                radius : 10,
+                mass : 15,
+                tilt: 5.0, //Degrees
+                rotationalVelocity: 8.0, //Degrees per second
+                orbitRadius: 90.0,
+                orbitAngle: 180.0,
+            },
+
+            mars: {
+                radius: 8.0,
+                mass: 10.0,
+                tilt: 3.0,
+                rotationalVelocity: 5.0,
+                orbitRadius: 80.0,
+                orbitAngle: 25.0
+            },
+
+            jupiter: {
+                radius: 18.0,
+                mass: 40.0,
+                tilt: 0.0,
+                rotationalVelocity: 6.0,
+                orbitRadius: 140.0,
+                orbitAngle: 125.0
+            },
+        },
+
+        laser: {
+            length: 7.5,
+            numParticles: 10,
+            velocityMultiplier: 100,
+            maxAge: 4,
+        },
+
+        solver: {
+            timestep: 0.03,
+            gravitationalConstant: 200.0,
+        },
+
+        maxPlayers: 8,
+        planetSphereDensity: 25,
+        maxFrameRate: 60,
+        arenaRadius: 400,
+        arenaKickbackMultiplier: 150,
+    };
 
     //all the resources that need to be loaded before the game will work correctly
     YV.Resources = {
@@ -24,7 +117,7 @@ var YV = {};
         this.program = "planet";
         this.texture = "jupiter.jpg"; //Default texture
         this.mass = 0.0; //Default doesn't affect gravity
-        this.radius = 1.0;
+        this.radius = 0.0;
         this.tilt = 0.0;
         this.rotationalVelocity = 0.0;
         this.orbitRadius = 0.0;
@@ -40,10 +133,10 @@ var YV = {};
     };
     $.extend(UFO.prototype, {
         program: "ufo",
-        position: new SglVec3(50.0, 0.0, -80.0),
-        mass: 10.0,
-        radius: 10.0,
-        lives: 3,
+        position: new SglVec3(0.0, 0.0, 0.0),
+        mass: YV.Constants.ufo.mass,
+        radius: YV.Constants.ufo.radius,
+        lives: YV.Constants.ufo.lives,
         invulnerable: 0.0,
         controller: {
             xrot: 0.0,
@@ -58,14 +151,14 @@ var YV = {};
         acceleration: new SglVec3(0.0, 0.0, 0.0),
         cannon_angle: 0.0,
         last_shot: 0, //time the last shot occurred
-        recharge_time: 3. //time between shots (in seconds)
+        recharge_time: YV.Constants.ufo.rechargeTime //time between shots (in seconds)
     })
     YV.UFO = UFO
 
     YV.Respawn = function(player_id, ufo) {
         if(ufo.lives > 0) {
             setInitialPosAndVel(player_id, ufo);
-            ufo.invulnerable = 3.0;
+            ufo.invulnerable = YV.Constants.ufo.invulnerablePeriod;
             ufo.control_velocity = new SglVec3(0.0, 0.0, 0.0);
         } else {
             //Kill off the player for good
@@ -78,9 +171,9 @@ var YV = {};
     }
     $.extend(Particle.prototype, {
         position: new SglVec3(0.),
-        velocity: new SglVec3(1., 0., 1.),
+        velocity: new SglVec3(0.),
         acceleration: new SglVec3(0.),
-        lifetime: 2.,
+        lifetime: YV.Constants.particle.lifetime,
         age: 0.
     })
 
@@ -90,30 +183,27 @@ var YV = {};
     }
     Laser.prototype = Particle.prototype
     $.extend(Laser.prototype, {
-        shooter_id: -1,
+        shooter_id: 0,
         time_shot: 0,
         age: 0
     })
     YV.Laser = Laser
 
     function Explosion(opts) {
-        $.extend(this, opts || {})
+        $.extend(this, opts || {});
 
         //initialize explosion particles
-        //var nParticles = YV.GameModel.particles.laser.numParticles
-        var nParticles = 100
-        var center = this.position
+        var center = this.position;
 
-        var verts = GLIB.MakeSphericalVerts(10.0, 20, 20)
-        var that = this
+        var verts = GLIB.MakeSphericalVerts(YV.Constants.explosion.outwardVelocity,
+                YV.Constants.explosion.vertexDensity, YV.Constants.explosion.vertexDensity);
+        var that = this;
         verts.map(function(vert){
             that.particles.push(new Particle({
                 position: center.clone(),
                 velocity: vert.clone()
             }))
         })
-
-        console.log("made " + verts.length + " verts")
     }
     $.extend(Explosion.prototype, {
         position: new SglVec3(0.0),
@@ -127,14 +217,12 @@ var YV = {};
     //the unifying data structure for all the stuff in the game ... whoa
     YV.GameModel = {
         camera : new Planet({ //really just for the position getter
-           fov : 60.0, //Degrees 
-           orbitRadius : 250.0,
-           //orbitAngle : -10.0,
-           orbitAngle: 0.,
-           near : 1,
-           far : 500,
-           //azimuth : 70.0
-           azimuth: 89.9
+           fov : YV.Constants.camera.fov, //Degrees 
+           orbitRadius : YV.Constants.camera.orbitRadius,
+           orbitAngle: YV.Constants.camera.orbitAngle,
+           near : YV.Constants.camera.near,
+           far : YV.Constants.camera.far,
+           azimuth: YV.Constants.camera.azimuth,
         }), 
 
         background : {
@@ -147,38 +235,39 @@ var YV = {};
         sun : new Planet({
             program : "sun",
             texture : "sun.jpg",
-            radius: 20.0,
-            mass: 100.0,
+            radius: YV.Constants.planets.sun.radius,
+            mass: YV.Constants.planets.sun.mass,
         }),
 
         planets : [
             new Planet({
                 texture : "earth.jpg",
-                mass : 30.0, 
-                radius : 15.0,
-                tilt : 5.0, //Degrees
-                rotationalVelocity : 8.0, //Degrees per second
-                orbitRadius : 90.0,
-                orbitAngle : 180.0, //Degrees
+                mass : YV.Constants.planets.earth.mass, 
+                radius : YV.Constants.planets.earth.radius,
+                tilt : YV.Constants.planets.earth.tilt, 
+                rotationalVelocity : YV.Constants.planets.earth.rotationalVelocity,
+                orbitRadius : YV.Constants.planets.earth.orbitRadius,
+                orbitAngle : YV.Constants.planets.earth.orbitAngle,
             }),
 
             new Planet({
                 texture : "mars.jpg",
-                mass : 10.0,
-                radius : 8.0,
-                tilt : 3.0, 
-                rotationalVelocity : 5.0, 
-                orbitRadius : 80.0,
-                orbitAngle : 25.0,
+                mass : YV.Constants.planets.mars.mass, 
+                radius : YV.Constants.planets.mars.radius,
+                tilt : YV.Constants.planets.mars.tilt, 
+                rotationalVelocity : YV.Constants.planets.mars.rotationalVelocity,
+                orbitRadius : YV.Constants.planets.mars.orbitRadius,
+                orbitAngle : YV.Constants.planets.mars.orbitAngle,
             }),
 
             new Planet({
                 texture : "jupiter.jpg",
-                mass : 40.0,
-                radius : 18.0,
-                rotationalVelocity : 6.0,
-                orbitRadius : 140.0,
-                orbitAngle : 125.0,
+                mass : YV.Constants.planets.jupiter.mass, 
+                radius : YV.Constants.planets.jupiter.radius,
+                tilt : YV.Constants.planets.jupiter.tilt, 
+                rotationalVelocity : YV.Constants.planets.jupiter.rotationalVelocity,
+                orbitRadius : YV.Constants.planets.jupiter.orbitRadius,
+                orbitAngle : YV.Constants.planets.jupiter.orbitAngle,
             })
         ],
 
@@ -188,25 +277,17 @@ var YV = {};
 
         //truck for global laser config
         laser: {
-            length: 7.5,
-            numParticles: 10,
+            length: YV.Constants.laser.length,
+            numParticles: YV.Constants.laser.numParticles,
             texture: "laser.png"
         }, 
 
         explosion: {
-            numParticles: 100,
             texture: "fire.png"
         },
 
         particles: {
-            lasers: [
-                /*
-                new Laser({
-                    position: new SglVec3(20.0, 0.0, 20.0),
-                    velocity: new SglVec3(1.0, 0.0, 1.0)
-                })
-                */
-            ],
+            lasers: [],
 
             explosions: [],
 
@@ -219,7 +300,7 @@ var YV = {};
     }
 
     YV.AddExplosion = function(pos) {
-        //YV.GameModel.particles.explosions.push(new Explosion({position: new SglVec3(pos)}));
+        YV.GameModel.particles.explosions.push(new Explosion({position: new SglVec3(pos)}));
     };
             
     function setInitialPosAndVel(playerid, ufo) {
@@ -231,13 +312,11 @@ var YV = {};
                 count++;
         }
         //var num_players = Object.keys(YV.GameModel.players).length + 1;
-        var num_players = 6;
-        var angle = count * (2*Math.PI / num_players);
-        var initial_radius = 50;
-        var pos = new SglVec3(initial_radius * Math.sin(angle), 0.0,
-                                  initial_radius * Math.cos(angle))
+        var angle = count * (2*Math.PI / YV.Constants.maxPlayers);
+        var pos = new SglVec3(YV.Constants.ufo.initialRadius * Math.sin(angle), 0.0,
+                              YV.Constants.ufo.initialRadius * Math.cos(angle))
         var vel = pos.normalized;
-        vel = vel.mul(new SglVec3(5));
+        vel = vel.mul(new SglVec3(YV.Constants.ufo.initialVelocity));
 
         ufo.position = pos;
         ufo.velocity = vel;

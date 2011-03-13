@@ -77,8 +77,8 @@ var GLIB = {};
 (function(){
     var Solver = {};
     //Solver.TimeStep = .01
-    Solver.TimeStep = .03
-    Solver.grav_constant = 200.0
+    Solver.TimeStep = YV.Constants.solver.timestep;
+    Solver.grav_constant = YV.Constants.solver.gravitationalConstant;
     Solver.print_updates = false
 
     var accum = 0
@@ -119,14 +119,14 @@ var GLIB = {};
         });
 
         //Arena bounds buffer
-            var vec = YV.GameModel.sun.position.sub(player_pos);
-            var distance = vec.length;
-            if(distance > 300) { //TODO Arena size
-                var toofar = distance - 300;
-                vec.normalize();
-                var vel = vec.mul(new SglVec3(150*toofar));
-                grav_accel = grav_accel.add(vel);
-            }
+        var vec = YV.GameModel.sun.position.sub(player_pos);
+        var distance = vec.length;
+        if(distance > YV.Constants.arenaRadius) {
+            var toofar = distance - YV.Constants.arenaRadius;
+            vec.normalize();
+            var vel = vec.mul(new SglVec3(YV.Constants.arenaKickbackMultiplier * toofar));
+            grav_accel = grav_accel.add(vel);
+        }
 
         return grav_accel
     }

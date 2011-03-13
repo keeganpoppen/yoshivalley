@@ -2,8 +2,8 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
 (function(){
     function setCamera(gl, camera, sun) {
-        var w = gl.ui.width;
-        var h = gl.ui.height;
+        var w = gl.canvas.width;
+        var h = gl.canvas.height;
 
         gl.viewport(0, 0, w, h);
         gl.xform.projection.loadIdentity();
@@ -69,7 +69,9 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
     function renderUFOs(gl, model) {
         $.each(model.players, function(player_id, player) {
-            if(player.invulnerable > 0.0 && player.invulnerable % 0.3 > 0.20)
+            if(player.invulnerable > 0.0 && player.invulnerable %
+                    YV.Constants.ufo.blinkPeriod < YV.Constants.ufo.blinkPeriod
+                    * YV.Constants.ufo.blinkOffPercent)
                 return;
             var pos = player.position;
             var sunpos = model.sun.position;
@@ -85,8 +87,8 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
             //Render Disk
             gl.xform.model.push();
-            gl.xform.model.scale(player.radius, 0.3 * player.radius, player.radius);
-            //sglRenderMeshGLPrimitives(model.UFOMesh, "index", gl.programs.ufo, null,
+            gl.xform.model.scale(player.radius, YV.Constants.ufo.diskSquishFrac*
+                    player.radius, player.radius);
             sglRenderMeshGLPrimitives(model.ufo.mesh, "index", gl.programs.ufo, null,
                 {
                     ViewProjectionMatrix : gl.xform.viewProjectionMatrix,
@@ -102,6 +104,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
             //render laser timer ring thing
             gl.xform.model.push()
 
+            /*
             var ring_radius = player.radius + 2.
             var frac_ready = Math.min(1., ((Date.now() - player.last_shot) / (1000. * player.recharge_time)))
 
@@ -120,14 +123,15 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
 
             })
+            */
 
             gl.xform.model.pop()
 
             //Render Dome
             gl.xform.model.push();
-            gl.xform.model.scale(0.6 * player.radius, 0.6 * player.radius,
-                    0.6 *player.radius);
-            //sglRenderMeshGLPrimitives(model.UFOMesh, "index", gl.programs.ufo, null,
+            gl.xform.model.scale(YV.Constants.ufo.domeRadFrac * player.radius,
+                    YV.Constants.ufo.domeRadFrac * player.radius,
+                    YV.Constants.ufo.domeRadFrac * player.radius);
             sglRenderMeshGLPrimitives(model.ufo.mesh, "index", gl.programs.ufo, null,
                 {
                     ViewProjectionMatrix : gl.xform.viewProjectionMatrix,

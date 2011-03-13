@@ -43,7 +43,8 @@ GLIB.FireWhenReady(YV.Resources, function(resources) {
             GameModel.background.texture = new SglTexture2D(gl,
                     resources.textures[GameModel.background.texture], textureOptions);
 
-            var sphereMesh = GLIB.MakeSphere(1, 25, 25);
+            var sphereMesh = GLIB.MakeSphere(1,
+                    YV.Constants.planetSphereDensity, YV.Constants.planetSphereDensity);
             var SGLsphereMesh = GLIB.MakeSGLMesh(gl, sphereMesh);
             GameModel.sun.mesh = SGLsphereMesh;
             GameModel.sun.texture = new SglTexture2D(gl,
@@ -57,7 +58,8 @@ GLIB.FireWhenReady(YV.Resources, function(resources) {
             }
 
             //GameModel.UFOMesh = GLIB.MakeSGLMesh(gl, resources.meshes['ufo.json']);
-            var sphereMeshWithNormals = GLIB.MakeSphere(1, 25, 25, true);
+            var sphereMeshWithNormals = GLIB.MakeSphere(1,
+                    YV.Constants.planetSphereDensity, YV.Constants.planetSphereDensity, true);
             var SGLMeshWithNormals = GLIB.MakeSGLMesh(gl, sphereMeshWithNormals); 
             GameModel.ufo.mesh = SGLMeshWithNormals;
             gl.ui = this.ui;
@@ -102,6 +104,8 @@ GLIB.FireWhenReady(YV.Resources, function(resources) {
         },
 
         draw: function(gl) {
+            
+            //Draw fps
             var cur_time = Date.now()
             var fps = 1000. / (cur_time - last_frame_time)
             fps = Math.round(fps * 10) / 10
@@ -114,8 +118,9 @@ GLIB.FireWhenReady(YV.Resources, function(resources) {
                 last_fps_print = cur_time
             }
             last_frame_time = cur_time
+
             YV.Render(gl, YV.GameModel)
         }
 
-    }, 60.0);
+    }, YV.Constants.maxFrameRate);
 });
