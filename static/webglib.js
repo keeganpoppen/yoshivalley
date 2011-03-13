@@ -77,8 +77,8 @@ var GLIB = {};
 (function(){
     var Solver = {};
     //Solver.TimeStep = .01
-    Solver.TimeStep = .03
-    Solver.grav_constant = 200.0
+    Solver.TimeStep = YV.Constants.solver.timestep;
+    Solver.grav_constant = YV.Constants.solver.gravitationalConstant;
     Solver.print_updates = false
 
     var accum = 0
@@ -98,7 +98,7 @@ var GLIB = {};
         return to_vec.mul(new SglVec3(force_mult))
     }
 
-    var calculate_grav_accelerations = function(grav_bodies, player_pos) {
+    var calculate_grav_accelerations = function(grav_bodies, player_pos, anti_grav) {
         if(!grav_bodies || grav_bodies === undefined)
             throw "don't have any bodies with which to apply gravity"
 
@@ -106,10 +106,27 @@ var GLIB = {};
             throw "player doesn't have any position. guess gravity's not his/her biggest issue..."
 
         var grav_accel = new SglVec3(0.0)
-        grav_bodies.map(function(grav_body) {
-            var body_accel = calculate_gravity(grav_body.position, grav_body.mass, player_pos)
-            grav_accel = grav_accel.add(body_accel)
-        })
+        $.each(grav_bodies, function(id, grav_body) {
+            if(player_pos != grav_body.position) {
+                var body_accel = calculate_gravity(grav_body.position,
+                        grav_body.mass, player_pos)
+                if(anti_grav) {
+                    grav_accel = grav_accel.sub(body_accel)
+                } else {
+                    grav_accel = grav_accel.add(body_accel)
+                }
+            }
+        });
+
+        //Arena bounds buffer
+        var vec = YV.GameModel.sun.position.sub(player_pos);
+        var distance = vec.length;
+        if(distance > YV.Constants.arenaRadius) {
+            var toofar = distance - YV.Constants.arenaRadius;
+            vec.normalize();
+            var vel = vec.mul(new SglVec3(YV.Constants.arenaKickbackMultiplier * toofar));
+            grav_accel = grav_accel.add(vel);
+        }
 
         return grav_accel
     }
@@ -123,7 +140,7 @@ var GLIB = {};
         console.log('velocity: ' + vec_to_string(player.velocity))
     }
 
-    Solver.StepTime = function(particles, gravity, grav_bodies) {
+    Solver.StepTime = function(particles, gravity, grav_bodies, anti_grav_bodies) {
         var timestep_vec = new SglVec3(Solver.TimeStep)
 
         $.each(particles, function(particle_id, particle) {
@@ -136,6 +153,11 @@ var GLIB = {};
             if(gravity) {
                 var grav_accel = calculate_grav_accelerations(grav_bodies, particle.position)
                 acceleration = acceleration.add(grav_accel)
+                if(anti_grav_bodies) {
+                    var anti_grav_accel = calculate_grav_accelerations(anti_grav_bodies,
+                            particle.position, true);
+                    acceleration = acceleration.add(anti_grav_accel);
+                }
             }
 
             //integrate the accelerations

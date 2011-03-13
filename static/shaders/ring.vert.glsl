@@ -18,11 +18,11 @@ void main(void) {
     displacement += ufoCenter;
 
     gl_Position = ModelViewProjectionMatrix * vec4(displacement, 1.);
-    gl_PointSize = 15.;
-    if(index < 0.01) gl_PointSize = 50.; 
+    gl_PointSize = 5.;
+    if(index < 0.01) gl_PointSize = 25.; 
 
     if(index < 0.01) {
-        gl_PointSize = 50.;
+        gl_PointSize = 25.;
         leader = 1.;
         if(fracCharged > .999) {
             alpha = 1.;
@@ -30,7 +30,7 @@ void main(void) {
             alpha = .2;
         }
     } else {
-        gl_PointSize = 10. + (25. * (index / numRingParticles));
+        gl_PointSize = 5. + (10. * (index / numRingParticles));
         leader = 0.;
         if(index <= fracCharged * numRingParticles) {
             alpha = 1.;

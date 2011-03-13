@@ -18,8 +18,9 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
             var playerPos = player.position;
             $.each(collection2, function(planet_id, planet) {
                 var distanceVec = playerPos.sub(planet.position);
-                var distance = distanceVec.length; //TODO parametarize this value
-                var playerRadius = (player.radius ? player.radius-1 : 0.0);
+                var distance = distanceVec.length; 
+                var playerRadius = (player.radius ? player.radius - 
+                                    YV.Constants.ufo.collisionEpsilon : 0.0);
                 if(distance < planet.radius + playerRadius) {
                     callback(player_id, planet_id);
                 }
@@ -38,10 +39,18 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         var particle_hack = model.planets.slice(0)
         particle_hack.push(model.sun)
 
-        GLIB.Solver.StepTime(model.players, true, particle_hack)
+        GLIB.Solver.StepTime(model.players, true, particle_hack, model.players)
+        $.each(model.players, function(player_id, player) {
+            player.invulnerable -= GLIB.Solver.TimeStep;
+        });
+
+        
 
         checkForPlanetaryIntersection(model.players, model, function(player_id, planet_id) {
-            delete model.players[player_id];
+            var player = model.players[player_id];
+            player.lives--;
+            YV.AddExplosion(player.position);
+            YV.Respawn(player_id, player);
         });
     }
 
@@ -53,7 +62,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         var toremove = [];
         $.each(lasers, function(laser_id, laser) {
             laser.age += GLIB.Solver.TimeStep;    
-            if(laser.age > 4) { //TODO paramaterize this value
+            if(laser.age > YV.Constants.laser.maxAge) {
                 toremove.push(laser_id);
             }
         });
@@ -68,9 +77,11 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
             if(player_id != lasers[laser_id].shooter_id) {
                 //var shooter = model.players[lasers[laser_id].shooter_id];
                 var sunk = model.players[player_id];
-                sunk.lives--;
-                YV.AddExplosion(sunk.position);
-                YV.Respawn(sunk);
+                if(sunk.invulnerable <= 0) {
+                    sunk.lives--;
+                    YV.AddExplosion(sunk.position);
+                    YV.Respawn(player_id, sunk);
+                }
                 toremove.push(laser_id);
             }
         });
@@ -102,8 +113,6 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         //TODO:update thrusters
     }
 
-    //function detectCollisions(...){...}
-
     YV.Update = function(dt, model) {
         //immune from accumulator
         updatePlanets(model, dt)
@@ -115,7 +124,6 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
             updateProjectiles(model)
 
-            //detectCollisions()
         }
     }
 

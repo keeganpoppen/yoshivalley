@@ -2,8 +2,8 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
 (function(){
     function setCamera(gl, camera, sun) {
-        var w = gl.ui.width;
-        var h = gl.ui.height;
+        var w = gl.canvas.width;
+        var h = gl.canvas.height;
 
         gl.viewport(0, 0, w, h);
         gl.xform.projection.loadIdentity();
@@ -69,6 +69,10 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
     function renderUFOs(gl, model) {
         $.each(model.players, function(player_id, player) {
+            if(player.invulnerable > 0.0 && player.invulnerable %
+                    YV.Constants.ufo.blinkPeriod < YV.Constants.ufo.blinkPeriod
+                    * YV.Constants.ufo.blinkOffPercent)
+                return;
             var pos = player.position;
             var sunpos = model.sun.position;
 
@@ -83,8 +87,8 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
             //Render Disk
             gl.xform.model.push();
-            gl.xform.model.scale(player.radius, 0.3 * player.radius, player.radius);
-            //sglRenderMeshGLPrimitives(model.UFOMesh, "index", gl.programs.ufo, null,
+            gl.xform.model.scale(player.radius, YV.Constants.ufo.diskSquishFrac*
+                    player.radius, player.radius);
             sglRenderMeshGLPrimitives(model.ufo.mesh, "index", gl.programs.ufo, null,
                 {
                     ViewProjectionMatrix : gl.xform.viewProjectionMatrix,
@@ -115,7 +119,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
             gl.uniformMatrix4fv(loc_obj.uniforms.ModelViewProjectionMatrix, false,
                                     new Float32Array(gl.xform.viewProjectionMatrix));
-            gl.uniform1f(loc_obj.uniforms.ringRadius, player.radius + 2)
+            gl.uniform1f(loc_obj.uniforms.ringRadius, 2. * player.radius)
             gl.uniform1f(loc_obj.uniforms.numRingParticles, NUM_RING_PARTICLES)
             gl.uniform1f(loc_obj.uniforms.cannonAngle, player.cannon_angle)
 
@@ -130,6 +134,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
                                     ((Date.now() - player.last_shot) / (1000. * player.recharge_time)))
             gl.uniform1f(loc_obj.uniforms.fracCharged, frac_charged)
 
+            //since vertex positions are computed in the shader, this is just an array [1..NUM_RING_PARTICLES]
             var indices = []
             for(var i = 0; i < NUM_RING_PARTICLES; ++i) indices.push(i)
                         
@@ -146,9 +151,9 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
             //Render Dome
             gl.xform.model.push();
-            gl.xform.model.scale(0.6 * player.radius, 0.6 * player.radius,
-                    0.6 *player.radius);
-            //sglRenderMeshGLPrimitives(model.UFOMesh, "index", gl.programs.ufo, null,
+            gl.xform.model.scale(YV.Constants.ufo.domeRadFrac * player.radius,
+                    YV.Constants.ufo.domeRadFrac * player.radius,
+                    YV.Constants.ufo.domeRadFrac * player.radius);
             sglRenderMeshGLPrimitives(model.ufo.mesh, "index", gl.programs.ufo, null,
                 {
                     ViewProjectionMatrix : gl.xform.viewProjectionMatrix,
