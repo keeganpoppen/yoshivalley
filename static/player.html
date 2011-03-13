@@ -73,28 +73,32 @@
 
             var CannonThrottle = {};
             (function(){
-                var prev_val = 0.
-                var last_update = Date.now()
-
-                var should_send_given_input = function(input) {
-                    if(!input || input === undefined) return false
-
-                    var should = false
-                    var send_time = Date.now()
-                    if((input - prev_val) > .2 || (send_time - last_update) > 500) {
-                        prev_val = input
-                        last_update = send_time
-                        should = true
+                var last_sent = 0.
+                var last_update = 0.
+                var timeout = undefined
+                var dirty = false
+                CannonThrottle.AcceptInput = function(input) {
+                    last_update = input
+                    if(dirty) {
+                        send_data()
                     }
-                    return should
                 }
 
-                var get_value = function(){
-                    return prev_val
-                }
+                function send_data(){
+                    timeout = null
+                    if(last_sent != last_update) {
+                        socket.send({type: 'laser:update', angle: last_update, player_id: player_id})
+                        last_sent = last_update
+                        dirty = false
+                    } else {
+                        dirty = true
+                    }
 
-                CannonThrottle.get_value = get_value
-                CannonThrottle.should_send_given_input = should_send_given_input
+                    clearTimeout(timeout)
+                    timeout = setTimeout(send_data, 50)
+                }
+                
+                timeout = setTimeout(send_data, 50)
             })();
 
             /*
@@ -156,9 +160,8 @@
                 var deviation_y = ev.pageY - offset.top - (cc.height()/2)
                 var angle = Math.atan2(-deviation_y, deviation_x)
                 prev_angle = angle
-                if(CannonThrottle.should_send_given_input(angle)) {
-                    socket.send({'type': 'laser:update', 'angle': angle, 'player_id': player_id})
-                }
+
+                CannonThrottle.AcceptInput(angle)
                 return false
             }
 
