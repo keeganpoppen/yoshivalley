@@ -60,7 +60,8 @@ var YV = {};
 
             explosion: {
                 outwardVelocity: 5*ufoRadius,
-                vertexDensity: 20
+                vertexDensity: 20,
+                particleSize: 600,
             },
 
             camera: {
@@ -111,6 +112,7 @@ var YV = {};
                 numParticles: 10,
                 velocityMultiplier: 20,
                 maxAge: 4,
+                particleSize: 300,
             },
 
             solver: {

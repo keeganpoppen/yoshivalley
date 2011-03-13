@@ -18,7 +18,7 @@ void main(void) {
     displacement += ufoCenter;
 
     gl_Position = ModelViewProjectionMatrix * vec4(displacement, 1.);
-    gl_PointSize = 5.;
+    gl_PointSize = 5.0;
     if(index < 0.01) gl_PointSize = 25.; 
 
     if(index < 0.01) {
@@ -38,4 +38,6 @@ void main(void) {
             alpha = .2;
         }
     }
+
+    gl_PointSize = 120.0 * gl_PointSize / length(gl_Position.xyz);
 }

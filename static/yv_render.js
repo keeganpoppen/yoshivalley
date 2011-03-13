@@ -185,6 +185,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
         //lasers don't age, of course
         gl.uniform1i(data.does_age_loc, 0);
+        gl.uniform1f(data.particle_size_loc, YV.Constants.laser.particleSize);
 
         var vertices = []
 
@@ -218,6 +219,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
         //fire ages, fo' sho'
         gl.uniform1i(data.does_age_loc, 1);
+        gl.uniform1f(data.particle_size_loc, YV.Constants.explosion.particleSize);
 
         var vertices = []
         var age_fracs = []
@@ -315,9 +317,9 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         var modelview_loc = gl.getUniformLocation(prog, "ModelViewProjectionMatrix")
         gl.uniformMatrix4fv(modelview_loc, false, new Float32Array(gl.xform.viewProjectionMatrix));
 
-        var particle_size_loc = gl.getUniformLocation(prog, "particleSize")
-        gl.uniform1f(particle_size_loc, 7.5) //TODO: DEFAULT
-        fn_data.particle_size_loc = particle_size_loc
+        var particle_size_loc = gl.getUniformLocation(prog, "particleSize");
+        gl.uniform1f(particle_size_loc, 1.0);
+        fn_data.particle_size_loc = particle_size_loc;
 
         //get texture location
         fn_data.tex_loc = gl.getUniformLocation(prog, "laserTex")
