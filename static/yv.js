@@ -80,6 +80,8 @@ var YV = {};
             },
 
             planets : {
+                orbitVelocity: 25,
+
                 sun: {
                     radius: sunRadius,
                     mass: sunMass,

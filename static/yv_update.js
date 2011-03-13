@@ -6,10 +6,11 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
     //rotate the planets appropriately
     function updatePlanets(model, dt) {
-        for(var planet in model.planets) {
-            model.planets[planet].rotation +=
-                model.planets[planet].rotationalVelocity * dt;
-        }
+        $.each(model.planets, function(planet_id, planet) {
+            planet.rotation += planet.rotationalVelocity * dt;
+            planet.orbitAngle += YV.Constants.planets.orbitVelocity
+                    * dt / planet.orbitRadius;
+        });
         model.sun.rotation += model.sun.rotationalVelocity * dt;
     }
 
@@ -119,11 +120,8 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
         for(accumulator += dt; accumulator > GLIB.Solver.TimeStep;
                                 accumulator -= GLIB.Solver.TimeStep) {
-
             updatePlayerPositions(model)
-
             updateProjectiles(model)
-
         }
     }
 
