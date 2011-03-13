@@ -84,7 +84,8 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
             //Render Disk
             gl.xform.model.push();
             gl.xform.model.scale(player.radius, 0.3 * player.radius, player.radius);
-            sglRenderMeshGLPrimitives(model.UFOMesh, "index", gl.programs.ufo, null,
+            //sglRenderMeshGLPrimitives(model.UFOMesh, "index", gl.programs.ufo, null,
+            sglRenderMeshGLPrimitives(model.ufo.mesh, "index", gl.programs.ufo, null,
                 {
                     ViewProjectionMatrix : gl.xform.viewProjectionMatrix,
                     ModelMatrix : gl.xform.modelMatrix,
@@ -98,14 +99,35 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
             //render laser timer ring thing
             gl.xform.model.push()
-            //TODO: the rendering part 
+
+            var ring_radius = player.radius + 2.
+            var frac_ready = Math.min(1., ((Date.now() - player.last_shot) / (1000. * player.recharge_time)))
+            /*
+            renderParticles(gl, model, function(gl, model, data) {
+                var verts = []
+                var age_fracs = []
+
+                for(var i = 0; i < 2. * Math.PI; ++i) {
+                    verts.push(player_radius * Math.sin(i), 0., player_radius * Math.cos(i))
+                    var active = (i / (2. * Math.PI)) >= frac_ready
+                    age_fracs.push(((active)? .5 : .1))
+                }
+                
+                if(model.ufo.vert_buffer === undefined) model.ufo.vert_buffer = gl.createBuffer()
+                var vert_buffer = model.ufo.vert_buffer
+
+
+            })
+            */
+
             gl.xform.model.pop()
 
             //Render Dome
             gl.xform.model.push();
             gl.xform.model.scale(0.6 * player.radius, 0.6 * player.radius,
                     0.6 *player.radius);
-            sglRenderMeshGLPrimitives(model.UFOMesh, "index", gl.programs.ufo, null,
+            //sglRenderMeshGLPrimitives(model.UFOMesh, "index", gl.programs.ufo, null,
+            sglRenderMeshGLPrimitives(model.ufo.mesh, "index", gl.programs.ufo, null,
                 {
                     ViewProjectionMatrix : gl.xform.viewProjectionMatrix,
                     ModelMatrix : gl.xform.modelMatrix,
@@ -119,17 +141,17 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         });
     }
 
-    function renderLasers(gl, model, vertex_loc, tex_loc, age_frac_loc, does_age_loc) {
+    function renderLasers(gl, model, data) {
         //only ever create one laser buffer
         if(model.laser.buffer === undefined) model.laser.buffer = gl.createBuffer()
 
         //set laser texture
         gl.activeTexture(gl.TEXTURE0)
         model.laser.texture.bind()
-        gl.uniform1i(tex_loc, 0)
+        gl.uniform1i(data.tex_loc, 0)
 
         //lasers don't age, of course
-        gl.uniform1i(does_age_loc, 0);
+        gl.uniform1i(data.does_age_loc, 0);
 
         var vertices = []
 
@@ -148,34 +170,30 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         var vert_buffer = model.laser.buffer
         gl.bindBuffer(gl.ARRAY_BUFFER, vert_buffer)
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW)
-        gl.vertexAttribPointer(vertex_loc, 3, gl.FLOAT, false, 0, 0)
+        gl.vertexAttribPointer(data.vertex_loc, 3, gl.FLOAT, false, 0, 0)
         
         gl.drawArrays(gl.POINTS, 0, vertices.length/3)
 
         model.laser.texture.unbind()
     }
 
-    function renderExplosions(gl, model, vertex_loc, tex_loc, age_frac_loc, does_age_loc) {
+    function renderExplosions(gl, model, data) {
         //set explosion / fire texture
         gl.activeTexture(gl.TEXTURE0)
         model.explosion.texture.bind()
-        gl.uniform1i(tex_loc, 0)
+        gl.uniform1i(data.tex_loc, 0)
 
         //fire ages, fo' sho'
-        gl.uniform1i(does_age_loc, 1);
+        gl.uniform1i(data.does_age_loc, 1);
 
         var vertices = []
         var age_fracs = []
-        //var ages = []
-        //var lifetimes = []
 
         model.particles.explosions.map(function(explosion) {
             explosion.particles.map(function(particle) {
                 var pos = particle.position
                 vertices.push(pos.x, pos.y, pos.z)
                 age_fracs.push(particle.age/particle.lifetime)
-                //ages.push(particle.age)
-                //lifetimes.push(particle.lifetime)
             })
         })
 
@@ -184,33 +202,21 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         var vert_buffer = model.explosion.vert_buffer
         gl.bindBuffer(gl.ARRAY_BUFFER, vert_buffer)
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW)
-        gl.vertexAttribPointer(vertex_loc, 3, gl.FLOAT, false, 0, 0)
+        gl.vertexAttribPointer(data.vertex_loc, 3, gl.FLOAT, false, 0, 0)
 
         if(model.explosion.age_frac_buffer === undefined) model.explosion.age_frac_buffer = gl.createBuffer()
 
         var age_frac_buffer = model.explosion.age_frac_buffer
         gl.bindBuffer(gl.ARRAY_BUFFER, age_frac_buffer)
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(age_fracs), gl.STATIC_DRAW)
-        gl.vertexAttribPointer(age_frac_loc, 1, gl.FLOAT, false, 0, 0)
+        gl.vertexAttribPointer(data.age_frac_loc, 1, gl.FLOAT, false, 0, 0)
 
-        /* CHROME BUG... FUCKERS!!!!!
-        var lifetime_buffer = gl.createBuffer()
-        gl.bindBuffer(gl.ARRAY_BUFFER, lifetime_buffer)
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(lifetimes), gl.STATIC_DRAW)
-        gl.vertexAttribPointer(lifetime_loc, 1, gl.FLOAT, false, 0, 0)
-
-        var age_buffer = gl.createBuffer()
-        gl.bindBuffer(gl.ARRAY_BUFFER, age_buffer)
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(ages), gl.STATIC_DRAW)
-        gl.vertexAttribPointer(age_loc, 1, gl.FLOAT, false, 0, 0)
-        */
-        
         gl.drawArrays(gl.POINTS, 0, vertices.length/3)
 
         model.explosion.texture.unbind()
     }
 
-    function renderParticles(gl, model) {
+    function renderParticles(gl, model, particle_fns) {
         gl.disable(gl.DEPTH_TEST)
         gl.enable(gl.BLEND)
 
@@ -226,20 +232,27 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         var modelview_loc = gl.getUniformLocation(prog, "ModelViewProjectionMatrix")
         gl.uniformMatrix4fv(modelview_loc, false, new Float32Array(gl.xform.viewProjectionMatrix));
 
+        //locations for uniforms & attribs set per particle_fn
+        var fn_data = {}
+
         //get texture location
-        var tex_loc = gl.getUniformLocation(prog, "laserTex")
+        fn_data.tex_loc = gl.getUniformLocation(prog, "laserTex")
 
         //get position attribute location
-        var vertex_loc = gl.getAttribLocation(prog, "a_position")
+        fn_data.vertex_loc = gl.getAttribLocation(prog, "a_position")
 
         //get attrib locations for particle age & uniform for whether age effects alpha
-        //var lifetime_loc = gl.getAttribLocation(prog, "a_lifetime")
-        //var age_loc = gl.getAttribLocation(prog, "a_age")
-        var age_frac_loc = gl.getAttribLocation(prog, "a_age_frac")
-        var does_age_loc = gl.getUniformLocation(prog, "does_age")
+        fn_data.age_frac_loc = gl.getAttribLocation(prog, "a_age_frac")
 
-        renderLasers(gl, model, vertex_loc, tex_loc, age_frac_loc, does_age_loc)
-        renderExplosions(gl, model, vertex_loc, tex_loc, age_frac_loc, does_age_loc)
+        fn_data.does_age_loc = gl.getUniformLocation(prog, "does_age") 
+
+        if(particle_fns instanceof Array) {
+            particle_fns.map(function(fn) {
+                fn(gl, model, fn_data)
+            })
+        } else if(typeof(particle_fns) == "function") {
+            particle_fns(gl, model, fn_data)
+        }
 
         gl.programs.particle.unbind()
 
@@ -256,7 +269,8 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         renderBackground(gl, model.background);
         renderPlanets(gl, model);
         renderUFOs(gl, model);
-        renderParticles(gl, model);
+
+        renderParticles(gl, model, [renderLasers, renderExplosions]);
 
         gl.disable(gl.DEPTH_TEST);
     }
