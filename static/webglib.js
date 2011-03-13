@@ -242,10 +242,10 @@ var GLIB = {};
         }
 
         var retval = { };
-        retval.indices = new Uint16Array(indexData);
-        retval.vertices = new Float32Array(geometryData);
-        retval.texCoords = new Float32Array(texCoordData);
-        if(addNormals) retval.normals = new Float32Array(normalData);
+        retval.indices = indexData;//new Uint16Array(indexData);
+        retval.vertices = geometryData; //new Float32Array(geometryData);
+        retval.texCoords = texCoordData; //new Float32Array(texCoordData);
+        if(addNormals) retval.normals = normalData; //new Float32Array(normalData);
         
         return retval;
     };
@@ -267,16 +267,56 @@ var GLIB = {};
     GLIB.MakeSGLMesh = function(gl, mesh) {
         var sglMesh = new SglMeshGL(gl);
         if(mesh.vertices) {
-            sglMesh.addVertexAttribute('position', 3, mesh.vertices);
+            sglMesh.addVertexAttribute('position', 3, new Float32Array(mesh.vertices));
         }
         if(mesh.texCoords) {
-            sglMesh.addVertexAttribute('texcoord', 2, mesh.texCoords);
+            sglMesh.addVertexAttribute('texcoord', 2, new Float32Array(mesh.texCoords));
         }
         if(mesh.normals) {
-            sglMesh.addVertexAttribute('normal', 3, mesh.normals);
+            sglMesh.addVertexAttribute('normal', 3, new Float32Array(mesh.normals));
         }
-        sglMesh.addIndexedPrimitives('index', gl.TRIANGLES, mesh.indices);
+        sglMesh.addIndexedPrimitives('index', gl.TRIANGLES, new Uint16Array(mesh.indices));
         return sglMesh;
+    }
+})();
+
+(function(){
+    GLIB.MakeSaturnSGLMesh = function(gl) {
+        var mesh = {indices:[], vertices:[], normals:[]};
+
+        //Add rings to mesh
+        var innerRad = 1.2;
+        var outerRad = 1.9;
+        var step = 5.0 * Math.PI / 180.0;
+        var startIndex = mesh.vertices.length;
+
+        mesh.vertices.push(innerRad * Math.sin(0.0), 0.0,
+                innerRad * Math.cos(0.0));
+        mesh.vertices.push(outerRad * Math.sin(0.0), 0.0,
+                outerRad * Math.cos(0.0));
+        var currentIndex = startIndex + 1;
+        for(var angle = step; angle < Math.PI * 2; angle += step) {
+           mesh.vertices.push(innerRad * Math.sin(angle), 0.0,
+                              innerRad * Math.cos(angle));
+           mesh.vertices.push(outerRad * Math.sin(angle), 0.0,
+                              outerRad * Math.cos(angle));
+
+            mesh.indices.push(currentIndex, currentIndex+1, currentIndex+2);
+            mesh.normals.push(0.0, 1.0, 0.0);
+            mesh.indices.push(currentIndex+1, currentIndex+2, currentIndex+3);
+            mesh.normals.push(0.0, 1.0, 0.0);
+            currentIndex += 2;
+        }
+        mesh.vertices.push(innerRad * Math.sin(0.0), 0.0,
+            innerRad * Math.cos(0.0));
+        mesh.vertices.push(outerRad * Math.sin(0.0), 0.0,
+            outerRad * Math.cos(0.0));
+        mesh.indices.push(currentIndex, currentIndex+1, currentIndex+2);
+        mesh.vertices.push(innerRad * Math.sin(step), 0.0,
+            innerRad * Math.cos(step));
+        mesh.indices.push(currentIndex+1, currentIndex+2, currentIndex+3);
+   
+        return GLIB.MakeSGLMesh(gl, mesh);
     }
 })();
 

@@ -43,21 +43,35 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
     }
 
     function renderPlanet(gl, sun, planet) {
-        gl.xform.model.loadIdentity();
+                gl.xform.model.loadIdentity();
         var planPos = planet.position;
         gl.xform.model.translate(planPos.x, planPos.y, planPos.z);
         gl.xform.model.rotate(sglDegToRad(planet.tilt), 1.0, 0.0, 0.0);
         gl.xform.model.rotate(sglDegToRad(planet.rotation), 0.0, 1.0, 0.0);
         gl.xform.model.scale(planet.radius, planet.radius, planet.radius);
 
-        sglRenderMeshGLPrimitives(planet.mesh, "index", gl.programs.planet, null,
-        /*Uniforms*/ {
-                        ModelMatrix : gl.xform.modelMatrix,
-                        ModelViewProjectionMatrix : gl.xform.modelViewProjectionMatrix,
-                        planetCenter : [planPos.x, planPos.y, planPos.z],
-                        sunCenter : [sun.position.x, sun.position.y, sun.position.z]
-                     },
-        /*Samplers*/ {surfaceTexture : planet.texture});
+        var uniforms = {
+            ModelMatrix : gl.xform.modelMatrix,
+            ModelViewProjectionMatrix : gl.xform.modelViewProjectionMatrix,
+            planetCenter : [planPos.x, planPos.y, planPos.z],
+            sunCenter : [sun.position.x, sun.position.y, sun.position.z],
+        };
+
+        var textures = {
+            surfaceTexture: planet.texture,
+        };
+
+        if(planet.ringTexture) {
+            $.extend(textures, {ringTexture: planet.ringTexture,
+                                ringAlphaTexture: planet.ringTextureAlpha});
+            gl.enable(gl.BLEND)
+            gl.blendFunc(gl.SRC_ALPHA, gl.ONE)
+        }
+
+        sglRenderMeshGLPrimitives(planet.mesh, "index", gl.programs[planet.program], null,
+                uniforms, textures);
+                
+        gl.disable(gl.BLEND)
     }
 
     function renderPlanets(gl, model) {

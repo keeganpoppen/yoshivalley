@@ -21,6 +21,7 @@ GLIB.FireWhenReady(YV.Resources, function(resources) {
             gl.programs.ufo = GLIB.compileProgram(gl, resources, 'ufo');
             gl.programs.particle = GLIB.compileProgram(gl, resources, 'particle');
             gl.programs.ring = GLIB.compileProgram(gl, resources, 'ring');
+            gl.programs.saturn = GLIB.compileProgram(gl, resources, 'saturn');
 
             //Create Meshes 
             var textureOptions = {
@@ -64,6 +65,14 @@ GLIB.FireWhenReady(YV.Resources, function(resources) {
                 //Replace texture string with texture object
                 planet.texture = new SglTexture2D(gl,
                         resources.textures[planet.texture], textureOptions);
+                if(planet.ringTexture) {
+                    console.log(resources.textures[planet.ringTexture]);
+                    planet.ringTexture = new SglTexture2D(gl,
+                        resources.textures[planet.ringTexture], textureOptions);   
+                    planet.ringTextureAlpha = new SglTexture2D(gl,
+                        resources.textures[planet.ringTextureAlpha], textureOptions);   
+                    planet.mesh = GLIB.MakeSaturnSGLMesh(gl);
+                }
             }
 
             //GameModel.UFOMesh = GLIB.MakeSGLMesh(gl, resources.meshes['ufo.json']);

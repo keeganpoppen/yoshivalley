@@ -5,18 +5,24 @@ var YV = {};
     //Put all numerical constants here
     YV.Constants = (function() {
         var arenaRadius = 50;
-        var sunRadius = arenaRadius / 20;
-        var jupiterRadius = sunRadius * 0.8;
-        var earthRadius = sunRadius * 0.5;
-        var marsRadius = sunRadius * 0.4;
+        var sunRadius = arenaRadius / 15;
+        var neptuneRadius = sunRadius * 0.6;
+        var saturnRadius = sunRadius * 0.7;
+        var jupiterRadius = sunRadius * 0.9;
+        var earthRadius = sunRadius * 0.7;
+        var marsRadius = sunRadius * 0.6;
         var ufoRadius = sunRadius * 0.4;
 
-        var earthOrbit = 1 * arenaRadius / 8;
-        var marsOrbit = 2 * arenaRadius / 8;
-        var jupiterOrbit = 3 * arenaRadius / 8;
+        var earthOrbit = 2 * arenaRadius / 8;
+        var marsOrbit = 3 * arenaRadius / 8;
+        var jupiterOrbit = 4 * arenaRadius / 8;
+        var saturnOrbit = 5 * arenaRadius / 8;
+        var neptuneOrbit = 6 * arenaRadius / 8;
 
         var sunMass = 20;
         var jupiterMass = 0.8 * sunMass;
+        var saturnMass = 0.4 * sunMass;
+        var neptuneMass = 0.6 * sunMass;
         var earthMass = 0.5 * sunMass;
         var marsMass = 0.4 * sunMass;
         var ufoMass = 0.2 * sunMass;
@@ -105,6 +111,24 @@ var YV = {};
                     orbitRadius: jupiterOrbit,
                     orbitAngle: 125.0
                 },
+
+                saturn: {
+                    radius: saturnRadius,
+                    mass: saturnMass,
+                    tilt: 15.0,
+                    rotationalVelocity: 12.0,
+                    orbitRadius: saturnOrbit,
+                    orbitAngle: 270.0,
+                },
+
+                neptune: {
+                    radius: neptuneRadius,
+                    mass: neptuneMass,
+                    tilt: 1.0,
+                    rotationalVelocity: 8.0,
+                    orbitRadius: neptuneOrbit,
+                    orbitAngle: -30.0,
+                },
             },
 
             laser: {
@@ -125,12 +149,15 @@ var YV = {};
 
     //all the resources that need to be loaded before the game will work correctly
     YV.Resources = {
-        textures: ["earth.jpg", "sun.jpg", "mars.jpg", "sky2.jpg", "jupiter.jpg", "laser.png", "fire.png", "ring.png", "metal.jpg"],
+        textures: ["earth.jpg", "sun.jpg", "mars.jpg", "sky2.jpg", "jupiter.jpg",
+                   "saturn.jpg", "laser.png", "fire.png", "ring.png", "metal.jpg",
+                   "saturn-ring.jpg", "saturn-ring-alpha.gif", "neptune.jpg"],
         shaders: ["planet.frag.glsl", "planet.vert.glsl",
                   "sun.vert.glsl", "sun.frag.glsl",
                   "bg.vert.glsl", "bg.frag.glsl",
                   "particle.vert.glsl", "particle.frag.glsl",
                   "ufo.vert.glsl", "ufo.frag.glsl",
+                  "saturn.vert.glsl", "saturn.frag.glsl",
                   "ring.vert.glsl", "ring.frag.glsl"],
         meshes: [],
     }
@@ -297,7 +324,41 @@ var YV = {};
                 rotationalVelocity : YV.Constants.planets.jupiter.rotationalVelocity,
                 orbitRadius : YV.Constants.planets.jupiter.orbitRadius,
                 orbitAngle : YV.Constants.planets.jupiter.orbitAngle,
-            })
+            }),
+
+            new Planet({
+                texture : "saturn.jpg",
+                mass : YV.Constants.planets.saturn.mass, 
+                radius : YV.Constants.planets.saturn.radius,
+                tilt : YV.Constants.planets.saturn.tilt, 
+                rotationalVelocity : YV.Constants.planets.saturn.rotationalVelocity,
+                orbitRadius : YV.Constants.planets.saturn.orbitRadius,
+                orbitAngle : YV.Constants.planets.saturn.orbitAngle,
+            }),
+
+            new Planet({
+                program : "saturn",
+                texture : "saturn.jpg",
+                ringTexture : "saturn-ring.jpg",
+                ringTextureAlpha : "saturn-ring-alpha.gif",
+                mass : YV.Constants.planets.saturn.mass, 
+                radius : YV.Constants.planets.saturn.radius,
+                tilt : YV.Constants.planets.saturn.tilt, 
+                rotationalVelocity : YV.Constants.planets.saturn.rotationalVelocity,
+                orbitRadius : YV.Constants.planets.saturn.orbitRadius,
+                orbitAngle : YV.Constants.planets.saturn.orbitAngle,
+            }),
+
+
+            new Planet({
+                texture : "neptune.jpg",
+                mass : YV.Constants.planets.neptune.mass, 
+                radius : YV.Constants.planets.neptune.radius,
+                tilt : YV.Constants.planets.neptune.tilt, 
+                rotationalVelocity : YV.Constants.planets.neptune.rotationalVelocity,
+                orbitRadius : YV.Constants.planets.neptune.orbitRadius,
+                orbitAngle : YV.Constants.planets.neptune.orbitAngle,
+            }),
         ],
 
         players: {},
