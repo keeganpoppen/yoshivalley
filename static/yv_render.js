@@ -100,27 +100,49 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
             //render laser timer ring thing
             gl.xform.model.push()
 
-            var ring_radius = player.radius + 2.
-            var frac_ready = Math.min(1., ((Date.now() - player.last_shot) / (1000. * player.recharge_time)))
-            /*
-            renderParticles(gl, model, function(gl, model, data) {
-                var verts = []
-                var age_fracs = []
+            enableParticleRendering(gl)
 
-                for(var i = 0; i < 2. * Math.PI; ++i) {
-                    verts.push(player_radius * Math.sin(i), 0., player_radius * Math.cos(i))
-                    var active = (i / (2. * Math.PI)) >= frac_ready
-                    age_fracs.push(((active)? .5 : .1))
-                }
-                
-                if(model.ufo.vert_buffer === undefined) model.ufo.vert_buffer = gl.createBuffer()
-                var vert_buffer = model.ufo.vert_buffer
+            var prog = gl.programs.ring.handle
+            gl.programs.ring.bind()
 
-
+            var loc_obj = getShaderVarLocations(gl, prog, {
+                uniforms: ['ModelViewProjectionMatrix', 'ufoCenter', 'fracCharged',
+                                'ringRadius', 'numRingParticles', 'cannonAngle', 'ringTex'],
+                attributes: ['index']
             })
-            */
 
-            gl.xform.model.pop()
+            var NUM_RING_PARTICLES = 10. //TODO: MOVE
+
+            gl.uniformMatrix4fv(loc_obj.uniforms.ModelViewProjectionMatrix, false,
+                                    new Float32Array(gl.xform.viewProjectionMatrix));
+            gl.uniform1f(loc_obj.uniforms.ringRadius, player.radius + 2)
+            gl.uniform1f(loc_obj.uniforms.numRingParticles, NUM_RING_PARTICLES)
+            gl.uniform1f(loc_obj.uniforms.cannonAngle, player.cannon_angle)
+
+            gl.activeTexture(gl.TEXTURE0)
+            model.ufo.ring_texture.bind()
+            gl.uniform1i(loc_obj.uniforms.ringTex, 0)
+
+            var pos = player.position
+            gl.uniform3f(loc_obj.uniforms.ufoCenter, pos.x, pos.y, pos.z)
+
+            var frac_charged = Math.min(1.,
+                                    ((Date.now() - player.last_shot) / (1000. * player.recharge_time)))
+            gl.uniform1f(loc_obj.uniforms.fracCharged, frac_charged)
+
+            var indices = []
+            for(var i = 0; i < NUM_RING_PARTICLES; ++i) indices.push(i)
+                        
+            if(model.ufo.index_buffer === undefined) model.ufo.index_buffer = gl.createBuffer()
+            var index_buffer = model.ufo.index_buffer
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, index_buffer)
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(indices), gl.STATIC_DRAW)
+            gl.vertexAttribPointer(loc_obj.attributes.index, 1, gl.FLOAT, false, 0, 0)
+
+            gl.drawArrays(gl.POINTS, 0, indices.length)
+
+            disableParticleRendering(gl)
 
             //Render Dome
             gl.xform.model.push();
@@ -216,24 +238,75 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         model.explosion.texture.unbind()
     }
 
-    function renderParticles(gl, model, particle_fns) {
+    function enableParticleRendering(gl){
         gl.disable(gl.DEPTH_TEST)
         gl.enable(gl.BLEND)
 
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE)
 
         //dumb hack to get point sprites working
-        gl.enable(0x8642);
+        gl.enable(0x8642)
+    }
+
+    function disableParticleRendering(gl) {
+        gl.disable(gl.BLEND)
+        gl.enable(gl.DEPTH_TEST)
+    }
+
+    /*
+     * takes in: {
+     *  uniforms: []
+     *  attributes: []
+     * }, and returns: {
+     *  uniforms: {name: loc, }
+     *  attributes: {name:loc, }
+     * }
+     */
+    function getShaderVarLocations(gl, shader, obj) {
+        if(!shader || shader === undefined) throw "shader undefined... what are you trying to pull?"
+        if(!obj || obj === undefined) throw "no object? you're an idiot"
+
+        var ret = {}
+
+        ret.uniforms = {}
+        if(obj.uniforms != undefined) {
+            obj.uniforms.map(function(uniform) {
+                var loc = gl.getUniformLocation(shader, uniform)
+                if(loc == -1) throw "bad uniform name: " + uniform
+
+                ret.uniforms[uniform] = loc
+            })
+        }
+
+        ret.attributes = {}
+        if(obj.attributes != undefined) {
+            obj.attributes.map(function(attrib) {
+                var loc = gl.getAttribLocation(shader, attrib)
+                if(loc == -1) throw "bad attribute name: " + attrib
+
+                ret.attributes[attrib] = loc
+            })
+        }
+
+        return ret
+    }
+
+    function renderParticles(gl, model, particle_fns) {
+        enableParticleRendering(gl)
 
         var prog = gl.programs.particle.handle
         gl.programs.particle.bind()
+
+        //locations for uniforms & attribs set per particle_fn
+        var fn_data = {}
 
         //set modelviewprojection matrix
         var modelview_loc = gl.getUniformLocation(prog, "ModelViewProjectionMatrix")
         gl.uniformMatrix4fv(modelview_loc, false, new Float32Array(gl.xform.viewProjectionMatrix));
 
-        //locations for uniforms & attribs set per particle_fn
-        var fn_data = {}
+        var particle_size_loc = gl.getUniformLocation(prog, "particleSize")
+        gl.uniform1f(particle_size_loc, 7.5) //TODO: DEFAULT
+        fn_data.particle_size_loc = particle_size_loc
 
         //get texture location
         fn_data.tex_loc = gl.getUniformLocation(prog, "laserTex")
@@ -256,8 +329,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
         gl.programs.particle.unbind()
 
-        gl.disable(gl.BLEND)
-        gl.enable(gl.DEPTH_TEST)
+        disableParticleRendering(gl)
     }
 
     YV.Render = function(gl, model) {

@@ -20,6 +20,7 @@ GLIB.FireWhenReady(YV.Resources, function(resources) {
             gl.programs.bg = GLIB.compileProgram(gl, resources, 'bg');
             gl.programs.ufo = GLIB.compileProgram(gl, resources, 'ufo');
             gl.programs.particle = GLIB.compileProgram(gl, resources, 'particle');
+            gl.programs.ring = GLIB.compileProgram(gl, resources, 'ring');
 
             //Create Meshes 
             var textureOptions = {
@@ -30,7 +31,12 @@ GLIB.FireWhenReady(YV.Resources, function(resources) {
 
             //set up laser texture
             GameModel.laser.texture = new SglTexture2D(gl, resources.textures[GameModel.laser.texture], textureOptions)
+            
+            //set up explosion texture
             GameModel.explosion.texture = new SglTexture2D(gl, resources.textures[GameModel.explosion.texture], textureOptions)
+
+            //set up ring texture
+            GameModel.ufo.ring_texture = new SglTexture2D(gl, resources.textures[GameModel.ufo.ring_texture], textureOptions)
 
             GameModel.background.mesh = GLIB.MakeSGLMesh(gl, {
                 vertices: new Float32Array([-1.0, -1.0, 0.0,

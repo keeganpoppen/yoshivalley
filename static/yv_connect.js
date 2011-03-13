@@ -39,6 +39,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
         } else if(message.type == 'laser:update') { 
             laser_angle = message.angle 
+            player.cannon_angle = laser_angle + Math.PI
             //console.log('new angle: ' + laser_angle)
 
         //FIRE ZE MISSILES!!!

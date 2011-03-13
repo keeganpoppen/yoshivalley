@@ -1,11 +1,11 @@
 attribute vec3 a_position;
 
 //age / alpha-related vars
-//attribute float a_lifetime;
-//attribute float a_age;
 attribute float a_age_frac;
 
 uniform bool does_age;
+
+uniform float particleSize;
 
 //the alpha value as a result of particle age
 varying float age_alpha;
@@ -14,7 +14,7 @@ uniform mat4 ModelViewProjectionMatrix;
 
 void main(void) {
     gl_Position = ModelViewProjectionMatrix * vec4(a_position, 1.0);
-    gl_PointSize = 7.5;
+    gl_PointSize = particleSize;
 
     if(does_age) {
         if(a_age_frac < .2) {
