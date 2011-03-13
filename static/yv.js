@@ -177,10 +177,6 @@ var YV = {};
 
         players: {},
 
-        /*
-        UFOMeshDisk : {}, 
-        UFOMeshDome : {}, 
-        */
         ufo: {},
 
         //truck for global laser config

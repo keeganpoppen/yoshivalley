@@ -102,7 +102,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
             var ring_radius = player.radius + 2.
             var frac_ready = Math.min(1., ((Date.now() - player.last_shot) / (1000. * player.recharge_time)))
-            /*
+
             renderParticles(gl, model, function(gl, model, data) {
                 var verts = []
                 var age_fracs = []
@@ -118,7 +118,6 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
 
             })
-            */
 
             gl.xform.model.pop()
 
