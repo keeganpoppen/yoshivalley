@@ -3,98 +3,121 @@ var YV = {};
 
 (function(){
     //Put all numerical constants here
-    YV.Constants = {
-        ufo: {
-            mass: 10.0,
-            radius: 10.0,
-            lives: 3,
-            rechargeTime: 3,
-            invulnerablePeriod: 3,
-            initialRadius: 70,
-            initialVelocity: 5,
+    YV.Constants = (function() {
+        var arenaRadius = 50;
+        var sunRadius = arenaRadius / 25;
+        var jupiterRadius = sunRadius * 0.8;
+        var earthRadius = sunRadius * 0.5;
+        var marsRadius = sunRadius * 0.4;
+        var ufoRadius = sunRadius * 0.3;
 
-            collisionEpsilon: 1,
+        var earthOrbit = 1 * arenaRadius / 8;
+        var marsOrbit = 2 * arenaRadius / 8;
+        var jupiterOrbit = 3 * arenaRadius / 8;
 
-            minMaxAngle: 60.0,
-            controlVelocityMultiplier: 100,
+        var sunMass = 20;
+        var jupiterMass = 0.8 * sunMass;
+        var earthMass = 0.5 * sunMass;
+        var marsMass = 0.4 * sunMass;
+        var ufoMass = 0.2 * sunMass;
 
-            blinkPeriod: 0.3,
-            blinkOffPercent: 0.33,
+        var fieldOfView = 60.0;
+        var cameraRadius = Math.abs(2 * arenaRadius / Math.tan(sglDegToRad(fieldOfView)));
+    
+        var constants = {
+            maxPlayers: 8,
+            planetSphereDensity: 25,
+            maxFrameRate: 60,
+            arenaRadius: arenaRadius,
+            arenaKickbackMultiplier: 150,
 
-            diskSquishFrac: 0.3,
-            domeRadFrac: 0.6,
-        },
+            ufo: {
+                mass: ufoMass,
+                radius: ufoRadius,
+                lives: 3,
+                rechargeTime: 3,
+                invulnerablePeriod: 3,
+                initialRadius: arenaRadius / 2,
+                initialVelocity: 2*ufoRadius,
 
-        particle: {
-            lifetime: 2
-        },
+                collisionEpsilon: ufoRadius/4,
 
-        explosion: {
-            outwardVelocity: 10.0,
-            vertexDensity: 20
-        },
+                minMaxAngle: 60.0,
+                controlVelocityMultiplier: 20,
 
-        camera: {
-            fov: 40.0, //Degrees
-            orbitRadius: 250,
-            orbitAngle: 0.0,
-            near: 1,
-            far: 900,
-            azimuth: 70,
-        },
+                blinkPeriod: 0.3,
+                blinkOffPercent: 0.33,
 
-        planets : {
-            sun: {
-                radius: 20.0,
-                mass: 100.0,
+                diskSquishFrac: 0.3,
+                domeRadFrac: 0.6,
             },
 
-            earth: {
-                radius : 10,
-                mass : 15,
-                tilt: 5.0, //Degrees
-                rotationalVelocity: 8.0, //Degrees per second
-                orbitRadius: 90.0,
-                orbitAngle: 180.0,
+            particle: {
+                lifetime: 1,
             },
 
-            mars: {
-                radius: 8.0,
-                mass: 10.0,
-                tilt: 3.0,
-                rotationalVelocity: 5.0,
-                orbitRadius: 80.0,
-                orbitAngle: 25.0
+            explosion: {
+                outwardVelocity: 5*ufoRadius,
+                vertexDensity: 20
             },
 
-            jupiter: {
-                radius: 18.0,
-                mass: 40.0,
-                tilt: 0.0,
-                rotationalVelocity: 6.0,
-                orbitRadius: 140.0,
-                orbitAngle: 125.0
+            camera: {
+                fov: fieldOfView, //Degrees
+                orbitRadius: cameraRadius,
+                orbitAngle: 0.0,
+                near: 0.1,
+                far: 3*cameraRadius,
+                azimuth: 70,
             },
-        },
 
-        laser: {
-            length: 7.5,
-            numParticles: 10,
-            velocityMultiplier: 100,
-            maxAge: 4,
-        },
+            planets : {
+                sun: {
+                    radius: sunRadius,
+                    mass: sunMass,
+                },
 
-        solver: {
-            timestep: 0.03,
-            gravitationalConstant: 200.0,
-        },
+                earth: {
+                    radius : earthRadius,
+                    mass : earthMass,
+                    tilt: 5.0, //Degrees
+                    rotationalVelocity: 8.0, //Degrees per second
+                    orbitRadius: earthOrbit,
+                    orbitAngle: 180.0,
+                },
 
-        maxPlayers: 8,
-        planetSphereDensity: 25,
-        maxFrameRate: 60,
-        arenaRadius: 400,
-        arenaKickbackMultiplier: 150,
-    };
+                mars: {
+                    radius: marsRadius,
+                    mass: marsMass,
+                    tilt: 3.0,
+                    rotationalVelocity: 5.0,
+                    orbitRadius: marsOrbit, 
+                    orbitAngle: 25.0
+                },
+
+                jupiter: {
+                    radius: jupiterRadius,
+                    mass: jupiterMass,
+                    tilt: 0.0,
+                    rotationalVelocity: 6.0,
+                    orbitRadius: jupiterOrbit,
+                    orbitAngle: 125.0
+                },
+            },
+
+            laser: {
+                length: ufoRadius,
+                numParticles: 10,
+                velocityMultiplier: 20,
+                maxAge: 4,
+            },
+
+            solver: {
+                timestep: 0.03,
+                gravitationalConstant: 40.0,
+            },
+        };
+        return constants;
+    })();
 
     //all the resources that need to be loaded before the game will work correctly
     YV.Resources = {
