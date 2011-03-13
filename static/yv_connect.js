@@ -44,20 +44,24 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
         //FIRE ZE MISSILES!!!
         } else if(message.type == 'laser:fire') {
-            var MULT = YV.Constants.laser.velocityMultiplier;
-            var x = -Math.sin(laser_angle)
-            var z = -Math.cos(laser_angle)
+            //Check to see if we're allowed to shoot right now
+            var player = model.players[message.player_id];
+            if((Date.now() - player.last_shot)/1000 > player.recharge_time) {
+                var MULT = YV.Constants.laser.velocityMultiplier;
+                var x = -Math.sin(laser_angle)
+                var z = -Math.cos(laser_angle)
 
-            var laser_vel = new SglVec3(x, 0., z)
-            laser_vel = laser_vel.normalize().mul(new SglVec3(MULT));
+                var laser_vel = new SglVec3(x, 0., z)
+                laser_vel = laser_vel.normalize().mul(new SglVec3(MULT));
 
-            player.last_shot = Date.now()
+                player.last_shot = Date.now()
 
-            model.particles.lasers.push(new YV.Laser({
-                position: model.players[message.player_id].position,
-                velocity: laser_vel,
-                shooter_id: message.player_id
-            }))
+                model.particles.lasers.push(new YV.Laser({
+                    position: player.position,
+                    velocity: laser_vel,
+                    shooter_id: message.player_id
+                }))
+            }
         } else if(message.type == 'player:add') {
             YV.AddPlayer(message.player_id, message.color); 
         } else if(message.type == 'latency_check') {
