@@ -66,6 +66,13 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
                                 ringAlphaTexture: planet.ringTextureAlpha});
             gl.enable(gl.BLEND)
             gl.blendFunc(gl.SRC_ALPHA, gl.ONE)
+        } else if(planet.textureNight) {
+            var cameraVec = YV.GameModel.camera.position;
+            var cameraPos = [cameraVec.x, cameraVec.y, cameraVec.z];            
+            $.extend(textures, {nightTexture: planet.textureNight,
+                                spectralTexture: planet.textureSpectral});
+            $.extend(uniforms, {ViewMatrix: gl.xform.viewMatrix,
+                                cameraPosition: cameraPos});
         }
 
         sglRenderMeshGLPrimitives(planet.mesh, "index", gl.programs[planet.program], null,
@@ -103,13 +110,16 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
             gl.xform.model.push();
             gl.xform.model.scale(player.radius, YV.Constants.ufo.diskSquishFrac*
                     player.radius, player.radius);
+
+            var cameraVec = YV.GameModel.camera.position;
+            var cameraPos = [cameraVec.x, cameraVec.y, cameraVec.z];            
             sglRenderMeshGLPrimitives(model.ufo.mesh, "index", gl.programs.ufo, null,
                 {
-                    ViewMatrix : gl.xform.viewMatrix,
-                    ProjectionMatrix : gl.xform.projectionMatrix,
+                    ViewProjectionMatrix : gl.xform.viewProjectionMatrix,
                     ModelMatrix : gl.xform.modelMatrix,
                     NormalMatrix : gl.xform.worldSpaceNormalMatrix,
                     sunCenter : [sunpos.x, sunpos.y, sunpos.z],
+                    cameraPosition: cameraPos,
                     color : player.color,
                     halfSphere : false,
                     shininess: YV.Constants.ufo.shininess,
@@ -177,8 +187,8 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
                     YV.Constants.ufo.domeRadFrac * player.radius);
             sglRenderMeshGLPrimitives(model.ufo.mesh, "index", gl.programs.ufo, null,
                 {
-                    ViewMatrix : gl.xform.viewMatrix,
-                    ProjectionMatrix : gl.xform.projectionMatrix,
+                    ViewProjectionMatrix : gl.xform.viewProjectionMatrix,
+                    cameraPosition: cameraPos,
                     ModelMatrix : gl.xform.modelMatrix,
                     NormalMatrix : gl.xform.worldSpaceNormalMatrix,
                     sunCenter : [sunpos.x, sunpos.y, sunpos.z],

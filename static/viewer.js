@@ -22,6 +22,7 @@ GLIB.FireWhenReady(YV.Resources, function(resources) {
             gl.programs.particle = GLIB.compileProgram(gl, resources, 'particle');
             gl.programs.ring = GLIB.compileProgram(gl, resources, 'ring');
             gl.programs.saturn = GLIB.compileProgram(gl, resources, 'saturn');
+            gl.programs.earth = GLIB.compileProgram(gl, resources, 'earth');
 
             //Create Meshes 
             var textureOptions = {
@@ -66,12 +67,16 @@ GLIB.FireWhenReady(YV.Resources, function(resources) {
                 planet.texture = new SglTexture2D(gl,
                         resources.textures[planet.texture], textureOptions);
                 if(planet.ringTexture) {
-                    console.log(resources.textures[planet.ringTexture]);
                     planet.ringTexture = new SglTexture2D(gl,
                         resources.textures[planet.ringTexture], textureOptions);   
                     planet.ringTextureAlpha = new SglTexture2D(gl,
                         resources.textures[planet.ringTextureAlpha], textureOptions);   
                     planet.mesh = GLIB.MakeSaturnSGLMesh(gl);
+                } else if(planet.textureNight) {
+                    planet.textureNight = new SglTexture2D(gl,
+                        resources.textures[planet.textureNight], textureOptions);   
+                    planet.textureSpectral = new SglTexture2D(gl,
+                        resources.textures[planet.textureSpectral], textureOptions);   
                 }
             }
 

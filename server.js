@@ -147,9 +147,11 @@ socket.on('connection', function(client) {
             viewers[client.sessionId] = client
 
             //if players are connected before the viewer, just add them now
+            /*
             for(var id in players) {
                 client.send({'type': 'player:add', 'player_id': id})    
             }
+            */
 
             client.on('message', function(message) {
                 if(message.type == 'latency_check') {

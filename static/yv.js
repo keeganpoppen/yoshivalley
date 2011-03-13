@@ -13,11 +13,11 @@ var YV = {};
         var marsRadius = sunRadius * 0.6;
         var ufoRadius = sunRadius * 0.4;
 
-        var earthOrbit = 2 * arenaRadius / 8;
-        var marsOrbit = 3 * arenaRadius / 8;
-        var jupiterOrbit = 4 * arenaRadius / 8;
-        var saturnOrbit = 5 * arenaRadius / 8;
-        var neptuneOrbit = 6 * arenaRadius / 8;
+        var earthOrbit = 2 * arenaRadius / 7;
+        var marsOrbit = 3 * arenaRadius / 7;
+        var jupiterOrbit = 4 * arenaRadius / 7;
+        var saturnOrbit = 5 * arenaRadius / 7;
+        var neptuneOrbit = 6 * arenaRadius / 7;
 
         var sunMass = 20;
         var jupiterMass = 0.8 * sunMass;
@@ -28,7 +28,7 @@ var YV = {};
         var ufoMass = 0.2 * sunMass;
 
         var fieldOfView = 60.0;
-        var cameraRadius = Math.abs(2 * arenaRadius / Math.tan(sglDegToRad(fieldOfView)));
+        var cameraRadius = Math.abs(2.5 * arenaRadius / Math.tan(sglDegToRad(fieldOfView)));
     
         var constants = {
             maxPlayers: 8,
@@ -43,8 +43,8 @@ var YV = {};
                 lives: 3,
                 rechargeTime: 0.8,
                 invulnerablePeriod: 3,
-                initialRadius: arenaRadius / 2,
-                initialVelocity: 2*ufoRadius,
+                initialRadius: 0.8 * arenaRadius,
+                initialVelocity: ufoRadius,
 
                 collisionEpsilon: ufoRadius/4,
 
@@ -80,7 +80,7 @@ var YV = {};
             },
 
             planets : {
-                orbitVelocity: 25,
+                orbitVelocity: 200,
 
                 sun: {
                     radius: sunRadius,
@@ -111,7 +111,7 @@ var YV = {};
                     tilt: 0.0,
                     rotationalVelocity: 6.0,
                     orbitRadius: jupiterOrbit,
-                    orbitAngle: 125.0
+                    orbitAngle: -30,
                 },
 
                 saturn: {
@@ -129,14 +129,14 @@ var YV = {};
                     tilt: 1.0,
                     rotationalVelocity: 8.0,
                     orbitRadius: neptuneOrbit,
-                    orbitAngle: -30.0,
+                    orbitAngle: 125.0,
                 },
             },
 
             laser: {
                 length: ufoRadius,
                 numParticles: 10,
-                velocityMultiplier: 20,
+                velocityMultiplier: 40,
                 maxAge: 4,
                 particleSize: 300,
             },
@@ -153,13 +153,15 @@ var YV = {};
     YV.Resources = {
         textures: ["earth.jpg", "sun.jpg", "mars.jpg", "sky2.jpg", "jupiter.jpg",
                    "saturn.jpg", "laser.png", "fire.png", "ring.png", "metal.jpg",
-                   "saturn-ring.jpg", "saturn-ring-alpha.gif", "neptune.jpg"],
+                   "saturn-ring.jpg", "saturn-ring-alpha.gif", "neptune.jpg",
+                   "earth-spectral.jpg", "earth-night.jpg"],
         shaders: ["planet.frag.glsl", "planet.vert.glsl",
                   "sun.vert.glsl", "sun.frag.glsl",
                   "bg.vert.glsl", "bg.frag.glsl",
                   "particle.vert.glsl", "particle.frag.glsl",
                   "ufo.vert.glsl", "ufo.frag.glsl",
                   "saturn.vert.glsl", "saturn.frag.glsl",
+                  "earth.vert.glsl", "earth.frag.glsl",
                   "ring.vert.glsl", "ring.frag.glsl"],
         meshes: [],
     }
@@ -299,7 +301,10 @@ var YV = {};
 
         planets : [
             new Planet({
+                program: "earth",
                 texture : "earth.jpg",
+                textureNight: "earth-night.jpg",
+                textureSpectral: "earth-spectral.jpg",
                 mass : YV.Constants.planets.earth.mass, 
                 radius : YV.Constants.planets.earth.radius,
                 tilt : YV.Constants.planets.earth.tilt, 

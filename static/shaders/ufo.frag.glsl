@@ -3,6 +3,7 @@ precision highp float;
 #endif
 
 uniform vec3 sunCenter;
+uniform vec3 cameraPosition;
 uniform vec3 color;
 uniform bool halfSphere;
 uniform float shininess;
@@ -18,8 +19,8 @@ const float ambient = 0.2;
 void main(void)
 {
   vec3 N = normalize(normal);
-  vec3 L = normalize(worldPosition);
-  vec3 V = normalize(-eyePosition);
+  vec3 L = normalize(worldPosition - sunCenter);
+  vec3 V = normalize(worldPosition - cameraPosition);
   
   float rd = max(0.0, dot(-L, N)); 
   

@@ -9,7 +9,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         $.each(model.planets, function(planet_id, planet) {
             planet.rotation += planet.rotationalVelocity * dt;
             planet.orbitAngle += YV.Constants.planets.orbitVelocity
-                    * dt / planet.orbitRadius;
+                    * dt / Math.pow(planet.orbitRadius, 2);
         });
         model.sun.rotation += model.sun.rotationalVelocity * dt;
     }

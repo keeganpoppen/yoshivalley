@@ -52,12 +52,14 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
                 var z = -Math.cos(laser_angle)
 
                 var laser_vel = new SglVec3(x, 0., z)
-                laser_vel = laser_vel.normalize().mul(new SglVec3(MULT));
+                var laser_dir = laser_vel.normalize();
+                laser_vel = laser_dir.mul(new SglVec3(MULT));
 
                 player.last_shot = Date.now()
 
+                var radius = YV.Constants.ufo.ringRadius;
                 model.particles.lasers.push(new YV.Laser({
-                    position: player.position,
+                    position: player.position.add(laser_dir.mul(new SglVec3(radius))),
                     velocity: laser_vel,
                     shooter_id: message.player_id
                 }))
