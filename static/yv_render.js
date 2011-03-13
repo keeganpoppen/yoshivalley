@@ -100,7 +100,10 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
                     halfSphere : false,
                     shininess: YV.Constants.ufo.shininess,
                 },
-            {});
+                {
+                    metalTexture: YV.GameModel.ufo.metal,
+                }
+            );
             gl.xform.model.pop();
 
             //render laser timer ring thing

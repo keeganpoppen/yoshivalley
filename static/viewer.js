@@ -37,6 +37,9 @@ GLIB.FireWhenReady(YV.Resources, function(resources) {
 
             //set up ring texture
             GameModel.ufo.ring_texture = new SglTexture2D(gl, resources.textures[GameModel.ufo.ring_texture], textureOptions)
+            
+            //metal texture
+            GameModel.ufo.metal = new SglTexture2D(gl, resources.textures[GameModel.ufo.metal], textureOptions)
 
             GameModel.background.mesh = GLIB.MakeSGLMesh(gl, {
                 vertices: new Float32Array([-1.0, -1.0, 0.0,

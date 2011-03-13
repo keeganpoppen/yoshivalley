@@ -10,10 +10,12 @@ uniform bool halfSphere;
  
 attribute vec3 a_position;
 attribute vec3 a_normal;
+attribute vec2 a_texcoord;
  
 varying vec3 normal;
 varying vec3 worldPosition;
 varying vec3 eyePosition;
+varying vec2 texcoord;
  
 void main(void)
 {
@@ -30,4 +32,5 @@ void main(void)
     gl_Position = ProjectionMatrix * eyePositionTemp;
     
     normal = NormalMatrix * a_normal;
+    texcoord = a_texcoord;
 }

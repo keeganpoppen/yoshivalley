@@ -4,11 +4,14 @@ precision highp float;
 
 uniform vec3 sunCenter;
 uniform vec3 color;
+uniform bool halfSphere;
 uniform float shininess;
+uniform sampler2D metalTexture;
  
 varying vec3 worldPosition;
 varying vec3 eyePosition;
 varying vec3 normal;
+varying vec2 texcoord;
 
 const float ambient = 0.2;
 
@@ -23,5 +26,10 @@ void main(void)
   vec3 R = reflect(-L, N);
   float rs = pow( max(0.0, dot(V, R)), shininess);
 
-  gl_FragColor = vec4((ambient + rd + rs) * color, 1.0);
+  vec3 c = color;
+  if(!halfSphere) {
+    c = c * texture2D(metalTexture, texcoord).rgb;
+  }
+
+  gl_FragColor = vec4((ambient + rd + rs) * c, 1.0);
 }

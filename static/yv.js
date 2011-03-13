@@ -125,14 +125,14 @@ var YV = {};
 
     //all the resources that need to be loaded before the game will work correctly
     YV.Resources = {
-        textures: ["earth.jpg", "sun.jpg", "mars.jpg", "sky2.jpg", "jupiter.jpg", "laser.png", "fire.png", "ring.png"],
+        textures: ["earth.jpg", "sun.jpg", "mars.jpg", "sky2.jpg", "jupiter.jpg", "laser.png", "fire.png", "ring.png", "metal.jpg"],
         shaders: ["planet.frag.glsl", "planet.vert.glsl",
                   "sun.vert.glsl", "sun.frag.glsl",
                   "bg.vert.glsl", "bg.frag.glsl",
                   "particle.vert.glsl", "particle.frag.glsl",
                   "ufo.vert.glsl", "ufo.frag.glsl",
                   "ring.vert.glsl", "ring.frag.glsl"],
-        meshes: ["ufo.json"],
+        meshes: [],
     }
 
     function Planet(opts) {
@@ -303,7 +303,8 @@ var YV = {};
         players: {},
 
         ufo: {
-            ring_texture: "ring.png"     
+            ring_texture: "ring.png",
+            metal: "metal.jpg",
         },
 
         //truck for global laser config
