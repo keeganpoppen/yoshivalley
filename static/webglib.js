@@ -10,7 +10,6 @@ var GLIB = {};
         --num_resources
         if(num_resources == 0) {
             console.log('done loading resources')
-            console.log(resources)
             success_callback(resources)
         }
     }
