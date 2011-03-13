@@ -5,11 +5,11 @@ var YV = {};
     //Put all numerical constants here
     YV.Constants = (function() {
         var arenaRadius = 50;
-        var sunRadius = arenaRadius / 25;
+        var sunRadius = arenaRadius / 20;
         var jupiterRadius = sunRadius * 0.8;
         var earthRadius = sunRadius * 0.5;
         var marsRadius = sunRadius * 0.4;
-        var ufoRadius = sunRadius * 0.3;
+        var ufoRadius = sunRadius * 0.4;
 
         var earthOrbit = 1 * arenaRadius / 8;
         var marsOrbit = 2 * arenaRadius / 8;
@@ -35,7 +35,7 @@ var YV = {};
                 mass: ufoMass,
                 radius: ufoRadius,
                 lives: 3,
-                rechargeTime: 3,
+                rechargeTime: 0.8,
                 invulnerablePeriod: 3,
                 initialRadius: arenaRadius / 2,
                 initialVelocity: 2*ufoRadius,
@@ -50,6 +50,7 @@ var YV = {};
 
                 diskSquishFrac: 0.3,
                 domeRadFrac: 0.6,
+                ringRadius: 1.3 * ufoRadius,
             },
 
             particle: {
@@ -162,6 +163,7 @@ var YV = {};
         radius: YV.Constants.ufo.radius,
         lives: YV.Constants.ufo.lives,
         invulnerable: 0.0,
+        color: [0,0,0],
         controller: {
             xrot: 0.0,
             yrot: 0.0
@@ -348,8 +350,11 @@ var YV = {};
         ufo.velocity = vel;
     }
 
-    YV.AddPlayer = function(playerid) {
-        var newufo = new UFO();
+    YV.AddPlayer = function(playerid, color) {
+        var newufo = new UFO({
+            color: color,
+        });
+        console.log(newufo.color);
         setInitialPosAndVel(playerid, newufo);
         YV.GameModel.players[playerid] = newufo;
     }

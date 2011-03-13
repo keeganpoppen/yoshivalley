@@ -7,6 +7,7 @@
 		<script src="/socket.io.js"></script>
 		<script>
             var player_id = -1;
+            var color = [0.0, 0.0, 0.0];
 
 			var socket = new io.Socket();
 			socket.connect();
@@ -18,6 +19,12 @@
 			socket.on('message', function(message) {
                 if(message.type == 'init:setid') {
                     player_id = message.player_id
+                    console.log(message);
+                    color = message.color;
+                    var colorstring = "rgb(" + Math.floor(color[0]*255) + ", " + 
+                                               Math.floor(color[1]*255) + ", " +
+                                               Math.floor(color[2]*255) + ")";
+                    $('body').css('color', colorstring);
                     $("#player_id").html(player_id)
 
                 } else if(message.type == 'latency_check') {

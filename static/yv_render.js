@@ -111,7 +111,8 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
             var loc_obj = getShaderVarLocations(gl, prog, {
                 uniforms: ['ModelViewProjectionMatrix', 'ufoCenter', 'fracCharged',
-                                'ringRadius', 'numRingParticles', 'cannonAngle', 'ringTex'],
+                           'ringRadius', 'numRingParticles', 'cannonAngle', 'ringTex',
+                           'color'],
                 attributes: ['index']
             })
 
@@ -119,9 +120,10 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
             gl.uniformMatrix4fv(loc_obj.uniforms.ModelViewProjectionMatrix, false,
                                     new Float32Array(gl.xform.viewProjectionMatrix));
-            gl.uniform1f(loc_obj.uniforms.ringRadius, 2. * player.radius)
+            gl.uniform1f(loc_obj.uniforms.ringRadius, YV.Constants.ufo.ringRadius)
             gl.uniform1f(loc_obj.uniforms.numRingParticles, NUM_RING_PARTICLES)
             gl.uniform1f(loc_obj.uniforms.cannonAngle, player.cannon_angle)
+            gl.uniform3f(loc_obj.uniforms.color, player.color[0], player.color[1], player.color[2]);
 
             gl.activeTexture(gl.TEXTURE0)
             model.ufo.ring_texture.bind()

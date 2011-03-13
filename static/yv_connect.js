@@ -59,7 +59,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
                 shooter_id: message.player_id
             }))
         } else if(message.type == 'player:add') {
-            YV.AddPlayer(message.player_id); 
+            YV.AddPlayer(message.player_id, message.color); 
         } else if(message.type == 'latency_check') {
             sock.send(message) //send 'er right back
         }

@@ -88,6 +88,12 @@ function get_latencies(){
 }
 get_latencies()
 
+var Colors = [
+    [1.0, 0.0, 0.0], //Red
+    [0.0, 1.0, 0.0], //Green
+    [0.0, 0.0, 1.0], //Blue
+];
+var nextColor = 0;
 
 socket.on('connection', function(client) {
     //if(client in clients) util.log('WWTF!!!!!')
@@ -99,10 +105,15 @@ socket.on('connection', function(client) {
             util.log('hesa playa')
             players[client.sessionId] = client
 
-            //send the player his/her player_id
-            client.send({'type': 'init:setid', 'player_id': client.sessionId})
+            //Assign this player her color
+            client.color = Colors[nextColor];
+            nextColor = ((nextColor + 1) % Colors.length);
+            console.log("client assigned color: " + client.color);
 
-            broadcast_to_viewers({'type': 'player:add', 'player_id': client.sessionId})
+            //send the player his/her player_id
+            client.send({'type': 'init:setid', 'color': client.color, 'player_id': client.sessionId})
+
+            broadcast_to_viewers({'type': 'player:add', 'color': client.color, 'player_id': client.sessionId})
 
             client.on('message', function(message) {
                 if(message.type == 'latency_check') {
