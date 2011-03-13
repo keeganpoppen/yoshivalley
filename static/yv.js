@@ -44,6 +44,7 @@ var YV = {};
         mass: 10.0,
         radius: 10.0,
         lives: 3,
+        invulnerable: 0.0,
         controller: {
             xrot: 0.0,
             yrot: 0.0
@@ -59,9 +60,15 @@ var YV = {};
     })
     YV.UFO = UFO
 
-    YV.Respawn = function(ufo) {
-        ufo.position = new SglVec3(50.0, 0.0, -80.0);
-        //ufo.velocity = new Sglvec3(0.0, 0.0, 0.0);
+    YV.Respawn = function(player_id, ufo) {
+        if(ufo.lives > 0) {
+            setInitialPosAndVel(player_id, ufo);
+            ufo.invulnerable = 3.0;
+            ufo.control_velocity = new SglVec3(0.0, 0.0, 0.0);
+        } else {
+            //Kill off the player for good
+            delete YV.GameModel.players[player_id];
+        }
     };
 
     function Particle(opts) {
@@ -211,14 +218,34 @@ var YV = {};
     }
 
     YV.AddExplosion = function(pos) {
-        YV.GameModel.particles.explosions.push(new Explosion({position: new SglVec3(pos)}));
+        //YV.GameModel.particles.explosions.push(new Explosion({position: new SglVec3(pos)}));
     };
+            
+    function setInitialPosAndVel(playerid, ufo) {
+        var count = 0;
+        for(id in YV.GameModel.players) {
+            if(id === playerid)
+                break;
+            else
+                count++;
+        }
+        //var num_players = Object.keys(YV.GameModel.players).length + 1;
+        var num_players = 6;
+        var angle = count * (2*Math.PI / num_players);
+        var initial_radius = 50;
+        var pos = new SglVec3(initial_radius * Math.sin(angle), 0.0,
+                                  initial_radius * Math.cos(angle))
+        var vel = pos.normalized;
+        vel = vel.mul(new SglVec3(5));
+
+        ufo.position = pos;
+        ufo.velocity = vel;
+    }
 
     YV.AddPlayer = function(playerid) {
-        YV.GameModel.players[playerid] = new UFO({
-            //TODO set new player specific values, like a random location and
-            //  initial velocity
-        });
+        var newufo = new UFO();
+        setInitialPosAndVel(playerid, newufo);
+        YV.GameModel.players[playerid] = newufo;
     }
     
 })();

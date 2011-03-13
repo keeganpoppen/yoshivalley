@@ -69,6 +69,8 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
     function renderUFOs(gl, model) {
         $.each(model.players, function(player_id, player) {
+            if(player.invulnerable > 0.0 && player.invulnerable % 0.3 > 0.20)
+                return;
             var pos = player.position;
             var sunpos = model.sun.position;
 

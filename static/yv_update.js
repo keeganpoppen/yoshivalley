@@ -38,10 +38,18 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         var particle_hack = model.planets.slice(0)
         particle_hack.push(model.sun)
 
-        GLIB.Solver.StepTime(model.players, true, particle_hack)
+        GLIB.Solver.StepTime(model.players, true, particle_hack, model.players)
+        $.each(model.players, function(player_id, player) {
+            player.invulnerable -= GLIB.Solver.TimeStep;
+        });
+
+        
 
         checkForPlanetaryIntersection(model.players, model, function(player_id, planet_id) {
-            delete model.players[player_id];
+            var player = model.players[player_id];
+            player.lives--;
+            YV.AddExplosion(player.position);
+            YV.Respawn(player_id, player);
         });
     }
 
@@ -68,9 +76,11 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
             if(player_id != lasers[laser_id].shooter_id) {
                 //var shooter = model.players[lasers[laser_id].shooter_id];
                 var sunk = model.players[player_id];
-                sunk.lives--;
-                YV.AddExplosion(sunk.position);
-                YV.Respawn(sunk);
+                if(sunk.invulnerable <= 0) {
+                    sunk.lives--;
+                    YV.AddExplosion(sunk.position);
+                    YV.Respawn(player_id, sunk);
+                }
                 toremove.push(laser_id);
             }
         });
