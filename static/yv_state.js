@@ -230,14 +230,7 @@
 
         particles: {
             lasers: [],
-
-            explosions: [],
-
-            thrusters: [
-                //hmm.... this is slightly problematic-- the balance in between a no-knowledge
-                //particle system and not duplicating effort w.r.t. thruster position, which
-                //already really belongs to the player position, etc.
-            ]
+            explosions: []
         }
     }
             
