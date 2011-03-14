@@ -22,10 +22,10 @@
         var neptuneMass = 0.6 * sunMass;
         var earthMass = 0.5 * sunMass;
         var marsMass = 0.4 * sunMass;
-        var ufoMass = 0.2 * sunMass;
+        var ufoMass = 0.5 * sunMass;
 
         var fieldOfView = 60.0;
-        var cameraRadius = Math.abs(2.5 * arenaRadius / Math.tan(sglDegToRad(fieldOfView)));
+        var cameraRadius = Math.abs(3.0 * arenaRadius / Math.tan(sglDegToRad(fieldOfView)));
     
         var constants = {
             maxPlayers: 8,
@@ -40,7 +40,7 @@
                 lives: 3,
                 rechargeTime: 0.8,
                 invulnerablePeriod: 3,
-                initialRadius: 0.8 * arenaRadius,
+                initialRadius: 1.0 * arenaRadius,
                 initialVelocity: ufoRadius,
 
                 collisionEpsilon: ufoRadius/4,
@@ -62,9 +62,9 @@
             },
 
             explosion: {
-                finalRadius: 20 * ufoRadius,
+                finalRadius: 3 * ufoRadius,
                 radiusVariability: 0.2,
-                lifetime: 4,
+                lifetime: 0.8,
                 vertexDensity: 20,
                 particleSize: 600,
             },
@@ -75,7 +75,7 @@
                 orbitAngle: 0.0,
                 near: 0.1,
                 far: 3*cameraRadius,
-                azimuth: 70,
+                azimuth: 85,
             },
 
             planets : {

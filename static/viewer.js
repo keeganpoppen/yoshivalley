@@ -6,9 +6,6 @@ GLIB.FireWhenReady(YV.Resources, function(resources) {
 
     console.log('starting real work, namely the actual game');
 
-    //TODO: this is eventually superflous... I'm just lazy
-    var GameModel = YV.GameModel;
-    
     sglRegisterLoadedCanvas("canvas", {
         load: function(gl) {
             gl.xform = new SglTransformStack();
@@ -43,6 +40,9 @@ GLIB.FireWhenReady(YV.Resources, function(resources) {
                     break;
                 case 115: //S
                     YV.MoveCamera(0, -5, 0);
+                    break;
+                case 32: //Space
+                    YV.Begin();
                     break;
                 };
             }

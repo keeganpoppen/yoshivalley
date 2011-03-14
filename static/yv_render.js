@@ -13,7 +13,9 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         gl.xform.view.lookAt(camera.position.x,
                              camera.position.y,
                              camera.position.z,
-                             0.0,0.0,0.0,
+                             camera.lookat.x,
+                             camera.lookat.y,
+                             camera.lookat.z,
                              0.0, 1.0, 0.0);
     }
 

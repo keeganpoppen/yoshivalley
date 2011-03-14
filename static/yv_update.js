@@ -94,14 +94,36 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
     }
 
     YV.Update = function(dt) {
-        //immune from accumulator
-        updatePlanets(dt)
-        updateExplosions(dt)
+        switch(YV.GamePhase) {
+        case 'lobby':
+            break;
+        case 'intro':
+            YV.Intro.TimeStep(dt);
+            break;
+        case 'play':
+            var numPlayersLeft = 0;
+            var lastPlayer;
+            YV.OverPlayers(function(player_id, player) {
+                numPlayersLeft += 1;
+                lastPlayer = player;
+            });
+            if(numPlayersLeft === 1) {
+                YV.End(lastPlayer);
+            }
+            
+            //immune from accumulator
+            updatePlanets(dt)
+            updateExplosions(dt)
 
-        for(accumulator += dt; accumulator > GLIB.Solver.TimeStep;
-                                accumulator -= GLIB.Solver.TimeStep) {
-            updatePlayerPositions();
-            updateProjectiles();
+            for(accumulator += dt; accumulator > GLIB.Solver.TimeStep;
+                                    accumulator -= GLIB.Solver.TimeStep) {
+                updatePlayerPositions();
+                updateProjectiles();
+            }
+            break;
+        case 'victory':
+            updateExplosions(dt)
+            break;
         }
     }
 

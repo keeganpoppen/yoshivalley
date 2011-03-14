@@ -123,6 +123,7 @@
            near : YV.Constants.camera.near,
            far : YV.Constants.camera.far,
            azimuth: YV.Constants.camera.azimuth,
+           lookat : new SglVec3(0.0),
         }), 
 
         background : {
@@ -209,6 +210,7 @@
         ],
 
         players: {},
+        waitingPlayers: [],
 
         ufo: {
             ring_texture: "ring.png",
@@ -351,6 +353,12 @@
         return State.camera;
     };
 
+    YV.SetCameraTo = function(angle, azimuth, radius) {
+        State.camera.orbitAngle = angle;
+        State.camera.azimuth = azimuth;
+        State.camera.orbitRadius = radius;
+    };
+
     YV.GetBackground = function() {
         return State.background;
     };
@@ -392,12 +400,25 @@
         State.particles.exlosions = tokeep;
     };
 
+    function gameFull() {
+        var count = 0;    
+        YV.OverPlayers(function() {
+            count++;
+        });
+        return (count >= YV.Constants.maxPlayers);
+    }
+
     YV.AddPlayer = function(playerid, color) {
         var newufo = new UFO({
             color: color,
         });
-        setInitialPosAndVel(playerid, newufo);
-        State.players[playerid] = newufo;
+        if((YV.GamePhase === 'lobby') && !gameFull()) {
+            setInitialPosAndVel(playerid, newufo);
+            State.players[playerid] = newufo;
+        } else {
+            //TODO this queue should be managed on the server
+            State.waitingPlayers.push(newufo);
+        }
     };
 
     function bracketed(min, max, val) {
@@ -408,7 +429,7 @@
 
     YV.UpdatePlayerVelocity = function(player_id, data) {
         var player = State.players[player_id];
-        if(player === undefined) return;
+        if(player === undefined || YV.GamePhase != 'play') return;
 
         $.each(data, function(rot, angle) {
             data[rot] = bracketed(-YV.Constants.ufo.minMaxAngle,
@@ -429,13 +450,13 @@
 
     YV.UpdatePlayerCannonAngle = function(player_id, angle) {
         var player = State.players[player_id];
-        if(player === undefined) return;
+        if(player === undefined || YV.GamePhase != 'play') return;
         player.cannon_angle = angle + Math.PI; //TODO base this correction on the camera
     };
 
     YV.FireLaser = function(player_id) {
         var player = State.players[player_id];
-        if(player === undefined) return false;
+        if(player === undefined || YV.GamePhase != 'play') return false;
 
         //Check to see if we're allowed to shoot right now
         if((Date.now() - player.last_shot)/1000 > player.recharge_time) {
