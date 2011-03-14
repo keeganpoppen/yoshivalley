@@ -34,11 +34,6 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
     var laserSrc = "/audio/laser.mp3";
     var explosionSrc = "/audio/explosion.mp3";
-    var musicSrc = "/audio/fates.mp3";
-
-    var music = new Audio();
-    music.src = musicSrc;
-    music.loop = true;
 
     var LaserList = new List();
     for(i = 0; i<YV.Constants.maxPlayers; i++) {
