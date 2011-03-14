@@ -137,20 +137,35 @@ window.addEventListener('deviceorientation', function(e) {
 }, false)
 
 /*
+ * handler for flipping between portrait and landscape
+ * (DEPRECATED)
+ */
+
+window.addEventListener('orientationchange', function(e) {
+    var orient = window.orientation
+    if(orient == 0 || orient == 180) {
+        $("body").removeClass()
+        $("body").addClass("portrait")
+    } else {
+        $("body").removeClass()
+        $("body").addClass("landscape")
+    }
+    setTimeout(function(){window.scrollTo(0,1);},100)
+})
+
+/*
  * set up handling for cannon aimer
  */
 
 var prev_angle = 0.0
-var CANNON_ACTIVE = false
 var send_touch_angle = function(e) {
     e.preventDefault()
-
-    if(!CANNON_ACTIVE) return
-
+    var control_center = document.getElementById("control_center")
+    var cc = $(control_center)
     var ev = e.touches[0]
-    var deviation_x = ev.pageX - 160
-    var deviation_y = ev.pageY - 115
-
+    var offset = cc.offset()
+    var deviation_x = ev.pageX - offset.left - (cc.width()/2)
+    var deviation_y = ev.pageY - offset.top - (cc.height()/2)
     var angle = Math.atan2(-deviation_y, deviation_x)
     prev_angle = angle
 

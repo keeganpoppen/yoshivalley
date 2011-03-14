@@ -7,6 +7,18 @@
 		<script src="/socket.io.js"></script>
         <script src="/player.js"></script>
 		<script>
+
+            function show_error(message) {
+                $("#error_message_container").html(message)
+                $("#normal_container").hide()
+                $("#error_message_container").show()
+            }
+
+            function hide_error() {
+                $("#error_message_container").hide()
+                $("#normal_container").show()
+            }
+
             $(function(){
                 var orient = window.orientation
                 if(orient == 0 || orient == 180) {
@@ -19,11 +31,19 @@
                 setTimeout(function(){window.scrollTo(0,1);},100)
 
                 var control_center = document.getElementById("control_center")
-                control_center.addEventListener("touchstart", send_touch_angle, false);
+                control_center.addEventListener("touchstart", function(){
+                    CANNON_ACTIVE = true
+                }, false);
                 control_center.addEventListener("touchmove", send_touch_angle, false);
+                control_center.addEventListener("touchend", function(){
+                    CANNON_ACTIVE = false 
+                }, false);
+                control_center.addEventListener("touchcancel", function(){
+                    CANNON_ACTIVE = false 
+                }, false);
 
-                document.body.addEventListener("touchstart", function(e){e.preventDefault();},false)
-                document.body.addEventListener("touchmove", function(e){e.preventDefault();},false)
+                document.body.addEventListener("touchstart", send_touch_angle, false)
+                document.body.addEventListener("touchmove", send_touch_angle, false)
 
                 document.getElementById("fire_button").addEventListener("touchstart", function(){
                     socket.send({'type': 'laser:fire', 'angle': prev_angle, 'player_id': player_id})
@@ -66,50 +86,155 @@
                     }
                 }, false);
 
+                function orientation_check(){
+                    if(window.orientation % 180 != 0) {
+                        show_error("you should lock your phone into portrait for best performance!")
+                    } else {
+                        $("#error_message_container").hide()
+                        $("#normal_container").show()
+                    }
+                }
+
+                if(!window.navigator.standalone) {
+                    show_error("To play, pin this page to your home screen. Trust us-- it's better this way.")
+                } else {
+                    orientation_check()
+                    window.addEventListener('orientationchange', orientation_check) 
+                }
             })
 		</script>
         <style>
             * {
                 margin: 0px;
                 padding: 0px;
+                color: black;
+            }
+
+            body {
+                width: 460px;
+                height: 320px;
+                -webkit-transform: rotate(90deg);
+                -webkit-transform-origin: bottom left;
+                top: -320px;
+                position: relative;
+            }
+
+            #error_message_container {
+                display: none;
+                padding: 20px;
+            }
+
+            #normal_container {
+                background-color: blue;
             }
 
             .column {
+                width: 230px;
+                height: 320px;
                 float: left;
-                margin:0px;
-                padding:0px;
-                overflow:hidden;
-                width: 10px;
-                height: 10px;
             }
 
-            body.portrait {
-                width: 320px;
-                height: 416px;
+            #control_center {
+                background-color: blue;
             }
 
-            body.landscape {
-                height: 276px;
-                width: 480px;
+            #other_stuff {
+                background-color: orange;
             }
 
-            body.portrait .column {
-                height:208px;
-                width:320px;
-                background-color: green;
+            #player_info {
+                width: 230px;
+                height: 160px;
+                background-color: purple;
             }
 
-            body.landscape .column {
-                height: 276px;
-                width: 240px;
+            #player_id {
+                margin: auto;
+                padding: 10px 15px;
+                height: 30px;
+                line-height: 30px;
+                font-size: 22px;
+                font-weight: bold;
+                font-family: "Helvetica";
+                text-align: center;
+                color: white;
+            }
+
+            #lives_title {
+                margin: auto;
+                padding: 5px 15px;
+                height: 20px;
+                font-size: 18px;
+                font-family: "Helvetica";
+                text-align: center;
+            }
+
+            #lives_container {
+                margin: auto;
+                padding: 10px 10px;
+                height: 60px;
+                font-size: 18px;
+                font-family: "Helvetica";
+                text-align: center;
+            }
+
+            .life {
+                width: 50px;
+                height: 50px;
+                margin: 5px 10px;
+                background-color: #00ee00;
+                text-align: center;
+                line-height: 50px;
+                font-size: 18px;
+                font-weight: bold;
+                float: left;
+            }
+
+            .extinguished {
+                opacity: .5;
+            }
+
+            #fire_button_container {
+                width: 230px;
+                height: 160px;
                 background-color: yellow;
+            }
+
+            #fire_button {
+                width: 200px;
+                height: 120px;
+                margin: 20px 15px;
+                font-size: 36px;
+                font-family: "Helvetica";
+                font-weight: bold;
+                background-color: red;
             }
         </style>
 	</head>
 	<body>
-        <div id="error_message_container"></div>
+        <div id="error_message_container">
+            ERROR!
+        </div>
         <div id="normal_container">
-
+            <div id="control_center" class="column">(control center)</div>
+            <div class="column" id="other_stuff">
+                <div id="player_info"> 
+                    <div id="player_id">
+                        id: 9402835085939
+                    </div>
+                    <div id="lives_title">Lives remaining:</div>
+                    <div id="lives_container">
+                        <div class="life">1</div>
+                        <div class="life">2</div>
+                        <div class="life extinguished">3</div>
+                        <div style="clear:both"></div>
+                    </div>
+                </div>
+                <div id="fire_button_container">
+                    <button id="fire_button">FIRE!</button>
+                </div>
+            </div>
+            <div style="clear:both"></div>
         </div>
 	</body>
 </html>
