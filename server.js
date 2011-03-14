@@ -58,7 +58,6 @@ var viewer_timer = MessageTimer.create(50, 100, MessageTimer.ServerQueueCallback
     if(Object.keys(queue).length == 0) return
 
     for(var id in viewers) {
-        util.log('sending object: ' + util.inspect(queue))
         viewers[id].send(queue)
     }
 })
