@@ -211,6 +211,7 @@
 
         players: {},
         waitingPlayers: [],
+        killedPlayers: [], //Pushed on inorder of death
 
         ufo: {
             ring_texture: "ring.png",
@@ -241,16 +242,8 @@
         }
     }
             
-    function setInitialPosAndVel(playerid, ufo) {
-        var count = 0;
-        for(id in State.players) {
-            if(id === playerid)
-                break;
-            else
-                count++;
-        }
-
-        var angle = count * (2*Math.PI / YV.Constants.maxPlayers);
+    function resetPlayer(index, ufo) {
+        var angle = index * (2*Math.PI / YV.Constants.maxPlayers);
         var pos = new SglVec3(YV.Constants.ufo.initialRadius * Math.sin(angle), 0.0,
                               YV.Constants.ufo.initialRadius * Math.cos(angle))
         var vel = pos.normalized;
@@ -258,6 +251,8 @@
 
         ufo.position = pos;
         ufo.velocity = vel;
+        ufo.controller = {xrot: 0.0, yrot: 0.0};
+        ufo.control_velocity = new SglVec3(0.0);
     }
     
     //External API for interacting with the game state
@@ -376,14 +371,18 @@
     };
 
     YV.RemoveLasers = function(toremove) {
-        var tokeep = [];
-        YV.OverLasers(function(laser_id, laser) {
-            if($.inArray(laser_id, toremove) < 0) {
-                tokeep.push(laser);
-            }
-        });
+        if(toremove === undefined) {
+            State.particles.lasers = [];
+        } else {
+            var tokeep = [];
+            YV.OverLasers(function(laser_id, laser) {
+                if($.inArray(laser_id, toremove) < 0) {
+                    tokeep.push(laser);
+                }
+            });
 
-        State.particles.lasers = tokeep;
+            State.particles.lasers = tokeep;
+        }
     };
 
     YV.AddExplosion = function(pos) {
@@ -392,13 +391,17 @@
     };
 
     YV.RemoveExplosions = function(toremove) {
-        var tokeep = [];
-        YV.OverExplosions(function(explosion_id, explosion) {
-            if($.inArray(explosion_id, toremove) < 0) {
-                tokeep.push(explosion);
-            }
-        });
-        State.particles.exlosions = tokeep;
+        if(toremove === undefined) {
+            State.particles.explosions = [];
+        } else {
+            var tokeep = [];
+            YV.OverExplosions(function(explosion_id, explosion) {
+                if($.inArray(explosion_id, toremove) < 0) {
+                    tokeep.push(explosion);
+                }
+            });
+            State.particles.exlosions = tokeep;
+        }
     };
 
     function gameFull() {
@@ -409,17 +412,84 @@
         return (count >= YV.Constants.maxPlayers);
     }
 
-    YV.AddPlayer = function(playerid, color) {
-        var newufo = new UFO({
-            color: color,
-        });
+    var Colors = [
+        [ 0.933333333333 ,  0.866666666667 ,  0.250980392157 ],
+        [ 0.960784313725 ,  0.474509803922 ,  0.0 ],
+        [ 0.560784313725 ,  0.349019607843 ,  0.0078431372549 ],
+        [ 0.450980392157 ,  0.823529411765 ,  0.0862745098039 ],
+        [ 0.203921568627 ,  0.396078431373 ,  0.643137254902 ],
+        [ 0.458823529412 ,  0.313725490196 ,  0.482352941176 ],
+        [ 0.729411764706 ,  0.741176470588 ,  0.713725490196 ],
+        [ 0.8 ,  0.0 ,  0.0 ],
+    ];
+
+    var ColorsInUse = [
+        false,false,false,false,false,false,false,false
+    ];
+
+    function findColor() {
+        for(i = 0; i<ColorsInUse.length; ++i) {
+            if(!ColorsInUse[i]) {
+                ColorsInUse[i] = true;
+                return i;
+            }
+        }
+    };
+
+    YV.GetColor = function(i) {
+        return Colors[i];
+    };
+
+    YV.AddPlayer = function(playerid) {
+        var newufo = new UFO();
         if((YV.GamePhase === 'lobby') && !gameFull()) {
-            setInitialPosAndVel(playerid, newufo);
+            newufo.color = findColor();
+            resetPlayer(newufo.color, newufo);
             State.players[playerid] = newufo;
         } else {
-            //TODO this queue should be managed on the server
-            State.waitingPlayers.push(newufo);
+            State.waitingPlayers.push([playerid, newufo]);
         }
+    };
+
+    YV.ResetPlayers = function(winner) {
+        //The winner always gets to keep playing and keep her color
+        resetPlayer(winner.color, winner);
+        winner.lives = YV.Constants.ufo.lives;
+        winner.invulnerable = 0.0;
+
+        //Refill from the defeated list if room, they get to keep their color too
+        //Put the rest at the end of the wait queue
+        var numSlots = (YV.Constants.maxPlayers - 1);
+        var numWaiters = State.waitingPlayers.length;
+        numWaiters = (numWaiters < numSlots) ? numWaiters : numSlots;
+        var numDefeateds = numSlots - numWaiters;
+        console.log(State.killedPlayers);
+        console.log(State.killedPlayers.length);
+        console.log(State.killedPlayers[State.killedPlayers.length-1]);
+        for(var i = State.killedPlayers.length-1; i >= 0; --i) {
+            var player_id = State.killedPlayers[i][0];
+            var player = State.killedPlayers[i][1];
+            if(numDefeateds > 0) {
+                resetPlayer(player.color, player);
+                player.lives = YV.Constants.ufo.lives;
+                player.invulnerable = 0.0;
+                State.players[player_id] = player;
+                numDefeateds--;
+            } else {
+                //They have to give up their color to a new commer;
+                Colors[player.color] = false;
+                State.waitingPlayers.push([player_id, player]);
+            }
+        }
+        State.killedPlayers = [];
+        for(var i=0; i<numWaiters; ++i) {
+            var player_id = State.waitingPlayers[i][0];
+            var player = State.waitingPlayers[i][1];
+            player.color = findColor();
+            resetPlayer(player.color, player);
+            State.players[player_id] = player;
+        }
+        State.waitingPlayers.splice(0, numWaiters);
     };
 
     function bracketed(min, max, val) {
@@ -482,13 +552,14 @@
         }
     };
     
-    YV.Respawn = function(player_id, ufo) {
-        if(ufo.lives > 0) {
-            setInitialPosAndVel(player_id, ufo);
-            ufo.invulnerable = YV.Constants.ufo.invulnerablePeriod;
-            ufo.control_velocity = new SglVec3(0.0, 0.0, 0.0);
+    YV.Respawn = function(player_id, player) {
+        if(player.lives > 0) {
+            resetPlayer(player.color, player);
+            player.invulnerable = YV.Constants.ufo.invulnerablePeriod;
+            player.control_velocity = new SglVec3(0.0, 0.0, 0.0);
         } else {
             //Kill off the player for good
+            State.killedPlayers.push([player_id, player]);
             delete State.players[player_id];
         }
     };

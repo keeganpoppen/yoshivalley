@@ -1,6 +1,7 @@
 var connect = require('connect')
 var util = require('util')
 var io = require('socket.io')
+//var dns = require('ndns')
 var MessageTimer = require('./messagetimer')
 
 var router = connect.router(function(app) {

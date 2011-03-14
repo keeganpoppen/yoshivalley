@@ -107,7 +107,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
                     NormalMatrix : gl.xform.worldSpaceNormalMatrix,
                     sunCenter : [0.0, 0.0, 0.0],
                     cameraPosition: cameraPos,
-                    color : player.color,
+                    color : YV.GetColor(player.color),
                     halfSphere : false,
                     shininess: YV.Constants.ufo.shininess,
                 },
@@ -139,7 +139,8 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
             gl.uniform1f(loc_obj.uniforms.ringRadius, YV.Constants.ufo.ringRadius)
             gl.uniform1f(loc_obj.uniforms.numRingParticles, NUM_RING_PARTICLES)
             gl.uniform1f(loc_obj.uniforms.cannonAngle, player.cannon_angle)
-            gl.uniform3f(loc_obj.uniforms.color, player.color[0], player.color[1], player.color[2]);
+            var color = YV.GetColor(player.color);
+            gl.uniform3f(loc_obj.uniforms.color, color[0], color[1], color[2]);
 
             gl.activeTexture(gl.TEXTURE0)
             ufo.ring_texture.bind()
