@@ -15,82 +15,11 @@ GLIB.FireWhenReady(YV.Resources, function(resources) {
             gl.programs = {};
             
             //Compile Shaders
-            gl.programs.planet = GLIB.compileProgram(gl, resources, 'planet');
-            gl.programs.sun = GLIB.compileProgram(gl, resources, 'sun');
-            gl.programs.bg = GLIB.compileProgram(gl, resources, 'bg');
-            gl.programs.ufo = GLIB.compileProgram(gl, resources, 'ufo');
-            gl.programs.particle = GLIB.compileProgram(gl, resources, 'particle');
-            gl.programs.ring = GLIB.compileProgram(gl, resources, 'ring');
-            gl.programs.saturn = GLIB.compileProgram(gl, resources, 'saturn');
-            gl.programs.earth = GLIB.compileProgram(gl, resources, 'earth');
-            gl.programs.explosion = GLIB.compileProgram(gl, resources, 'explosion');
+            gl.programs = GLIB.compilePrograms(gl, resources.shaders);
 
-            //Create Meshes 
-            var textureOptions = {
-                    generateMipmap: true,
-                    flipY: false,
-                    minFilter: gl.LINEAR_MIPMAP_LINEAR,
-            };
+            YV.InitTextures(gl, resources.textures);
+            YV.InitMeshes(gl);
 
-            //set up laser texture
-            GameModel.laser.texture = new SglTexture2D(gl, resources.textures[GameModel.laser.texture], textureOptions)
-            
-            //set up explosion texture
-            GameModel.explosion.texture = new SglTexture2D(gl, resources.textures[GameModel.explosion.texture], textureOptions)
-
-            //set up ring texture
-            GameModel.ufo.ring_texture = new SglTexture2D(gl, resources.textures[GameModel.ufo.ring_texture], textureOptions)
-            
-            //metal texture
-            GameModel.ufo.metal = new SglTexture2D(gl, resources.textures[GameModel.ufo.metal], textureOptions)
-
-            GameModel.background.mesh = GLIB.MakeSGLMesh(gl, {
-                vertices: new Float32Array([-1.0, -1.0, 0.0,
-                                             1.0, -1.0, 0.0,
-                                             1.0, 1.0, 0.0,
-                                            -1.0, 1.0, 0.0]),
-                indices: new Uint16Array([0,1,2,2,3,0])
-            });
-
-            //set up explosion vertices
-            var verts = GLIB.MakeSphericalVerts(1., YV.Constants.explosion.vertexDensity,
-                                                    YV.Constants.explosion.vertexDensity)
-            GameModel.explosion.verts = new Float32Array(verts)
-
-            GameModel.background.texture = new SglTexture2D(gl,
-                    resources.textures[GameModel.background.texture], textureOptions);
-
-            var sphereMesh = GLIB.MakeSphere(1,
-                    YV.Constants.planetSphereDensity, YV.Constants.planetSphereDensity);
-            var SGLsphereMesh = GLIB.MakeSGLMesh(gl, sphereMesh);
-            GameModel.sun.mesh = SGLsphereMesh;
-            GameModel.sun.texture = new SglTexture2D(gl,
-                    resources.textures[GameModel.sun.texture], textureOptions);
-            for(var id in GameModel.planets) {
-                var planet = GameModel.planets[id];
-                planet.mesh = SGLsphereMesh;
-                //Replace texture string with texture object
-                planet.texture = new SglTexture2D(gl,
-                        resources.textures[planet.texture], textureOptions);
-                if(planet.ringTexture) {
-                    planet.ringTexture = new SglTexture2D(gl,
-                        resources.textures[planet.ringTexture], textureOptions);   
-                    planet.ringTextureAlpha = new SglTexture2D(gl,
-                        resources.textures[planet.ringTextureAlpha], textureOptions);   
-                    planet.mesh = GLIB.MakeSaturnSGLMesh(gl);
-                } else if(planet.textureNight) {
-                    planet.textureNight = new SglTexture2D(gl,
-                        resources.textures[planet.textureNight], textureOptions);   
-                    planet.textureSpectral = new SglTexture2D(gl,
-                        resources.textures[planet.textureSpectral], textureOptions);   
-                }
-            }
-
-            //GameModel.UFOMesh = GLIB.MakeSGLMesh(gl, resources.meshes['ufo.json']);
-            var sphereMeshWithNormals = GLIB.MakeSphere(1,
-                    YV.Constants.planetSphereDensity, YV.Constants.planetSphereDensity, true);
-            var SGLMeshWithNormals = GLIB.MakeSGLMesh(gl, sphereMeshWithNormals); 
-            GameModel.ufo.mesh = SGLMeshWithNormals;
             gl.ui = this.ui;
 
             //We want the canvas to resize with the window
@@ -104,36 +33,34 @@ GLIB.FireWhenReady(YV.Resources, function(resources) {
             window.onkeypress = function(e) {
                 switch(e.charCode) {
                 case 97: //A
-                    YV.GameModel.camera.orbitAngle -= 5;
+                    YV.MoveCamera(-5, 0, 0);
                     break;
                 case 100: //D
-                    YV.GameModel.camera.orbitAngle += 5;
+                    YV.MoveCamera(5, 0, 0);
                     break;
                 case 119: //W
-                    YV.GameModel.camera.azimuth += 5;
+                    YV.MoveCamera(0, 5, 0);
                     break;
                 case 115: //S
-                    YV.GameModel.camera.azimuth -= 5;
+                    YV.MoveCamera(0, -5, 0);
                     break;
                 };
             }
 
             window.addEventListener('mousewheel', function(e) {
-                YV.GameModel.camera.orbitRadius -= e.wheelDelta / 20;
+                YV.MoveCamera(0, 0, -e.wheelDelta / 20);
             }, false);
 
             //set up all the relevant socket callbacks, etc.
             //right now this is last so that stuff is displaying before sockets start doing shit
-            YV.Connect(resources.socket, GameModel)
+            YV.Connect(resources.socket);
         },
 
         update: function(gl, dt) {
-            //update the positions and velocities of ... everything!
-            YV.Update(dt, YV.GameModel)
+            YV.Update(dt);
         },
 
         draw: function(gl) {
-            
             //Draw fps
             var cur_time = Date.now()
             var fps = 1000. / (cur_time - last_frame_time)
@@ -148,7 +75,7 @@ GLIB.FireWhenReady(YV.Resources, function(resources) {
             }
             last_frame_time = cur_time
 
-            YV.Render(gl, YV.GameModel)
+            YV.Render(gl);
         }
 
     }, YV.Constants.maxFrameRate);

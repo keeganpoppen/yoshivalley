@@ -6,6 +6,8 @@
         <script type="text/javascript" src="webgl-debug.js"></script>
         <script type="text/javascript" src="spidergl.js"></script>
         <script type="text/javascript" src="yv.js"></script>
+        <script type="text/javascript" src="yv_constants.js"></script>
+        <script type="text/javascript" src="yv_state.js"></script>
         <script type="text/javascript" src="webglib.js"></script>
         <script type="text/javascript" src="yv_connect.js"></script>
         <script type="text/javascript" src="yv_render.js"></script>
@@ -13,9 +15,8 @@
         <script type="text/javascript" src="viewer.js"></script>
     </head>
     <body style="background-color:black; border:none">
-        <!--
-        <audio src="/audio/fates.mp3" autoplay="autoplay" loop="loop"></audio>
-        -->
+        <!--<audio src="/audio/fates.mp3" autoplay="autoplay" loop="loop"></audio>-->
+        <audio id="laser" src="/audio/laser.mp3" ></audio>
         <div style="border: none; width:100%; height:100%; margin:0px; padding:0px; overflow:hidden;">
             <canvas style="border:none; margin:0px; padding:0px" id="canvas" height="500", width="800"></canvas>
         </div>

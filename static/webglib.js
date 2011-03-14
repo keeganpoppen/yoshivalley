@@ -97,28 +97,27 @@ var GLIB = {};
         return to_vec.mul(new SglVec3(force_mult))
     }
 
-    var calculate_grav_accelerations = function(grav_bodies, player_pos, anti_grav) {
-        if(!grav_bodies || grav_bodies === undefined)
-            throw "don't have any bodies with which to apply gravity"
-
-        if(!player_pos || player_pos === undefined)
-            throw "player doesn't have any position. guess gravity's not his/her biggest issue..."
-
+    var calculate_grav_accelerations = function(player_pos) {
         var grav_accel = new SglVec3(0.0)
-        $.each(grav_bodies, function(id, grav_body) {
+
+        //Planets
+        YV.OverPlanets(function(id, grav_body) {
+            var body_accel = calculate_gravity(grav_body.position,
+                    grav_body.mass, player_pos)
+            grav_accel = grav_accel.add(body_accel)
+        });
+
+        //Other ufos
+        YV.OverPlayers(function(id, grav_body) {
             if(player_pos != grav_body.position) {
                 var body_accel = calculate_gravity(grav_body.position,
                         grav_body.mass, player_pos)
-                if(anti_grav) {
-                    grav_accel = grav_accel.sub(body_accel)
-                } else {
-                    grav_accel = grav_accel.add(body_accel)
-                }
+                grav_accel = grav_accel.sub(body_accel)
             }
         });
 
         //Arena bounds buffer
-        var vec = YV.GameModel.sun.position.sub(player_pos);
+        var vec = player_pos.neg;
         var distance = vec.length;
         if(distance > YV.Constants.arenaRadius) {
             var toofar = distance - YV.Constants.arenaRadius;
@@ -139,8 +138,40 @@ var GLIB = {};
         console.log('velocity: ' + vec_to_string(player.velocity))
     }
 
+    var timestep_vec = new SglVec3(Solver.TimeStep)
+
+    Solver.StepParticle = function(particle) {
+        if(!particle.position || particle.position === undefined)
+                throw "particle has no position? how is it going to move???";
+
+        var velocity = particle.velocity || new SglVec3(0.0)
+        var acceleration = particle.acceleration || new SglVec3(0.0)
+
+        //integrate the accelerations
+        velocity = velocity.add(acceleration.mul(timestep_vec))
+
+        //update the position by the amount the time step will allow
+        particle.position = particle.position.add(velocity.mul(timestep_vec))
+    };
+
+    Solver.StepGravity = function(player) {
+        var grav_accel = calculate_grav_accelerations(player.position);
+
+        var velocity = player.velocity || new SglVec3(0.0)
+        var acceleration = player.acceleration || new SglVec3(0.0)
+
+        acceleration = acceleration.add(grav_accel);
+
+        //integrate the accelerations
+        velocity = velocity.add(acceleration.mul(timestep_vec))
+
+        //update the position by the amount the time step will allow
+        player.position = player.position.add(velocity.mul(timestep_vec))
+ 
+    };
+
+/*
     Solver.StepTime = function(particles, gravity, grav_bodies, anti_grav_bodies) {
-        var timestep_vec = new SglVec3(Solver.TimeStep)
 
         $.each(particles, function(particle_id, particle) {
             if(!particle.position || particle.position === undefined)
@@ -166,6 +197,7 @@ var GLIB = {};
             particle.position = particle.position.add(velocity.mul(timestep_vec))
         })
     }
+*/
 
     GLIB.Solver = Solver;
 })();
@@ -252,15 +284,25 @@ var GLIB = {};
 })();
 
 (function(){
-    GLIB.compileProgram = function(gl, resources, stem) {
-        p = new SglProgram(gl, [resources.shaders[stem + '.vert.glsl']],
-                               [resources.shaders[stem + '.frag.glsl']]);
+    function compileProgram(gl, shaders, stem) {
+        p = new SglProgram(gl, [shaders[stem + '.vert.glsl']],
+                               [shaders[stem + '.frag.glsl']]);
         if(!p.isValid) {
             console.log("Shader program " + stem + " failed to compile");
             console.log(p.log);
         }
         return p;
     }
+
+    GLIB.compilePrograms = function(gl, shaders) {
+        var programs = {};
+        $.each(shaders, function(shader_name, shader_text) {
+            var stem = shader_name.split('.', 1)[0];
+            if(!programs[stem])
+                programs[stem] = compileProgram(gl, shaders, stem);
+        });
+        return programs;
+    };
 })();
 
 (function(){
