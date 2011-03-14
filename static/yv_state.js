@@ -12,6 +12,7 @@
                   "ufo.vert.glsl", "ufo.frag.glsl",
                   "saturn.vert.glsl", "saturn.frag.glsl",
                   "earth.vert.glsl", "earth.frag.glsl",
+                  "explosion.vert.glsl", "explosion.frag.glsl",
                   "ring.vert.glsl", "ring.frag.glsl"],
         meshes: [],
     }
@@ -86,28 +87,32 @@
         age: 0
     })
 
+
     function Explosion(opts) {
         $.extend(this, opts || {});
 
-        //initialize explosion particles
-        var center = this.position;
+        var exp_const = YV.Constants.explosion
+        var dist_variation = exp_const.finalRadius * exp_const.radiusVariability
 
-        var verts = GLIB.MakeSphericalVerts(YV.Constants.explosion.outwardVelocity,
-                YV.Constants.explosion.vertexDensity, YV.Constants.explosion.vertexDensity);
-        var that = this;
-        verts.map(function(vert){
-            that.particles.push(new Particle({
-                position: center.clone(),
-                velocity: vert.clone()
-            }))
-        })
-    }
+        var dists = []
+        for(var i = 0; i < State.explosion.verts.length / 3; ++i) {
+            //rand -> (0, 2 * dist_variation)
+            var rand = Math.floor(Math.random() * (dist_variation * 2. + 1)) 
+
+            //rand -> (-dist_variation, dist_variation)
+            rand -= dist_variation
+
+            dists.push(exp_const.finalRadius + rand)
+        } 
+
+        this.distances = new Float32Array(dists)
+    } 
     $.extend(Explosion.prototype, {
         position: new SglVec3(0.0),
         lifetime: Particle.prototype.lifetime,
         age: 0.0,
-        particles: []
     })
+    
 
     //the unifying data structure for all the stuff in the game ... whoa
     var State = {
@@ -266,6 +271,10 @@
         $.each(State.particles.lasers, f);
     };
 
+    YV.OverExplosions = function(f) {
+        $.each(State.particles.explosions, f);
+    };
+
     YV.InitTextures = function(gl, textures) {
         var textureOptions = {
             generateMipmap: true,
@@ -326,6 +335,10 @@
                 YV.Constants.planetSphereDensity, YV.Constants.planetSphereDensity, true);
         var SGLMeshWithNormals = GLIB.MakeSGLMesh(gl, sphereMeshWithNormals); 
         State.ufo.mesh = SGLMeshWithNormals;
+
+        var verts = GLIB.MakeSphericalVerts(1., YV.Constants.explosion.vertexDensity, 
+                YV.Constants.explosion.vertexDensity);
+        State.explosion.verts = new Float32Array(verts);
     };
 
     YV.MoveCamera = function(orbitAngle, azimuth, orbitRadius) {
@@ -350,6 +363,10 @@
         return State.laser;
     };
 
+    YV.GetExplosionData = function() {
+        return State.explosion;
+    };
+
     YV.RemoveLasers = function(toremove) {
         var tokeep = [];
         YV.OverLasers(function(laser_id, laser) {
@@ -363,6 +380,16 @@
 
     YV.AddExplosion = function(pos) {
         State.particles.explosions.push(new Explosion({position: new SglVec3(pos)}));
+    };
+
+    YV.RemoveExplosions = function(toremove) {
+        var tokeep = [];
+        YV.OverExplosions(function(explosion_id, explosion) {
+            if($.inArray(explosion_id, toremove) < 0) {
+                tokeep.push(explosion);
+            }
+        });
+        State.particles.exlosions = tokeep;
     };
 
     YV.AddPlayer = function(playerid, color) {

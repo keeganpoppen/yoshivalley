@@ -35,7 +35,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
             YV.OverPlanets(function(planet_id, planet) {
                 if(checkForIntersection(player, planet)) {
                     player.lives--;
-                    //YV.AddExplosion(player.position);
+                    YV.AddExplosion(player.position);
                     YV.Respawn(player_id, player);        
                 }
             });
@@ -71,7 +71,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
                     //var shooter = model.players[lasers[laser_id].shooter_id];
                     if(player.invulnerable <= 0) {
                         player.lives--;
-                        //YV.AddExplosion(sunk.position);
+                        YV.AddExplosion(player.position);
                         YV.Respawn(player_id, player);
                     }
                     toremove.push(laser_id);
@@ -82,29 +82,21 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         YV.RemoveLasers(toremove);
     }
 
-    function updateExplosions(model, dt) {
-        var explosions = model.particles.explosions
-        var tokeep = [];
-        explosions.map(function(explosion) {
-            /* this should help... :)
-            GLIB.Solver.StepTime(explosion.particles)
-            explosion.particles.map(function(particle) {
-                particle.age += GLIB.Solver.TimeStep
-            })
-            explosion.age += GLIB.Solver.TimeStep;
-            */
-            explosion.age += dt 
-            if(explosion.age < explosion.lifetime) {
-                tokeep.push(explosion);
+    function updateExplosions(dt) {
+        var toremove = [];
+        YV.OverExplosions(function(explosion_id, explosion) {
+            explosion.age += dt;
+            if(explosion.age > explosion.lifetime) {
+                toremove.push(explosion_id);
             }
-        })
-        model.particles.explosions = tokeep;
+        });
+        YV.RemoveExplosions(toremove);
     }
 
     YV.Update = function(dt) {
         //immune from accumulator
         updatePlanets(dt)
-        //updateExplosions(model, dt)
+        updateExplosions(dt)
 
         for(accumulator += dt; accumulator > GLIB.Solver.TimeStep;
                                 accumulator -= GLIB.Solver.TimeStep) {

@@ -62,7 +62,9 @@
             },
 
             explosion: {
-                outwardVelocity: 5*ufoRadius,
+                finalRadius: 20 * ufoRadius,
+                radiusVariability: 0.2,
+                lifetime: 4,
                 vertexDensity: 20,
                 particleSize: 600,
             },
