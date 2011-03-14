@@ -107,9 +107,22 @@
         </style>
 	</head>
 	<body>
-        <div id="error_message_container"></div>
-        <div id="normal_container">
-
+        <div class="column">
+            <div id="control_center" style="width:200px;height:200px;vertical-align:middle;margin:auto;background-color:blue">
+                CONTROL CENTER
+            </div>
         </div>
+        <div class="column">
+            <h2>PLAYER ID: <span id="player_id">(none)</span></h2>
+            <h3>Random junk:</h3>
+            <div id="stuff"></div>
+            <h3>Device data:</h3>
+            <div id= "accel"></div>
+            <div id="gyro"></div>	
+            <div style="width:100px;height:100px;margin:auto;background-color:red" id="fire_button">
+                FIRE!!!
+            </div>
+        </div>
+        <div style="clear:both"></div>
 	</body>
 </html>
