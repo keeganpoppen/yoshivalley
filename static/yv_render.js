@@ -302,9 +302,13 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
      *  attributes: {name:loc, }
      * }
      */
+
+    var shader_map = {}
     function getShaderVarLocations(gl, shader, obj) {
         if(!shader || shader === undefined) throw "shader undefined... what are you trying to pull?"
         if(!obj || obj === undefined) throw "no object? you're an idiot"
+
+        if(shader in shader_map) return shader_map[shader]
 
         var ret = {}
 
@@ -327,6 +331,8 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
                 ret.attributes[attrib] = loc
             })
         }
+
+        shader_map[shader] = ret
 
         return ret
     }
