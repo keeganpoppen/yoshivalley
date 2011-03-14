@@ -387,6 +387,7 @@
     };
 
     YV.AddExplosion = function(pos) {
+        YV.Audio.PlayExplosion();
         State.particles.explosions.push(new Explosion({position: new SglVec3(pos)}));
     };
 
@@ -456,10 +457,12 @@
 
     YV.FireLaser = function(player_id) {
         var player = State.players[player_id];
-        if(player === undefined || YV.GamePhase != 'play') return false;
+        if(player === undefined || YV.GamePhase != 'play') return;
 
         //Check to see if we're allowed to shoot right now
         if((Date.now() - player.last_shot)/1000 > player.recharge_time) {
+            YV.Audio.PlayLaser();
+
             var MULT = YV.Constants.laser.velocityMultiplier;
             var x = -Math.sin(player.cannon_angle);
             var z = -Math.cos(player.cannon_angle);
@@ -476,10 +479,7 @@
                 velocity: laser_vel,
                 shooter_id: player_id
             }));
-            
-            return true;
         }
-        return false;
     };
     
     YV.Respawn = function(player_id, ufo) {

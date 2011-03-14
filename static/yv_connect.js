@@ -11,9 +11,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         } else if(message.type == 'laser:update') { 
             YV.UpdatePlayerCannonAngle(message.player_id, message.angle);
         } else if(message.type == 'laser:fire') {
-            if(YV.FireLaser(message.player_id)) {
-                document.getElementById('laser').play();
-            }
+            YV.FireLaser(message.player_id);
         } else if(message.type == 'latency_check') {
             sock.send(message) //send 'er right back
         }
