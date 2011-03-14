@@ -65,7 +65,10 @@ var YV = {};
             },
 
             explosion: {
-                outwardVelocity: 5*ufoRadius,
+                //outwardVelocity: 5*ufoRadius,
+                finalRadius: 20 * ufoRadius,
+                radiusVariability: .2, //radius varies by .2 * finalRadius
+                lifetime: 4,
                 vertexDensity: 20,
                 particleSize: 600,
             },
@@ -155,14 +158,17 @@ var YV = {};
                    "saturn.jpg", "laser.png", "fire.png", "ring.png", "metal.jpg",
                    "saturn-ring.jpg", "saturn-ring-alpha.gif", "neptune.jpg",
                    "earth-spectral.jpg", "earth-night.jpg"],
-        shaders: ["planet.frag.glsl", "planet.vert.glsl",
-                  "sun.vert.glsl", "sun.frag.glsl",
-                  "bg.vert.glsl", "bg.frag.glsl",
-                  "particle.vert.glsl", "particle.frag.glsl",
-                  "ufo.vert.glsl", "ufo.frag.glsl",
-                  "saturn.vert.glsl", "saturn.frag.glsl",
-                  "earth.vert.glsl", "earth.frag.glsl",
-                  "ring.vert.glsl", "ring.frag.glsl"],
+        shaders: [
+                    "planet.frag.glsl", "planet.vert.glsl",
+                    "sun.vert.glsl", "sun.frag.glsl",
+                    "bg.vert.glsl", "bg.frag.glsl",
+                    "particle.vert.glsl", "particle.frag.glsl",
+                    "ufo.vert.glsl", "ufo.frag.glsl",
+                    "saturn.vert.glsl", "saturn.frag.glsl",
+                    "earth.vert.glsl", "earth.frag.glsl",
+                    "ring.vert.glsl", "ring.frag.glsl",
+                    "explosion.vert.glsl", "explosion.frag.glsl"
+                  ],
         meshes: [],
     }
 
@@ -252,24 +258,27 @@ var YV = {};
     function Explosion(opts) {
         $.extend(this, opts || {});
 
-        //initialize explosion particles
-        var center = this.position;
+        var exp_const = YV.Constants.explosion
+        var dist_variation = exp_const.finalRadius * exp_const.radiusVariability
 
-        var verts = GLIB.MakeSphericalVerts(YV.Constants.explosion.outwardVelocity,
-                YV.Constants.explosion.vertexDensity, YV.Constants.explosion.vertexDensity);
-        var that = this;
-        verts.map(function(vert){
-            that.particles.push(new Particle({
-                position: center.clone(),
-                velocity: vert.clone()
-            }))
-        })
+        var dists = []
+        for(var i = 0; i < YV.GameModel.explosion.verts.length / 3; ++i) {
+            //rand -> (0, 2 * dist_variation)
+            var rand = Math.floor(Math.random() * (dist_variation * 2. + 1))
+
+            //rand -> (-dist_variation, dist_variation)
+            rand -= dist_variation
+
+            dists.push(exp_const.finalRadius + rand)
+        }
+
+        this.distances = new Float32Array(dists)
     }
     $.extend(Explosion.prototype, {
         position: new SglVec3(0.0),
         lifetime: Particle.prototype.lifetime,
         age: 0.0,
-        particles: []
+        //particles: []
     })
 
     
@@ -383,7 +392,8 @@ var YV = {};
         }, 
 
         explosion: {
-            texture: "fire.png"
+            texture: "fire.png",
+            program: "explosion"
         },
 
         particles: {

@@ -187,7 +187,8 @@ var GLIB = {};
                 var y = cosTheta;
                 var z = sinPhi * sinTheta;
 
-                verts.push(new SglVec3(radius * x,radius * y,radius * z))
+                //verts.push(new SglVec3(radius * x,radius * y,radius * z))
+                verts.push(x, y, z)
             }
         }
 

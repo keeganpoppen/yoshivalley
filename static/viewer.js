@@ -23,6 +23,7 @@ GLIB.FireWhenReady(YV.Resources, function(resources) {
             gl.programs.ring = GLIB.compileProgram(gl, resources, 'ring');
             gl.programs.saturn = GLIB.compileProgram(gl, resources, 'saturn');
             gl.programs.earth = GLIB.compileProgram(gl, resources, 'earth');
+            gl.programs.explosion = GLIB.compileProgram(gl, resources, 'explosion');
 
             //Create Meshes 
             var textureOptions = {
@@ -50,6 +51,11 @@ GLIB.FireWhenReady(YV.Resources, function(resources) {
                                             -1.0, 1.0, 0.0]),
                 indices: new Uint16Array([0,1,2,2,3,0])
             });
+
+            //set up explosion vertices
+            var verts = GLIB.MakeSphericalVerts(1., YV.Constants.explosion.vertexDensity,
+                                                    YV.Constants.explosion.vertexDensity)
+            GameModel.explosion.verts = new Float32Array(verts)
 
             GameModel.background.texture = new SglTexture2D(gl,
                     resources.textures[GameModel.background.texture], textureOptions);

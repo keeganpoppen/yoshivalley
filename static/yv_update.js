@@ -45,8 +45,6 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
             player.invulnerable -= GLIB.Solver.TimeStep;
         });
 
-        
-
         checkForPlanetaryIntersection(model.players, model, function(player_id, planet_id) {
             var player = model.players[player_id];
             player.lives--;
@@ -55,6 +53,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         });
     }
 
+    //a somewhat poorly-named function, it should be said
     function updateProjectiles(model) {
         //update lasers
         var lasers = model.particles.lasers
@@ -67,13 +66,12 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
                 toremove.push(laser_id);
             }
         });
-        
 
         checkForPlanetaryIntersection(lasers, model, function(laser_id, planet_id) {
             toremove.push(laser_id);
         });
 
-        //Check for intersections with ufo's, hits if you will
+        //Check for intersections with ufo's, hits if you will - grammar wtf? love, keegan
         checkForIntersection(lasers, model.players, function(laser_id, player_id) {
             if(player_id != lasers[laser_id].shooter_id) {
                 //var shooter = model.players[lasers[laser_id].shooter_id];
@@ -87,6 +85,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
             }
         });
 
+        //remove lasers that are now irrelevant for whatever reason
         var tokeep = [];
         $.each(lasers, function(laser_id, laser) {
             if($.inArray(laser_id, toremove) < 0) {
@@ -95,28 +94,31 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         });
 
         model.particles.lasers = tokeep;
+    }
 
-        //update explosions
+    function updateExplosions(model, dt) {
         var explosions = model.particles.explosions
         var tokeep = [];
         explosions.map(function(explosion) {
+            /* this should help... :)
             GLIB.Solver.StepTime(explosion.particles)
             explosion.particles.map(function(particle) {
                 particle.age += GLIB.Solver.TimeStep
             })
             explosion.age += GLIB.Solver.TimeStep;
+            */
+            explosion.age += dt 
             if(explosion.age < explosion.lifetime) {
                 tokeep.push(explosion);
             }
         })
         model.particles.explosions = tokeep;
-
-        //TODO:update thrusters
     }
 
     YV.Update = function(dt, model) {
         //immune from accumulator
         updatePlanets(model, dt)
+        updateExplosions(model, dt)
 
         for(accumulator += dt; accumulator > GLIB.Solver.TimeStep;
                                 accumulator -= GLIB.Solver.TimeStep) {
