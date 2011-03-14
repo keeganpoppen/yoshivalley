@@ -1,0 +1,128 @@
+<html>
+	<head>
+		<title>Yoshivalley :: Player Page</title>
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name = "viewport" content = "width=device-width,minimum-scale=1.0,maximum-scale=1.0,height=device-height,initial-scale=1.0,user-scalable=0" />
+		<script src="/jquery-1.5.1.min.js"></script>
+		<script src="/socket.io.js"></script>
+        <script src="/player_old.js"></script>
+		<script>
+            $(function(){
+                var orient = window.orientation
+                if(orient == 0 || orient == 180) {
+                    $("body").removeClass()
+                    $("body").addClass("portrait")
+                } else {
+                    $("body").removeClass()
+                    $("body").addClass("landscape")
+                }
+                setTimeout(function(){window.scrollTo(0,1);},100)
+
+                var control_center = document.getElementById("control_center")
+                control_center.addEventListener("touchstart", send_touch_angle, false);
+                control_center.addEventListener("touchmove", send_touch_angle, false);
+
+                document.body.addEventListener("touchstart", function(e){e.preventDefault();},false)
+                document.body.addEventListener("touchmove", function(e){e.preventDefault();},false)
+
+                document.getElementById("fire_button").addEventListener("touchstart", function(){
+                    socket.send({'type': 'laser:fire', 'angle': prev_angle, 'player_id': player_id})
+                }, false)
+
+
+                /* For testing purposes, add call backs for mouse and keyboard events. That way we can test
+                   on a laptop too */
+
+                var xrot = 0.0;
+                var yrot = 0.0;
+                var zrot = 0.0;
+                function sendVelocityUpdate(x, y, z) {
+                    xrot += x;
+                    yrot += y;
+                    zrot += z;
+                    var data = {}
+                    data.xrot = xrot; data.yrot = yrot; data.zrot = zrot;
+                    socket.send({'type': 'gyro:update', 'data': data, 'player_id': player_id})
+                }
+
+                window.addEventListener("keypress", function(e) {
+                    switch(e.keyCode) {
+                    case 32:
+                        socket.send({'type': 'laser:fire', 'angle': prev_angle, 'player_id': player_id});
+                        break;
+                    //WASD keys
+                    case 119: //Up
+                        sendVelocityUpdate(0, 10, 0);    
+                        break;
+                    case 115: //Down
+                        sendVelocityUpdate(0, -10, 0);    
+                        break;
+                    case 100: //Right
+                        sendVelocityUpdate(10, 0, 0);    
+                        break;
+                    case 97: //Left
+                        sendVelocityUpdate(-10, 0, 0);    
+                        break;
+                    }
+                }, false);
+
+            })
+		</script>
+        <style>
+            * {
+                margin: 0px;
+                padding: 0px;
+            }
+
+            .column {
+                float: left;
+                margin:0px;
+                padding:0px;
+                overflow:hidden;
+                width: 10px;
+                height: 10px;
+            }
+
+            body.portrait {
+                width: 320px;
+                height: 416px;
+            }
+
+            body.landscape {
+                height: 276px;
+                width: 480px;
+            }
+
+            body.portrait .column {
+                height:208px;
+                width:320px;
+                background-color: green;
+            }
+
+            body.landscape .column {
+                height: 276px;
+                width: 240px;
+                background-color: yellow;
+            }
+        </style>
+	</head>
+	<body>
+        <div class="column">
+            <div id="control_center" style="width:200px;height:200px;vertical-align:middle;margin:auto;background-color:blue">
+                CONTROL CENTER
+            </div>
+        </div>
+        <div class="column">
+            <h2>PLAYER ID: <span id="player_id">(none)</span></h2>
+            <h3>Random junk:</h3>
+            <div id="stuff"></div>
+            <h3>Device data:</h3>
+            <div id= "accel"></div>
+            <div id="gyro"></div>	
+            <div style="width:100px;height:100px;margin:auto;background-color:red" id="fire_button">
+                FIRE!!!
+            </div>
+        </div>
+        <div style="clear:both"></div>
+	</body>
+</html>

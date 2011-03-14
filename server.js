@@ -101,7 +101,12 @@ var Colors = [
 var nextColor = 0;
 
 socket.on('connection', function(client) {
-    //if(client in clients) util.log('WWTF!!!!!')
+    client.on('message', function(message) {
+        if(message.type == 'latency_check') {
+            console.log('latency for client ' + client.sessionId + ': ' + (Date.now() - message.sent) + 'ms')
+        }
+        ++num_packets
+    })
     
     //the first message that comes from the client needs to determine
     //the 'client_type'-- either 'player' or 'viewer'
@@ -121,11 +126,6 @@ socket.on('connection', function(client) {
             broadcast_to_viewers({'type': 'player:add', 'color': client.color, 'player_id': client.sessionId})
 
             client.on('message', function(message) {
-                if(message.type == 'latency_check') {
-                    console.log('latency for player ' + client.sessionId + ': ' + (Date.now() - message.sent) + 'ms')
-                    return
-                }
-
                 //util.log('last message was ' + (Date.now() - last_message) + ' ms ago')
                 last_message = Date.now()
 
@@ -134,8 +134,6 @@ socket.on('connection', function(client) {
 
                 message.player_id = client.sessionId
                 broadcast_to_viewers(message)
-
-                ++num_packets
             })
 
             client.on('disconnect', function(message) {
@@ -154,13 +152,7 @@ socket.on('connection', function(client) {
             */
 
             client.on('message', function(message) {
-                if(message.type == 'latency_check') {
-                    console.log('latency for viewer' + client.sessionId + ': ' + (Date.now() - message.sent) + 'ms')
-                    return
-                }
-
                 //TODO: don't actually know if anything should be happening here right now
-                ++num_packets
             })
 
             client.on('disconnect', function() {
