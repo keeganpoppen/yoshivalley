@@ -42,16 +42,33 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         var player;
         var animTime = 5.0;
         var endCallback;
+
+        var angle = 0.0;
+        var azimuth = 0.0;
+        var radius = 5*YV.Constants.ufo.radius;
+        var fireworkfrequency = 0.7;
         
         victory = {
             Reset : function(winner, atEnd) {
                 player = winner;
                 endCallback = atEnd;
                 YV.GetCamera().lookat = new SglVec3(winner.position);
+                YV.SetCameraTo(angle, azimuth, radius);
             },
 
             TimeStep : function(dt) {
                 animTime -= dt;
+
+                if(animTime % fireworkfrequency < 1.5*dt) {
+                    //Set off firework
+                    var pos = new SglVec3(player.position);
+                    pos.y += 4*YV.Constants.ufo.radius;
+                    pos.y += 3*Math.random() * YV.Constants.ufo.radius;
+                    pos.z += 3*Math.random() * YV.Constants.ufo.radius;
+                    pos.x += 3*Math.random() * YV.Constants.ufo.radius;
+                    YV.AddExplosion(pos);
+                }
+
                 if(animTime < 0.0) {
                     endCallback();
                 }

@@ -87,7 +87,7 @@
                 }, false);
 
                 function orientation_check(){
-                    if(window.orientation % 180 != 0) {
+                    if(window.orientation % 180 != 0 && false) {
                         show_error("you should lock your phone into portrait for best performance!")
                     } else {
                         $("#error_message_container").hide()
@@ -95,7 +95,7 @@
                     }
                 }
 
-                if(!window.navigator.standalone) {
+                if(!window.navigator.standalone && false) {
                     show_error("To play, pin this page to your home screen. Trust us-- it's better this way.")
                 } else {
                     orientation_check()

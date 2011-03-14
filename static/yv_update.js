@@ -123,6 +123,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
             break;
         case 'victory':
             updateExplosions(dt)
+            YV.Victory.TimeStep(dt);
             break;
         }
     }
