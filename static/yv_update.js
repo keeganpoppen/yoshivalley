@@ -80,7 +80,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
                 var sunk = model.players[player_id];
                 if(sunk.invulnerable <= 0) {
                     sunk.lives--;
-                    YV.AddExplosion(sunk.position);
+                    //YV.AddExplosion(sunk.position);
                     YV.Respawn(player_id, sunk);
                 }
                 toremove.push(laser_id);

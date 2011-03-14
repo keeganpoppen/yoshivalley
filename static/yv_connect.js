@@ -63,6 +63,9 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
                     velocity: laser_vel,
                     shooter_id: message.player_id
                 }))
+
+                //$('#laser').play();
+                document.getElementById('laser').play();
             }
         } else if(message.type == 'player:add') {
             YV.AddPlayer(message.player_id, message.color); 
