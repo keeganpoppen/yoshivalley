@@ -79,6 +79,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
                     YV.Constants.ufo.blinkPeriod < YV.Constants.ufo.blinkPeriod
                     * YV.Constants.ufo.blinkOffPercent)
                 return;
+
             var pos = player.position;
 
             gl.xform.model.loadIdentity();
@@ -127,7 +128,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
                            'ringRadius', 'numRingParticles', 'cannonAngle', 'ringTex',
                            'color'],
                 attributes: ['index']
-            })
+            }, 'ring')
 
             var NUM_RING_PARTICLES = 10. //TODO: MOVE
 
@@ -161,6 +162,8 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
             gl.vertexAttribPointer(loc_obj.attributes.index, 1, gl.FLOAT, false, 0, 0)
 
             gl.drawArrays(gl.POINTS, 0, indices.length)
+
+            gl.xform.model.pop()
 
             disableParticleRendering(gl)
 
@@ -223,44 +226,64 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
     }
 
 /*
-    function renderExplosions(gl, model, data) {
+    function renderExplosions(gl, model) {
+        //short circuit on no explosions
+        if(model.particles.explosions.length == 0) return
+
+        gl.xform.model.push()
+
+        enableParticleRendering(gl)
+
+        var prog = gl.programs.explosion.handle
+        gl.programs.explosion.bind()
+
+        var loc_obj = getShaderVarLocations(gl, prog, {
+            uniforms: ['ModelViewProjectionMatrix', 'particleSize', 'particleAge', 'lifetime', 'origin'],
+            attributes: ['particleDirection', 'maxDist']
+        }, 'explosion')
+
+        gl.uniformMatrix4fv(loc_obj.uniforms.ModelViewProjectionMatrix, false,
+                                    new Float32Array(gl.xform.viewProjectionMatrix))
+        gl.uniform1f(loc_obj.uniforms.particleSize, YV.Constants.explosion.particleSize)
+        gl.uniform1f(loc_obj.uniforms.lifetime, YV.Constants.explosion.lifetime)
+
         //set explosion / fire texture
         gl.activeTexture(gl.TEXTURE0)
         model.explosion.texture.bind()
-        gl.uniform1i(data.tex_loc, 0)
+        gl.uniform1i(loc_obj.uniforms.explosionTex, 0)
 
-        //fire ages, fo' sho'
-        gl.uniform1i(data.does_age_loc, 1);
-        gl.uniform1f(data.particle_size_loc, YV.Constants.explosion.particleSize);
-
-        var vertices = []
-        var age_fracs = []
+        //set the vertices, as they are constant for all explosions
+        if(model.explosion.vert_buffer === undefined) {
+            model.explosion.vert_buffer = gl.createBuffer()
+            gl.bindBuffer(gl.ARRAY_BUFFER, model.explosion.vert_buffer)
+            gl.bufferData(gl.ARRAY_BUFFER, model.explosion.verts, gl.STATIC_DRAW)
+        } else {
+            gl.bindBuffer(gl.ARRAY_BUFFER, model.explosion.vert_buffer)
+        }
+        gl.vertexAttribPointer(loc_obj.uniforms.particleDirection, 3, gl.FLOAT, false, 0, 0)
 
         model.particles.explosions.map(function(explosion) {
-            explosion.particles.map(function(particle) {
-                var pos = particle.position
-                vertices.push(pos.x, pos.y, pos.z)
-                age_fracs.push(particle.age/particle.lifetime)
-            })
+            //set particleAge
+            gl.uniform1f(loc_obj.uniforms.particleAge, explosion.age)
+
+            //set the center / origin of the explosion
+            var origin = explosion.position
+            gl.uniform3f(loc_obj.uniforms.origin, origin.x, origin.y, origin.z)
+
+            //set the maxDist attribute
+            if(model.explosion.dist_buffer === undefined) model.explosion.dist_buffer = gl.createBuffer()
+            var dist_buffer = model.explosion.dist_buffer
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, dist_buffer)
+            gl.bufferData(gl.ARRAY_BUFFER, explosion.distances, gl.STATIC_DRAW)
+            gl.vertexAttribPointer(loc_obj.attributes.maxDist, 1, gl.FLOAT, false, 0, 0)
+
+            gl.drawArrays(gl.POINTS, 0, explosion.distances.length)
         })
 
-        if(model.explosion.vert_buffer === undefined) model.explosion.vert_buffer = gl.createBuffer()
+        gl.xform.model.pop()
 
-        var vert_buffer = model.explosion.vert_buffer
-        gl.bindBuffer(gl.ARRAY_BUFFER, vert_buffer)
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW)
-        gl.vertexAttribPointer(data.vertex_loc, 3, gl.FLOAT, false, 0, 0)
-
-        if(model.explosion.age_frac_buffer === undefined) model.explosion.age_frac_buffer = gl.createBuffer()
-
-        var age_frac_buffer = model.explosion.age_frac_buffer
-        gl.bindBuffer(gl.ARRAY_BUFFER, age_frac_buffer)
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(age_fracs), gl.STATIC_DRAW)
-        gl.vertexAttribPointer(data.age_frac_loc, 1, gl.FLOAT, false, 0, 0)
-
-        gl.drawArrays(gl.POINTS, 0, vertices.length/3)
-
-        model.explosion.texture.unbind()
+        disableParticleRendering(gl)
     }
 */
 
@@ -275,6 +298,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
     }
 
     function disableParticleRendering(gl) {
+        gl.disable(0x8642)
         gl.disable(gl.BLEND)
         gl.enable(gl.DEPTH_TEST)
     }
@@ -290,11 +314,12 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
      */
 
     var shader_map = {}
-    function getShaderVarLocations(gl, shader, obj) {
+    function getShaderVarLocations(gl, shader, obj, hash_name) {
+        if(!hash_name || hash_name === undefined) throw "sorry for the hack-- give a hash name"
         if(!shader || shader === undefined) throw "shader undefined... what are you trying to pull?"
         if(!obj || obj === undefined) throw "no object? you're an idiot"
 
-        if(shader in shader_map) return shader_map[shader]
+        if(hash_name in shader_map) return shader_map[hash_name]
 
         var ret = {}
 
@@ -318,7 +343,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
             })
         }
 
-        shader_map[shader] = ret
+        shader_map[hash_name] = ret
 
         return ret
     }
@@ -368,8 +393,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         renderPlanets(gl);
         renderUFOs(gl, YV.GetUFOData());
 
-        renderParticles(gl, [renderLasers, renderExplosions]);
-
+        renderParticles(gl);
         gl.disable(gl.DEPTH_TEST);
     }
 })();

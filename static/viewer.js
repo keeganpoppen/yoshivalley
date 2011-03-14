@@ -19,7 +19,7 @@ GLIB.FireWhenReady(YV.Resources, function(resources) {
 
             YV.InitTextures(gl, resources.textures);
             YV.InitMeshes(gl);
-            
+
             gl.ui = this.ui;
 
             //We want the canvas to resize with the window

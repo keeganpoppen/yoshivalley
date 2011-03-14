@@ -25,10 +25,8 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
     }
 
     function updatePlayerPositions() {
-        //GLIB.Solver.StepTime(model.players, true, particle_hack, model.players)
         YV.OverPlayers(function(player_id, player) {
             GLIB.Solver.StepGravity(player);
-            //GLIB.Solver.StepParticle(player);
             player.invulnerable -= GLIB.Solver.TimeStep;
         });
 
@@ -37,7 +35,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
             YV.OverPlanets(function(planet_id, planet) {
                 if(checkForIntersection(player, planet)) {
                     player.lives--;
-                    YV.AddExplosion(player.position);
+                    //YV.AddExplosion(player.position);
                     YV.Respawn(player_id, player);        
                 }
             });
@@ -82,28 +80,31 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         });
 
         YV.RemoveLasers(toremove);
+    }
 
-/*
-        //update explosions
+    function updateExplosions(model, dt) {
         var explosions = model.particles.explosions
         var tokeep = [];
         explosions.map(function(explosion) {
+            /* this should help... :)
             GLIB.Solver.StepTime(explosion.particles)
             explosion.particles.map(function(particle) {
                 particle.age += GLIB.Solver.TimeStep
             })
             explosion.age += GLIB.Solver.TimeStep;
+            */
+            explosion.age += dt 
             if(explosion.age < explosion.lifetime) {
                 tokeep.push(explosion);
             }
         })
         model.particles.explosions = tokeep;
-        */
     }
 
     YV.Update = function(dt) {
         //immune from accumulator
         updatePlanets(dt)
+        //updateExplosions(model, dt)
 
         for(accumulator += dt; accumulator > GLIB.Solver.TimeStep;
                                 accumulator -= GLIB.Solver.TimeStep) {
