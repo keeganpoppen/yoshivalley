@@ -1,7 +1,7 @@
 if(!YV || YV === undefined) throw "need to load yv.js first!";
 
 (function(){
-    function setCamera(gl, camera, sun) {
+    function setCamera(gl, camera) {
         var w = gl.canvas.width;
         var h = gl.canvas.height;
 
@@ -13,9 +13,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         gl.xform.view.lookAt(camera.position.x,
                              camera.position.y,
                              camera.position.z,
-                             sun.position.x,
-                             sun.position.y,
-                             sun.position.z,
+                             0.0,0.0,0.0,
                              0.0, 1.0, 0.0);
     }
 
@@ -30,20 +28,8 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         gl.enable(gl.DEPTH_TEST);
     }
 
-    function renderSun(gl, sun) {
+    function renderPlanet(gl, planet) {
         gl.xform.model.loadIdentity();
-        gl.xform.model.translate(sun.position.x, sun.position.y, sun.position.z);
-        gl.xform.model.rotate(sglDegToRad(sun.rotation), 0.0, 1.0, 0.0);
-        gl.xform.model.scale(sun.radius, sun.radius, sun.radius);
-        sglRenderMeshGLPrimitives(sun.mesh, "index", gl.programs.sun, null,
-        /*Uniforms*/ {
-                        ModelViewProjectionMatrix : gl.xform.modelViewProjectionMatrix,
-                     },
-        /*Samplers*/ {surfaceTexture : sun.texture});
-    }
-
-    function renderPlanet(gl, sun, planet) {
-                gl.xform.model.loadIdentity();
         var planPos = planet.position;
         gl.xform.model.translate(planPos.x, planPos.y, planPos.z);
         gl.xform.model.rotate(sglDegToRad(planet.tilt), 1.0, 0.0, 0.0);
@@ -54,7 +40,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
             ModelMatrix : gl.xform.modelMatrix,
             ModelViewProjectionMatrix : gl.xform.modelViewProjectionMatrix,
             planetCenter : [planPos.x, planPos.y, planPos.z],
-            sunCenter : [sun.position.x, sun.position.y, sun.position.z],
+            sunCenter : [0.0, 0.0, 0.0],
         };
 
         var textures = {
@@ -67,7 +53,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
             gl.enable(gl.BLEND)
             gl.blendFunc(gl.SRC_ALPHA, gl.ONE)
         } else if(planet.textureNight) {
-            var cameraVec = YV.GameModel.camera.position;
+            var cameraVec = YV.GetCamera().position;
             var cameraPos = [cameraVec.x, cameraVec.y, cameraVec.z];            
             $.extend(textures, {nightTexture: planet.textureNight,
                                 spectralTexture: planet.textureSpectral});
@@ -82,20 +68,18 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
     }
 
     function renderPlanets(gl, model) {
-        renderSun(gl, model.sun)
-        for(var planet in model.planets) {
-            renderPlanet(gl, model.sun, model.planets[planet]);
-        }
+        YV.OverPlanets(function(planet_id, planet) {
+            renderPlanet(gl, planet);
+        });
     }
 
-    function renderUFOs(gl, model) {
-        $.each(model.players, function(player_id, player) {
+    function renderUFOs(gl, ufo) {
+        YV.OverPlayers(function(player_id, player) {
             if(player.invulnerable > 0.0 && player.invulnerable %
                     YV.Constants.ufo.blinkPeriod < YV.Constants.ufo.blinkPeriod
                     * YV.Constants.ufo.blinkOffPercent)
                 return;
             var pos = player.position;
-            var sunpos = model.sun.position;
 
             gl.xform.model.loadIdentity();
             gl.xform.model.translate(pos.x, pos.y, pos.z);
@@ -111,21 +95,21 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
             gl.xform.model.scale(player.radius, YV.Constants.ufo.diskSquishFrac*
                     player.radius, player.radius);
 
-            var cameraVec = YV.GameModel.camera.position;
+            var cameraVec = YV.GetCamera().position;
             var cameraPos = [cameraVec.x, cameraVec.y, cameraVec.z];            
-            sglRenderMeshGLPrimitives(model.ufo.mesh, "index", gl.programs.ufo, null,
+            sglRenderMeshGLPrimitives(ufo.mesh, "index", gl.programs.ufo, null,
                 {
                     ViewProjectionMatrix : gl.xform.viewProjectionMatrix,
                     ModelMatrix : gl.xform.modelMatrix,
                     NormalMatrix : gl.xform.worldSpaceNormalMatrix,
-                    sunCenter : [sunpos.x, sunpos.y, sunpos.z],
+                    sunCenter : [0.0, 0.0, 0.0],
                     cameraPosition: cameraPos,
                     color : player.color,
                     halfSphere : false,
                     shininess: YV.Constants.ufo.shininess,
                 },
                 {
-                    metalTexture: YV.GameModel.ufo.metal,
+                    metalTexture: ufo.metal,
                 }
             );
             gl.xform.model.pop();
@@ -155,7 +139,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
             gl.uniform3f(loc_obj.uniforms.color, player.color[0], player.color[1], player.color[2]);
 
             gl.activeTexture(gl.TEXTURE0)
-            model.ufo.ring_texture.bind()
+            ufo.ring_texture.bind()
             gl.uniform1i(loc_obj.uniforms.ringTex, 0)
 
             var pos = player.position
@@ -169,8 +153,8 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
             var indices = []
             for(var i = 0; i < NUM_RING_PARTICLES; ++i) indices.push(i)
                         
-            if(model.ufo.index_buffer === undefined) model.ufo.index_buffer = gl.createBuffer()
-            var index_buffer = model.ufo.index_buffer
+            if(ufo.index_buffer === undefined) ufo.index_buffer = gl.createBuffer()
+            var index_buffer = ufo.index_buffer
 
             gl.bindBuffer(gl.ARRAY_BUFFER, index_buffer)
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(indices), gl.STATIC_DRAW)
@@ -185,13 +169,13 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
             gl.xform.model.scale(YV.Constants.ufo.domeRadFrac * player.radius,
                     YV.Constants.ufo.domeRadFrac * player.radius,
                     YV.Constants.ufo.domeRadFrac * player.radius);
-            sglRenderMeshGLPrimitives(model.ufo.mesh, "index", gl.programs.ufo, null,
+            sglRenderMeshGLPrimitives(ufo.mesh, "index", gl.programs.ufo, null,
                 {
                     ViewProjectionMatrix : gl.xform.viewProjectionMatrix,
                     cameraPosition: cameraPos,
                     ModelMatrix : gl.xform.modelMatrix,
                     NormalMatrix : gl.xform.worldSpaceNormalMatrix,
-                    sunCenter : [sunpos.x, sunpos.y, sunpos.z],
+                    sunCenter : [0.0, 0.0, 0.0],
                     color : [0.8, 0.8, 0.8],
                     halfSphere : true,
                     shininess: YV.Constants.ufo.shininess,
@@ -201,13 +185,13 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         });
     }
 
-    function renderLasers(gl, model, data) {
+    function renderLasers(gl, laser, data) {
         //only ever create one laser buffer
-        if(model.laser.buffer === undefined) model.laser.buffer = gl.createBuffer()
+        if(laser.buffer === undefined) laser.buffer = gl.createBuffer()
 
         //set laser texture
         gl.activeTexture(gl.TEXTURE0)
-        model.laser.texture.bind()
+        laser.texture.bind()
         gl.uniform1i(data.tex_loc, 0)
 
         //lasers don't age, of course
@@ -217,27 +201,28 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         var vertices = []
 
         //render all the lasers
-        model.particles.lasers.map(function(laser) {
-            var len_vec = laser.velocity.normalized.mul(new SglVec3(model.laser.length))
-            var start_pos = laser.position.add(len_vec.mul(new SglVec3(0.5)).neg)
-            var iter_vec = len_vec.mul(new SglVec3(1./model.laser.numParticles))
+        YV.OverLasers(function(laser_id, laserObj) {
+            var len_vec = laserObj.velocity.normalized.mul(new SglVec3(laser.length))
+            var start_pos = laserObj.position.add(len_vec.mul(new SglVec3(0.5)).neg)
+            var iter_vec = len_vec.mul(new SglVec3(1./laser.numParticles))
 
-            for(var i = 0; i < model.laser.numParticles; ++i) {
+            for(var i = 0; i < laser.numParticles; ++i) {
                 var pos = start_pos.add(iter_vec.mul(new SglVec3(i)))
                 vertices.push(pos.x, pos.y, pos.z)
             }
-        })
+        });
 
-        var vert_buffer = model.laser.buffer
+        var vert_buffer = laser.buffer
         gl.bindBuffer(gl.ARRAY_BUFFER, vert_buffer)
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW)
         gl.vertexAttribPointer(data.vertex_loc, 3, gl.FLOAT, false, 0, 0)
         
         gl.drawArrays(gl.POINTS, 0, vertices.length/3)
 
-        model.laser.texture.unbind()
+        laser.texture.unbind()
     }
 
+/*
     function renderExplosions(gl, model, data) {
         //set explosion / fire texture
         gl.activeTexture(gl.TEXTURE0)
@@ -277,6 +262,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
         model.explosion.texture.unbind()
     }
+*/
 
     function enableParticleRendering(gl){
         gl.disable(gl.DEPTH_TEST)
@@ -337,7 +323,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         return ret
     }
 
-    function renderParticles(gl, model, particle_fns) {
+    function renderParticles(gl) {
         enableParticleRendering(gl)
 
         var prog = gl.programs.particle.handle
@@ -365,30 +351,24 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
         fn_data.does_age_loc = gl.getUniformLocation(prog, "does_age") 
 
-        if(particle_fns instanceof Array) {
-            particle_fns.map(function(fn) {
-                fn(gl, model, fn_data)
-            })
-        } else if(typeof(particle_fns) == "function") {
-            particle_fns(gl, model, fn_data)
-        }
+        renderLasers(gl, YV.GetLaserData(), fn_data);
+        //renderExplosions(gl, , fn_data);
 
         gl.programs.particle.unbind()
-
         disableParticleRendering(gl)
     }
 
-    YV.Render = function(gl, model) {
+    YV.Render = function(gl) {
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
         gl.enable(gl.DEPTH_TEST);
 
-        setCamera(gl, model.camera, model.sun);
-        renderBackground(gl, model.background);
-        renderPlanets(gl, model);
-        renderUFOs(gl, model);
+        setCamera(gl, YV.GetCamera());
+        renderBackground(gl, YV.GetBackground());
+        renderPlanets(gl);
+        renderUFOs(gl, YV.GetUFOData());
 
-        renderParticles(gl, model, [renderLasers, renderExplosions]);
+        renderParticles(gl, [renderLasers, renderExplosions]);
 
         gl.disable(gl.DEPTH_TEST);
     }
