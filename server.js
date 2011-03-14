@@ -1,6 +1,7 @@
 var connect = require('connect')
 var util = require('util')
 var io = require('socket.io')
+var MessageTimer = require('./messagetimer')
 
 var router = connect.router(function(app) {
 	app.get('/', function(req, res, next) {
@@ -26,14 +27,14 @@ var server = connect(
 	//i.e. static/penis.cock -> www.website.com/penis.cock
 	connect.static(__dirname + '/static'),
 
-  //kill all forms of caching. muahahaha.
-  function(req, res) {
-    res.setHeader('Cache-Control', 'no-cache, must-revalidate')
-    res.setHeader('Expires', 'Sat, 26 Jul 1997 05:00:00 GMT')
-    res.setHeader('Pragma', 'no-cache')
-    res.setHeader('Last-Modified', 'Sat, 26 Jul 2025 05:00:00 GMT')
-    res.end()
-  }
+    //kill all forms of caching. muahahaha.
+    function(req, res) {
+        res.setHeader('Cache-Control', 'no-cache, must-revalidate')
+        res.setHeader('Expires', 'Sat, 26 Jul 1997 05:00:00 GMT')
+        res.setHeader('Pragma', 'no-cache')
+        res.setHeader('Last-Modified', 'Sat, 26 Jul 2025 05:00:00 GMT')
+        res.end()
+    }
 )
 
 server.listen(6969) //listen on everyone's favorite port ;)
@@ -53,10 +54,17 @@ var clients = {};
 var players = {};
 var viewers = {};
 
-function broadcast_to_viewers(msg) {
+var viewer_timer = MessageTimer.create(50, 100, MessageTimer.ServerQueueCallback, function(queue){
+    if(Object.keys(queue).length == 0) return
+
     for(var id in viewers) {
-        viewers[id].send(msg)
+        util.log('sending object: ' + util.inspect(queue))
+        viewers[id].send(queue)
     }
+})
+
+function broadcast_to_viewers(msg) {
+    viewer_timer.AddMessage(msg, (msg.type == 'laser:fire'))
 }
 
 var socket = io.listen(server)

@@ -6,6 +6,7 @@
 		<script src="/jquery-1.5.1.min.js"></script>
 		<script src="/socket.io.js"></script>
         <script src="/player.js"></script>
+        <script src="/player_controls.js"></script>
 		<script>
 
             function show_error(message) {
@@ -20,71 +21,8 @@
             }
 
             $(function(){
-                var orient = window.orientation
-                if(orient == 0 || orient == 180) {
-                    $("body").removeClass()
-                    $("body").addClass("portrait")
-                } else {
-                    $("body").removeClass()
-                    $("body").addClass("landscape")
-                }
-                setTimeout(function(){window.scrollTo(0,1);},100)
-
-                var control_center = document.getElementById("control_center")
-                control_center.addEventListener("touchstart", function(){
-                    CANNON_ACTIVE = true
-                }, false);
-                control_center.addEventListener("touchmove", send_touch_angle, false);
-                control_center.addEventListener("touchend", function(){
-                    CANNON_ACTIVE = false 
-                }, false);
-                control_center.addEventListener("touchcancel", function(){
-                    CANNON_ACTIVE = false 
-                }, false);
-
-                document.body.addEventListener("touchstart", send_touch_angle, false)
-                document.body.addEventListener("touchmove", send_touch_angle, false)
-
-                document.getElementById("fire_button").addEventListener("touchstart", function(){
-                    socket.send({'type': 'laser:fire', 'angle': prev_angle, 'player_id': player_id})
-                }, false)
-
-
-                /* For testing purposes, add call backs for mouse and keyboard events. That way we can test
-                   on a laptop too */
-
-                var xrot = 0.0;
-                var yrot = 0.0;
-                var zrot = 0.0;
-                function sendVelocityUpdate(x, y, z) {
-                    xrot += x;
-                    yrot += y;
-                    zrot += z;
-                    var data = {}
-                    data.xrot = xrot; data.yrot = yrot; data.zrot = zrot;
-                    socket.send({'type': 'gyro:update', 'data': data, 'player_id': player_id})
-                }
-
-                window.addEventListener("keypress", function(e) {
-                    switch(e.keyCode) {
-                    case 32:
-                        socket.send({'type': 'laser:fire', 'angle': prev_angle, 'player_id': player_id});
-                        break;
-                    //WASD keys
-                    case 119: //Up
-                        sendVelocityUpdate(0, 10, 0);    
-                        break;
-                    case 115: //Down
-                        sendVelocityUpdate(0, -10, 0);    
-                        break;
-                    case 100: //Right
-                        sendVelocityUpdate(10, 0, 0);    
-                        break;
-                    case 97: //Left
-                        sendVelocityUpdate(-10, 0, 0);    
-                        break;
-                    }
-                }, false);
+                bind_cannon_handlers()
+                bind_keyboard_controls()
 
                 function orientation_check(){
                     if(window.orientation % 180 != 0 && false) {
