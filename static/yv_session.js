@@ -7,7 +7,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
     //Called when a user initiates the current game
     YV.Begin = function() {
         YV.GamePhase = 'intro';
-        $('#lobby').css('visibility', 'hidden');
+        $('#lobby').css('display', 'none');
         YV.Intro.Reset(function() {
             YV.GamePhase = 'play';
         });
@@ -24,7 +24,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
                            YV.Constants.camera.azimuth,
                            YV.Constants.camera.orbitRadius);    
             YV.GetCamera().lookat = new SglVec3(0.0,0.0,0.0);
-            $('#lobby').css('visibility', 'visible');
+            $('#lobby').css('display', 'block');
         });
     }
 })();
