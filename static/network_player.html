@@ -3,11 +3,58 @@
         <title>This is a test... of your tubes. And your mettle.</title>
 		<script src="/jquery-1.5.1.min.js"></script>
 		<script src="/socket.io.js"></script>
+        <script src="/player.js"></script>
         <script>
-            //TODO:
-                //socket.io
-                //listeners
-                //fire button
-                //gyro
+            var RATE = 100.
+            var interval = 3000. / RATE
 
-                //socket.send({type: 'gyro:update'
+            var last_lat_check = Date.now()
+
+            socket.on('message', function(msg) {
+                if(msg.type == 'latency_check') {
+                    var now = Date.now()
+                    var latency = now - last_lat_check
+                    $("#latency").html(latency)
+                    last_lat_check = now
+                }
+            })
+
+            SHOULD_MURDER = true
+            socket.on('disconnect', function(){
+                SHOULD_MURDER = false
+                $("#murder").html("the murder has ended-- socket disconnected")
+            })
+
+            function murder_the_server(){
+                if(!SHOULD_MURDER) return
+
+                socket.send({type: 'gyro:update', data: {xrot: 0, yrot: 0, zrot: 0}, player_id: player_id}) 
+                socket.send({'type': 'laser:fire', 'angle': 0, 'player_id': player_id});
+                socket.send({type: 'laser:update', angle: 0, player_id: player_id})
+                setTimeout(murder_the_server, interval)
+            }
+
+            setTimeout(function(){
+                $("#murder").html("<div>LET THE MURDER COMMENCE</div>")
+                murder_the_server()
+            }, 2000)
+
+            $(function(){
+                $("#rate").html(RATE)
+                setTimeout(function(){
+                    $("#color").html(color.join(','))
+                }, 2000)
+            })
+        </script>
+    </head>
+    <body>
+        <h1>Congratulations you are crushing the server</h1>
+        <div>
+            Your color: <span id="color">[color]</span>
+        </div>
+        <div>
+            msg/sec: <span id="rate">[rate]</span>
+        </div>
+        <div id="murder"></div>
+    </body>
+</html>
