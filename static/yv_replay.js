@@ -154,6 +154,8 @@ if(!YV || YV === undefined) throw "need a YV object, dawg!";
             playhead = play_start
         }
 
+        award.Shooter = frames[1].players[longest_kill.shooter_id]
+
         award.SetCamera = function() {
             var frame = frames[playhead]
 
