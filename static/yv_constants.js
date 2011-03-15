@@ -141,8 +141,7 @@
             },
 
             solver: {
-                /*timestep: 0.03,*/
-                timestep: 0.0005,
+                timestep: 0.03,
                 gravitationalConstant: 40.0,
             },
 

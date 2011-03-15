@@ -47,13 +47,37 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         var azimuth = 0.0;
         var radius = 5*YV.Constants.ufo.radius;
         var fireworkfrequency = 0.7;
-        
+
+        function displayWinnerName(name) {
+            var span = $('<span>'+name+' Wins</span>');
+            var canvasParent = $('#game_div');
+            canvasParent.append(span);
+            var sw = $(span).width();
+
+            var h = $('canvas').height();
+            var w = $('canvas').width();
+            $(span).css({
+                'position': 'absolute',
+                'top': h/6,
+                'left': (w-sw)/2,
+                'color': 'white',
+                'font-size': 38,
+                'font-family': 'sans-serif',
+            });
+            return function(){
+                canvasParent.removeChild(span);
+            };
+        }
+
+        var removeMessage;
         victory = {
             Reset : function(winner, atEnd) {
                 player = winner;
                 endCallback = atEnd;
                 YV.GetCamera().lookat = new SglVec3(winner.position);
                 YV.SetCameraTo(angle, azimuth, radius);
+
+                removeMessage = displayWinnerName(winner.display_name);
             },
 
             TimeStep : function(dt) {
@@ -70,6 +94,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
                 }
 
                 if(animTime < 0.0) {
+                    removeMessage();
                     endCallback();
                 }
             },

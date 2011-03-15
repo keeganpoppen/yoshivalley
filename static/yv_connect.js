@@ -21,7 +21,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
     function handleMessage(message) {
         if(message.type == 'player:add') {
-            YV.AddPlayer(message.player_id, message.color); 
+            YV.AddPlayer(message.player_id, message.displayName); 
         } else if(message.type == 'gyro:update') {
             YV.UpdatePlayerVelocity(message.player_id, message.data);
         } else if(message.type == 'laser:update') { 
@@ -42,12 +42,12 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         socket.send({client_type: 'viewer'})
     }
 
-    YV.SendPlayerColor = function(player_id, color) {
-        sock.send({type: "set:color", player_id: player_id, color: color});
+    YV.SendPlayerColor = function(playerId, color) {
+        sock.send({type: "set:color", player_id: playerId, color: color});
     };
 
-    YV.SendPlayerLives = function(player_id, lives) {
-        sock.send({type: "set:lives", player_id: player_id, lives: lives});
+    YV.SendPlayerLives = function(playerId, lives) {
+        sock.send({type: "set:lives", player_id: playerId, lives: lives});
     };
 
 })();

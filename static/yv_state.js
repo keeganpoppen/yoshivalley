@@ -45,6 +45,7 @@
     };
     $.extend(UFO.prototype, {
         program: "ufo",
+        display_name: "Player",
         position: new SglVec3(0.0, 0.0, 0.0),
         mass: YV.Constants.ufo.mass,
         radius: YV.Constants.ufo.radius,
@@ -471,8 +472,10 @@
         YV.SendPlayerColor(player_id, YV.GetColor(player.color));
     }
 
-    YV.AddPlayer = function(playerid) {
-        var newufo = new UFO();
+    YV.AddPlayer = function(playerid, displayName) {
+        var newufo = new UFO({
+            display_name: displayName,
+        });
         if((YV.GamePhase === 'lobby') && !gameFull()) {
             setNewColor(playerid, newufo);
             resetPlayer(newufo.color, newufo);
