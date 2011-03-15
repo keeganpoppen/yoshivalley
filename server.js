@@ -1,7 +1,6 @@
 var connect = require('connect')
 var util = require('util')
 var io = require('socket.io')
-//var dns = require('ndns')
 var MessageTimer = require('./messagetimer')
 
 var router = connect.router(function(app) {
@@ -40,7 +39,7 @@ var server = connect(
 
 server.listen(80) //listen on everyone's favorite port ;)
 
-util.log('server listening on port 6969... hotly')
+util.log('server listening on port 80... hotly')
 
 var clients = {};
 
@@ -96,18 +95,6 @@ function get_latencies(){
 }
 get_latencies()
 
-var Colors = [
-    [ 0.933333333333 ,  0.866666666667 ,  0.250980392157 ],
-    [ 0.960784313725 ,  0.474509803922 ,  0.0 ],
-    [ 0.560784313725 ,  0.349019607843 ,  0.0078431372549 ],
-    [ 0.450980392157 ,  0.823529411765 ,  0.0862745098039 ],
-    [ 0.203921568627 ,  0.396078431373 ,  0.643137254902 ],
-    [ 0.458823529412 ,  0.313725490196 ,  0.482352941176 ],
-    [ 0.729411764706 ,  0.741176470588 ,  0.713725490196 ],
-    [ 0.8 ,  0.0 ,  0.0 ]
-];
-var nextColor = 0;
-
 socket.on('connection', function(client) {
     client.on('message', function(message) {
         if(message.type == 'latency_check') {
@@ -123,15 +110,10 @@ socket.on('connection', function(client) {
             util.log('hesa playa')
             players[client.sessionId] = client
 
-            //Assign this player her color
-            client.color = Colors[nextColor];
-            nextColor = ((nextColor + 1) % Colors.length);
-            console.log("client assigned color: " + client.color);
-
             //send the player his/her player_id
-            client.send({'type': 'init:setid', 'color': client.color, 'player_id': client.sessionId})
+            client.send({'type': 'init:setid', 'player_id': client.sessionId})
 
-            broadcast_to_viewers({'type': 'player:add', 'color': client.color, 'player_id': client.sessionId})
+            broadcast_to_viewers({'type': 'player:add', 'player_id': client.sessionId})
 
             client.on('message', function(message) {
                 //util.log('last message was ' + (Date.now() - last_message) + ' ms ago')
@@ -160,7 +142,10 @@ socket.on('connection', function(client) {
             */
 
             client.on('message', function(message) {
-                //TODO: don't actually know if anything should be happening here right now
+                if(message.type === 'set:color') {
+                    var player = players[message.player_id];
+                    player.send(message);
+                }
             })
 
             client.on('disconnect', function() {

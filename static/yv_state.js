@@ -463,10 +463,16 @@
         return Colors[i];
     };
 
+
+    function setNewColor(player_id, player) {
+        player.color = findColor();
+        YV.SendPlayerColor(player_id, YV.GetColor(player.color));
+    }
+
     YV.AddPlayer = function(playerid) {
         var newufo = new UFO();
         if((YV.GamePhase === 'lobby') && !gameFull()) {
-            newufo.color = findColor();
+            setNewColor(playerid, newufo);
             resetPlayer(newufo.color, newufo);
             State.players[playerid] = newufo;
         } else {
@@ -501,6 +507,7 @@
             } else {
                 //They have to give up their color to a new commer;
                 Colors[player.color] = false;
+                YV.SendPlayerColor(player_id, null);
                 State.waitingPlayers.push([player_id, player]);
             }
         }
@@ -508,7 +515,7 @@
         for(var i=0; i<numWaiters; ++i) {
             var player_id = State.waitingPlayers[i][0];
             var player = State.waitingPlayers[i][1];
-            player.color = findColor();
+            setNewColor(player_id, player);
             resetPlayer(player.color, player);
             State.players[player_id] = player;
         }
