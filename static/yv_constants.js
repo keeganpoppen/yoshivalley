@@ -141,14 +141,16 @@
             },
 
             solver: {
-                timestep: 0.03,
+                /*timestep: 0.03,*/
+                timestep: 0.0005,
                 gravitationalConstant: 40.0,
             },
 
             replay: {
                 //number of frames before replay event
-                pre_replay_buffer: 60,
-                post_replay_buffer: 30
+                pre_replay_buffer: 90,
+                post_replay_buffer: 90,
+                slowmo_mult: 2 
             }
         };
         return constants;

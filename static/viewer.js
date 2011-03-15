@@ -63,6 +63,7 @@ GLIB.FireWhenReady(YV.Resources, function(resources) {
         },
 
         update: function(gl, dt) {
+            YV.UpdateAggregateTime(dt)
             YV.Update(dt);
         },
 

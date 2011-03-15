@@ -23,7 +23,6 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         YV.GetCamera().lookat = new SglVec3(0.0,0.0,0.0);
         YV.RemoveLasers();
         YV.RemoveExplosions();
-        YV.ResetPlayers(winner);
     }
 
     //Called when the game state has decided upon a winner
@@ -33,7 +32,10 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         //winner.controler.zrot = 0.0;
         YV.Victory.Reset(winner, function() {
             YV.GamePhase = 'awards_ceremony'
-            YV.AwardsCeremony.Reset(EnterLobby);
+            YV.AwardsCeremony.Reset(function(){
+                YV.EnterLobby()
+                YV.ResetPlayers(winner);
+            });
         });
     }
 })();

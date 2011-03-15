@@ -244,7 +244,9 @@
         particles: {
             lasers: [],
             explosions: []
-        }
+        },
+
+        aggregate_time: 0
     }
             
     function resetPlayer(index, ufo) {
@@ -603,5 +605,12 @@
         $.extend(State, merge_obj)
     }
 
+    YV.UpdateAggregateTime = function(dt){
+        State.aggregate_time += dt
+    }
+
+    YV.GetAggregateTime = function(){
+        return State.aggregate_time
+    }
     
 })();
