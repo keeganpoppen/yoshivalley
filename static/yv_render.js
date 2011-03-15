@@ -304,7 +304,9 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         if(obj.attributes != undefined) {
             obj.attributes.map(function(attrib) {
                 var loc = gl.getAttribLocation(shader, attrib)
-                if(loc == -1) throw "bad attribute name: " + attrib
+                if(loc == -1) {
+                    throw "bad attribute name: " + attrib
+                }
 
                 ret.attributes[attrib] = loc
             })
