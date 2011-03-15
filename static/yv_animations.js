@@ -40,7 +40,8 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
     YV.Victory = (function() {
         var player;
-        var animTime = 5.0;
+        var animStartTime = 5.0;
+        var animTime;
         var endCallback;
 
         var angle = 0.0;
@@ -52,11 +53,11 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
             var span = $('<span>'+name+' Wins</span>');
             var canvasParent = $('#game_div');
             canvasParent.append(span);
-            var sw = $(span).width();
+            var sw = span.width();
 
             var h = $('canvas').height();
             var w = $('canvas').width();
-            $(span).css({
+            span.css({
                 'position': 'absolute',
                 'top': h/6,
                 'left': (w-sw)/2,
@@ -65,7 +66,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
                 'font-family': 'sans-serif',
             });
             return function(){
-                canvasParent.removeChild(span);
+                span.remove();
             };
         }
 
@@ -78,6 +79,8 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
                 YV.SetCameraTo(angle, azimuth, radius);
 
                 removeMessage = displayWinnerName(winner.display_name);
+
+                animTime = animStartTime;
             },
 
             TimeStep : function(dt) {
@@ -122,7 +125,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
                     atEnd()
                 }
 
-                cur_award = awards[award_index]
+                cur_award = awards[award_index];
                 cur_award.SetPlayBounds(cur_award.startFrame - YV.Constants.replay.pre_replay_buffer,
                                         cur_award.endFrame + YV.Constants.replay.post_replay_buffer)
 

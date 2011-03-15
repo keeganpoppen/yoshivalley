@@ -527,6 +527,10 @@
         State.waitingPlayers.splice(0, numWaiters);
     };
 
+    YV.NotifyPlayers = function() {
+        YV.SendPlayerNotifications(State.players);
+    }
+
     function bracketed(min, max, val) {
         val = Math.max(min, val)
         val = Math.min(max, val)

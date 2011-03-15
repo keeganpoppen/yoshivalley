@@ -142,11 +142,9 @@ socket.on('connection', function(client) {
             */
 
             client.on('message', function(message) {
-                if(message.type === 'set:color' || message.type === 'set:lives') {
-                    var player = players[message.player_id];
-                    if(player !== undefined)
-                        player.send(message);
-                }
+                var player = players[message.player_id];
+                if(player !== undefined)
+                    player.send(message);
             })
 
             client.on('disconnect', function() {

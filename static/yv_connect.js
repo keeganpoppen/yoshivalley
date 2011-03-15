@@ -50,4 +50,10 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         sock.send({type: "set:lives", player_id: playerId, lives: lives});
     };
 
+    YV.SendPlayerNotifications = function(players) {
+        $.each(players, function(player_id, player) {
+            sock.send({'type': "set:reset", 'player_id': player_id});
+        });
+    };
+
 })();
