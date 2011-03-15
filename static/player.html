@@ -8,37 +8,115 @@
         <script src="/player.js"></script>
         <script src="/player_controls.js"></script>
 		<script>
-
-            function show_error(message) {
-                $("#error_message_container").html(message)
-                $("#normal_container").hide()
-                $("#error_message_container").show()
+            function show_error(message, callback) {
+                var err = $("#error_message_container")
+                err.html(message)
+                $("#normal_container").css('display', 'none')
+                err.fadeIn(callback)
             }
 
             function hide_error() {
-                $("#error_message_container").hide()
-                $("#normal_container").show()
+                var norm = $("#normal_container")
+                $("#error_message_container").css('display', 'none')
+                norm.fadeIn(function(){
+                    window.scrollTo(0,0)
+                })
+            }
+
+            function draw(theta){
+                var canvas = document.getElementById("control_canvas")
+                var cxt = canvas.getContext('2d')
+
+                cxt.clearRect(0, 0, 200, 200)
+
+                cxt.save()
+
+                var color_str = "rgb(" + Math.floor(255*color[0]) +
+                                    "," + Math.floor(255*color[1]) +
+                                    "," + Math.floor(255*color[2]) + ")";
+
+                cxt.strokeStyle = color_str 
+                cxt.fillStyle = color_str
+                cxt.lineWidth = 7 
+
+                //draw the outside circle
+                cxt.beginPath()
+                cxt.arc(100, 100, 65, 0, Math.PI * 2, true)
+                cxt.closePath()
+                cxt.stroke()
+
+                cxt.lineWidth = 6 
+
+                cxt.translate(100, 100)
+
+                //draw the center circle
+                cxt.beginPath()
+                cxt.arc(0, 0, 6, 0, Math.PI * 2, true)
+                cxt.closePath()
+                cxt.fill()
+
+                //draw the arrow
+                cxt.beginPath()
+                cxt.moveTo(0, 0)
+                cxt.rotate(theta)
+                cxt.lineTo(90, 0)
+                cxt.moveTo(93,0)
+                cxt.lineTo(85, -5)
+                cxt.lineTo(85, 5)
+                cxt.lineTo(93, 0)
+                cxt.closePath()
+                cxt.stroke()
+
+                cxt.restore()
             }
 
             $(function(){
+                draw(0.)
+
                 bind_cannon_handlers()
                 bind_keyboard_controls()
 
-                function orientation_check(){
-                    if(window.orientation % 180 != 0 && false) {
-                        show_error("you should lock your phone into portrait for best performance!")
-                    } else {
-                        $("#error_message_container").hide()
-                        $("#normal_container").show()
-                    }
-                }
+                if(!window.navigator.standalone) {
+                /*
+                    $("#normal_container").css('display', 'none')
+                    show_error("You should pin this website to your home screen for optimal performance. You'll thank us later ;).")
 
-                if(!window.navigator.standalone && false) {
-                    show_error("To play, pin this page to your home screen. Trust us-- it's better this way.")
+                    window.addEventListener('orientationchange', function(){
+                        var err = $("#error_message_container") 
+                        var width = $("body").width()
+                        var height = $("body").height()
+
+                        if(window.orientation % 180 != 0) {
+                            err.width(height)
+                            err.height(width)
+                        } else {
+                            err.width(width)
+                            err.height(height)
+                        }
+                    }) 
+                */
                 } else {
-                    orientation_check()
-                    window.addEventListener('orientationchange', orientation_check) 
-                }
+                    var err = $("#error_message_container") 
+                    var width = $("body").width()
+                    var height = $("body").height()
+                    if(window.orientation % 180 != 0) {
+                        show_error("you should lock your phone into portrait for best performance!", function(){
+                            err.width(height)
+                            err.height(width)
+                        })
+                    }
+
+                    window.addEventListener('orientationchange', function(){
+                        if(window.orientation % 180 != 0) {
+                            show_error("you should lock your phone into portrait for best performance!", function(){
+                                err.width(height)
+                                err.height(width)
+                            })
+                        } else {
+                            hide_error()
+                        }
+                    }) 
+                } 
             })
 		</script>
         <style>
@@ -48,22 +126,19 @@
                 color: black;
             }
 
-            body {
-                width: 460px;
-                height: 320px;
-                -webkit-transform: rotate(90deg);
-                -webkit-transform-origin: bottom left;
-                top: -320px;
-                position: relative;
-            }
-
             #error_message_container {
                 display: none;
-                padding: 20px;
+                width: 100%;
+                height: 100%;
             }
 
             #normal_container {
-                background-color: blue;
+                width: 460px;
+                height: 320px;
+                -webkit-transform: rotate(90deg);
+                -webkit-transform-origin: top left;
+                left: 320px;
+                position: relative;
             }
 
             .column {
@@ -72,18 +147,9 @@
                 float: left;
             }
 
-            #control_center {
-                background-color: blue;
-            }
-
-            #other_stuff {
-                background-color: orange;
-            }
-
             #player_info {
                 width: 230px;
                 height: 160px;
-                background-color: purple;
             }
 
             #player_id {
@@ -95,14 +161,14 @@
                 font-weight: bold;
                 font-family: "Helvetica";
                 text-align: center;
-                color: white;
             }
 
             #lives_title {
                 margin: auto;
                 padding: 5px 15px;
                 height: 20px;
-                font-size: 18px;
+                font-size: 22px;
+                font-weight: bold;
                 font-family: "Helvetica";
                 text-align: center;
             }
@@ -126,6 +192,10 @@
                 font-size: 18px;
                 font-weight: bold;
                 float: left;
+                background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#00ADEE), to(#0078A5));
+                -webkit-box-shadow: rgba(0, 0, 0, 0.199219) 0px 1px 2px;
+                border-radius: 7px;
+                text-shadow: rgba(0, 0, 0, 0.296875) 0px 1px 1px;
             }
 
             .extinguished {
@@ -135,7 +205,6 @@
             #fire_button_container {
                 width: 230px;
                 height: 160px;
-                background-color: yellow;
             }
 
             #fire_button {
@@ -145,16 +214,94 @@
                 font-size: 36px;
                 font-family: "Helvetica";
                 font-weight: bold;
-                background-color: red;
+                background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ED1C24), to(#AA1317));
+                border: 1px solid #980C10;
+                -webkit-box-shadow: rgba(0, 0, 0, 0.199219) 0px 1px 2px;
+                border-radius: 15px;
+            }
+
+            #control_container {
+                width: 200px;
+                height: 200px;
+                margin: auto;
+                margin-top: 40px;
+                border: 1px solid black;
+                border-radius: 10px;
+            }
+
+            #aim_title {
+                height: 40px;
+                width: 200px;
+                margin: auto;
+                text-align: center;
+                font-size: 20px;
+                font-family: "Helvetica";
+                line-height: 40px;
+            }
+
+            #name_prompt {
+                position: absolute;
+                background-color: white;
+                padding: 20px;
+                border-radius: 20px;
+                -webkit-transform: rotate(90deg);
+                -webkit-transform-origin: top left;
+                left: 96px;
+                z-index: 100;
+                border: 1px solid black;
+                width: 300px;
+            }
+
+            #name_prompt input, #name_prompt button {
+                height: 20px;
             }
         </style>
+        <script>
+            $(function(){
+                $("#normal_container").css('opacity', .3)
+                var np = $("#name_prompt")
+                np.css('left', 96 + 140 - (np.height()/2))
+                np.css('top', 205 - (np.width()/2)) 
+                np.fadeIn()
+
+                function handle_submit(){
+                    var value = $("#name_field").val()
+                    if(value != '') {
+                        player_name = value
+                        $("#name_prompt").css('display', 'none')
+                        $("#normal_container").css('opacity', 1)
+                        $('#player_id').html(value)
+                        setTimeout(window.scrollTo(0,0),10)
+                    }
+                    return false;
+                }
+
+                $("#name_submit").bind('touchstart', handle_submit)
+                $("#name_submit").click(handle_submit)
+
+            });
+        </script>
 	</head>
 	<body>
+        <div id="name_prompt">
+            <h1>What is your name?</h1>
+            <div style="margin:auto;width:200px;text-align:center">
+                <input type="text" id="name_field" />
+                <button type="submit" id="name_submit">Submit</button>
+            </div>
+        </div>
         <div id="error_message_container">
             ERROR!
         </div>
         <div id="normal_container">
-            <div id="control_center" class="column">(control center)</div>
+            <div id="control_center" class="column">
+                <div id="control_container">
+                    <canvas id="control_canvas" width="200" height="200" ></canvas>
+                </div>
+                <div id="aim_title">
+                    TargetComputer 2000
+                </div>
+            </div>
             <div class="column" id="other_stuff">
                 <div id="player_info"> 
                     <div id="player_id">
@@ -162,9 +309,9 @@
                     </div>
                     <div id="lives_title">Lives remaining:</div>
                     <div id="lives_container">
-                        <div class="life">1</div>
-                        <div class="life">2</div>
-                        <div class="life extinguished">3</div>
+                        <div class="life" id="life_0">1</div>
+                        <div class="life" id="life_1">2</div>
+                        <div class="life" id="life_2">3</div>
                         <div style="clear:both"></div>
                     </div>
                 </div>

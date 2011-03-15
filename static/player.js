@@ -2,9 +2,10 @@
  * globals
  */
 
-var player_id = -1;
-var color = [0.0, 0.0, 0.0];
-var socket = new io.Socket();
+var player_id = -1
+var color = [0.0, 0.0, 0.0]
+var socket = new io.Socket()
+var player_name;
 
 /*
  * set up socket
@@ -34,9 +35,27 @@ socket.on('message', function(message) {
         } else {
             color = message.color;
         }
+
+        if(draw !== undefined) draw(-CannonThrottle.last_sent)
+        $(function(){
+            $("#player_id").css('color', "rgb(" + Math.floor(255*color[0]) +
+                                    "," + Math.floor(255*color[1]) +
+                                    "," + Math.floor(255*color[2]) + ")");
+
+        })
+
     } else if(message.type == 'set:lives') {
+        $("#life_" + message.lives).addClass("extinguished")
+        if(message.lives == 0) {
+            $("#lives_title").html("You've died!")    
+        }
+        
     } else if(message.type == 'latency_check') {
         socket.send(message) //just send 'er right back
+
+    } else if(message.type == 'set:reset') {
+        $(".life").removeClass("extinguished")
+        $("#lives_title").html("Lives remaining:")    
     }
 })
 

@@ -72,11 +72,16 @@ var CannonThrottle = {};
         }
     }
 
+    CannonThrottle.last_sent = function(){ return last_sent; }
+
     function send_data(){
         timeout = null
         if(last_sent != last_update) {
             socket.send({type: 'laser:update', angle: last_update, player_id: player_id})
             last_sent = last_update
+
+            setTimeout(function(){draw(-last_update - Math.PI / 2)}, 10)
+
             dirty = false
         } else {
             dirty = true
@@ -125,6 +130,16 @@ var send_touch_angle = function(e) {
     var ev = e.touches[0]
     var deviation_x = ev.pageX - 160
     var deviation_y = ev.pageY - 115
+
+    if(e.touches.length > 1) {
+        e.touches.map(function(touch) {
+            if(touch.pageX - 160 >= deviation_x || 
+                touch.pageY - 115 >= deviation_y) return
+
+            deviation_x = touch.pageX - 160
+            deviation_y = touch.pageY - 115
+        })
+    }
 
     var angle = Math.atan2(-deviation_y, deviation_x)
     prev_angle = angle
