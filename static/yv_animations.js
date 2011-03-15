@@ -115,6 +115,9 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
         var awards_ceremony = {
             Reset: function(atEnd) {
+                //Dynamically adjust the step time
+                GLIB.Solver.TimeStep = 0.005;
+
                 console.log('STARTING THE REPLAY!!!')
 
                 awards = YV.Replay.ComputeAwards()
@@ -140,6 +143,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
                 if(!cur_award.TimeStep()) {
                     console.log("TIME STEP FAIL")
                     if((++award_index) == awards.length) {
+                        GLIB.Solver.TimeStep = YV.Constants.solver.timestep; 
                         endCallback()
                     } else {
                         cur_award = awards[award_index]

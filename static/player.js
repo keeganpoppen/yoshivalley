@@ -34,9 +34,7 @@ socket.on('message', function(message) {
         } else {
             color = message.color;
         }
-        alert(color);
     } else if(message.type == 'set:lives') {
-        alert(message.lives); 
     } else if(message.type == 'latency_check') {
         socket.send(message) //just send 'er right back
     }

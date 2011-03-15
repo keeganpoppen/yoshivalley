@@ -16,8 +16,8 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
     var width = 2;
     var length = 4;
-    var rate = length / 40;
-    var acc = length / 300;
+    var rate = length / 35;
+    var acc = length / 1000;
     var pos = -2.0;
 
     var program;
@@ -46,7 +46,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         Update : function(dt) {
             pos += rate * dt;
             rate += acc * dt;
-            if(pos > 8.0) {
+            if(pos > 12.0) {
                 YV.EnterLobby();
             }
         },
