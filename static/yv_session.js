@@ -31,6 +31,9 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         YV.GamePhase = 'victory';
         //winner.controler.xrot = 0.0;
         //winner.controler.zrot = 0.0;
-        YV.Victory.Reset(winner, YV.EnterLobby);
+        YV.Victory.Reset(winner, function() {
+            YV.GamePhase = 'awards_ceremony'
+            YV.AwardsCeremony.Reset(EnterLobby);
+        });
     }
 })();

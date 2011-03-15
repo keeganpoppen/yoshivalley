@@ -37,6 +37,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
                     player.lives--;
                     YV.AddExplosion(player.position);
                     YV.Respawn(player_id, player);        
+                    YV.Replay.LogPlanetKill(planet, player_id)
                 }
             });
         });
@@ -73,6 +74,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
                         player.lives--;
                         YV.AddExplosion(player.position);
                         YV.Respawn(player_id, player);
+                        YV.Replay.LogPlayerKill(laser.shooter_id, player_id, laser)
                     }
                     toremove.push(laser_id);
                 }
@@ -103,6 +105,9 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         case 'intro':
             YV.Intro.TimeStep(dt);
             break;
+        case 'awards_ceremony':
+            YV.AwardsCeremony.TimeStep(dt)
+            break
         case 'play':
             var numPlayersLeft = 0;
             var lastPlayer;
