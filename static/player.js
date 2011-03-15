@@ -22,13 +22,21 @@ socket.on('message', function(message) {
     if(message.type == 'init:setid') {
         player_id = message.player_id
         console.log(message);
-        color = message.color;
         var colorstring = "rgb(" + Math.floor(color[0]*255) + ", " + 
                                    Math.floor(color[1]*255) + ", " +
                                    Math.floor(color[2]*255) + ")";
         $('body').css('color', colorstring);
         $("#player_id").html(player_id)
 
+    } else if(message.type == 'set:color') {
+        if(message.color === null) {
+            color = [0.0, 0.0, 0.0];
+        } else {
+            color = message.color;
+        }
+        alert(color);
+    } else if(message.type == 'set:lives') {
+        alert(message.lives); 
     } else if(message.type == 'latency_check') {
         socket.send(message) //just send 'er right back
     }
