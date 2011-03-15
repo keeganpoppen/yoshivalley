@@ -42,12 +42,12 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         socket.send({client_type: 'viewer'})
     }
 
-    YV.SendMessage(message) {
-        socket.send(message);
-    }
+    YV.SendPlayerColor = function(player_id, color) {
+        sock.send({type: "set:color", player_id: player_id, color: color});
+    };
 
-    YV.SendPlayerColor(player_id, color) {
-        socket.send({type: "set:color", player_id: player_id, color: color});
+    YV.SendPlayerLives = function(player_id, lives) {
+        sock.send({type: "set:lives", player_id: player_id, lives: lives});
     };
 
 })();

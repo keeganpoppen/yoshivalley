@@ -142,7 +142,7 @@ socket.on('connection', function(client) {
             */
 
             client.on('message', function(message) {
-                if(message.type === 'set:color') {
+                if(message.type === 'set:color' || message.type === 'set:lives') {
                     var player = players[message.player_id];
                     player.send(message);
                 }

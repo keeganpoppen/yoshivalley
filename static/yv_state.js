@@ -586,6 +586,7 @@
     };
     
     YV.Respawn = function(player_id, player) {
+        YV.SendPlayerLives(player_id, player.lives);
         if(player.lives > 0) {
             resetPlayer(player.color, player);
             player.invulnerable = YV.Constants.ufo.invulnerablePeriod;
