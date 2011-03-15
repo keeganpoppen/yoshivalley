@@ -39,6 +39,14 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
     music.src = musicSrc;
     music.loop = true;
 
+    var titleMusic = new Audio();
+    titleMusic.src = "/audio/starwars.mp3";
+    titleMusic.loop = true;
+
+    setTimeout(function() {
+        titleMusic.play();
+    },1);
+
     var LaserList = new List();
     for(i = 0; i<YV.Constants.maxPlayers; i++) {
         var a = new Audio();
@@ -68,6 +76,10 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
         StartMusic : function () {
             music.play();
+        },
+
+        StopTitleMusic : function() {
+            titleMusic.pause();
         },
     };
 })();

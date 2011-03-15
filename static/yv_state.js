@@ -4,7 +4,7 @@
         textures: ["earth.jpg", "sun.jpg", "mars.jpg", "sky2.jpg", "jupiter.jpg",
                    "saturn.jpg", "laser.png", "fire.png", "ring.png", "metal.jpg",
                    "saturn-ring.jpg", "saturn-ring-alpha.gif", "neptune.jpg",
-                   "earth-spectral.jpg", "earth-night.jpg"],
+                   "earth-spectral.jpg", "earth-night.jpg", "title.png", ],
         shaders: ["planet.frag.glsl", "planet.vert.glsl",
                   "sun.vert.glsl", "sun.frag.glsl",
                   "bg.vert.glsl", "bg.frag.glsl",
@@ -13,6 +13,7 @@
                   "saturn.vert.glsl", "saturn.frag.glsl",
                   "earth.vert.glsl", "earth.frag.glsl",
                   "explosion.vert.glsl", "explosion.frag.glsl",
+                  "title.vert.glsl", "title.frag.glsl",
                   "ring.vert.glsl", "ring.frag.glsl"],
         meshes: [],
     }
@@ -537,7 +538,7 @@
             var x = -Math.sin(player.cannon_angle);
             var z = -Math.cos(player.cannon_angle);
 
-            var laser_vel = new SglVec3(x, 0., z)
+            var laser_vel = (new SglVec3(x, 0., z)).neg;
             var laser_dir = laser_vel.normalize();
             laser_vel = laser_dir.mul(new SglVec3(MULT));
 

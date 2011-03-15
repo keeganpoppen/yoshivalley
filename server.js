@@ -38,7 +38,7 @@ var server = connect(
     }
 )
 
-server.listen(6969) //listen on everyone's favorite port ;)
+server.listen(80) //listen on everyone's favorite port ;)
 
 util.log('server listening on port 6969... hotly')
 

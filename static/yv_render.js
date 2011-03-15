@@ -380,13 +380,22 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
         gl.enable(gl.DEPTH_TEST);
 
-        setCamera(gl, YV.GetCamera());
-        renderBackground(gl, YV.GetBackground());
-        renderPlanets(gl);
-        renderUFOs(gl, YV.GetUFOData());
+        switch(YV.GamePhase) {
+        case 'title':
+            YV.Title.Render(gl, function() {
+                renderBackground(gl, YV.GetBackground());
+            });
+            break;
+        default:
+            setCamera(gl, YV.GetCamera());
+            renderBackground(gl, YV.GetBackground());
+            renderPlanets(gl);
+            renderUFOs(gl, YV.GetUFOData());
 
-        renderLasers(gl, YV.GetLaserData());
-        renderExplosions(gl, YV.GetExplosionData());
+            renderLasers(gl, YV.GetLaserData());
+            renderExplosions(gl, YV.GetExplosionData());
+            break;
+        }
         gl.disable(gl.DEPTH_TEST);
     }
 })();

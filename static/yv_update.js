@@ -95,6 +95,9 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
     YV.Update = function(dt) {
         switch(YV.GamePhase) {
+        case 'title':
+            YV.Title.Update(dt);
+            break;
         case 'lobby':
             break;
         case 'intro':
