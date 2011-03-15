@@ -1,1 +1,67 @@
-keegan is really really cool
+Keegan Poppen and William Rowan
+
+Our submission is probably a little different from most cs248 final project
+submissions. Given the hubub over HTML5 and the recent stabilization of new
+web standards that enable 3D applications in the browser, we decied that
+the most exciting project we could work on would be based on WebGL and run
+on the web.
+
+WebGL is Javascript API for OpenGL ES in the browser. Working in this context
+was both limiting and enabling. Because our game was running in the browser
+we had access to a lot of convienient browser based technology such as the
+native image loading functionality that has always been a part of the web.
+Loading a texture is as easy as creating an image node in the DOM. Similarly,
+the new HTML5 audio element gave us easy sound asset loading.
+
+This convienience, however, was more than offset by the difficultly of finding
+anything like the wealth of libraries and tools for producing and manipulating
+models and animations for the desktop bound world. There are a number of pilot
+webgl library projects that vary from full fledged rendering engines to
+basic sets of convienience functions for compiling shaders etc. We first tried
+going it alone, found it very difficult, then evaluated several different
+frameworks, found that more diffiuclt, and then finally decided on a hybrid
+approach using a library called SpiderGL.
+
+SpiderGL aims to provide convinient tools for building WebGL programs without
+attempting to hide the underlying implementation so we were as free to do
+things ourselves where convinient. We ended up making extensive use of
+SpiderGL's great matrix stack implementation and basic mesh rendering tools.
+On the other hand, we ended up managing our shaders direclty and developed
+our own convienience functions for compiling shader programs and setting
+shader attributes and uniforms. Much of this functionality, you'll note,
+was provided to us in C++ form as starter code but not available to us
+on our choosen platform.
+
+Our project was much more ambitious than just implementing a regular game
+in a browser. We really wanted to do something that fully explored the space
+of mobility and accessibility that the web was already providing us. Our
+main motivation was to create something participatory, that would be as easy
+to play as downloading a webpage, and as social as the web by taking
+advantage of the fundamentally networked nature of the platform. Therefore
+we deceided to produce a second component of the game that would allow
+players to controll their charater using their smart phone using the
+gyroscope api bulit into Mobile Webkit and the iPhone4.
+
+This presented us with our biggest set of challenges, especially in the space
+of maintaining realtime performance over wireless networking. In particular,
+using the often crowded wifi hotspots at Stanford.
+
+The most important technology for this is yet another HTML5 addition,
+websockets, which implment a two-directional socket api for use by webapps
+which hitherto have been limited by the origional client-server model of the
+web and the only slightly more enabling technology of the xmlhttprequest.
+In order to get the performance we needed, we spent a lot of time thinking
+about how we could minimize our wireless traffic, especially when we had
+a lot of clients all trying to connec to the same wireless access point in
+order to all try and maintain a 1-to-1 mapping between their smart phone
+and the model on screen.
+
+To sum it all up, here is a list of advanced features we think we implemented:
+
+alternate input (from the iPhone's gryoscope)
+mobile devices (see previous)
+realtime multiplayer over the wireles mobile web
+doing anything in webgl should count
+generalized replayability for awesome maneuvers you'd like to remember
+hardware particle acceleration
+purely procedurally generated content ;)
