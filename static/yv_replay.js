@@ -163,8 +163,6 @@ if(!YV || YV === undefined) throw "need a YV object, dawg!";
 
             if(playhead <= startFrame) {
                 var shooter = frame.players[longest_kill.shooter_id]
-                //console.log('shoot')
-                //console.log(shooter)
 
                 cameraPosition = cam_pos_from_particle(shooter)
                 lookAt = new SglVec3(shooter.position)

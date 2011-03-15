@@ -31,7 +31,9 @@ socket.on('message', function(message) {
             color = message.color;
         }
 
-        if(draw !== undefined) draw(-CannonThrottle.last_sent)
+        //NOTE: THIS IS ONLY DONE FOR PERFORMANCE REASONS
+        //if(draw !== undefined) draw(-CannonThrottle.last_sent)
+
         $(function(){
             $("#player_id").css('color', "rgb(" + Math.floor(255*color[0]) +
                                     "," + Math.floor(255*color[1]) +

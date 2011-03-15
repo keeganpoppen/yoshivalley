@@ -80,7 +80,8 @@ var CannonThrottle = {};
             socket.send({type: 'laser:update', angle: last_update, player_id: player_id})
             last_sent = last_update
 
-            setTimeout(function(){draw(-last_update - Math.PI / 2)}, 10)
+            //NOTE: THIS IS ONLY DISABLED FOR PERFORMANCE REASONS!
+            //setTimeout(function(){draw(-last_update - Math.PI / 2)}, 10)
 
             dirty = false
         } else {
