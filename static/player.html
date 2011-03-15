@@ -31,8 +31,12 @@
 
                 cxt.save()
 
-                cxt.strokeStyle="#000000"
-                cxt.fillStyle="#000000"
+                var color_str = "rgb(" + Math.floor(255*color[0]) +
+                                    "," + Math.floor(255*color[1]) +
+                                    "," + Math.floor(255*color[2]) + ")";
+
+                cxt.strokeStyle = color_str 
+                cxt.fillStyle = color_str
                 cxt.lineWidth = 7 
 
                 //draw the outside circle
@@ -234,13 +238,58 @@
                 font-family: "Helvetica";
                 line-height: 40px;
             }
+
+            #name_prompt {
+                position: absolute;
+                background-color: white;
+                padding: 20px;
+                border-radius: 20px;
+                -webkit-transform: rotate(90deg);
+                -webkit-transform-origin: top left;
+                left: 96px;
+                z-index: 100;
+                border: 1px solid black;
+                width: 300px;
+            }
+
+            #name_prompt input, #name_prompt button {
+                height: 20px;
+            }
         </style>
         <script>
             $(function(){
-            })();
+                $("#normal_container").css('opacity', .3)
+                var np = $("#name_prompt")
+                np.css('left', 96 + 140 - (np.height()/2))
+                np.css('top', 205 - (np.width()/2)) 
+                np.fadeIn()
+
+                function handle_submit(){
+                    var value = $("#name_field").val()
+                    if(value != '') {
+                        player_name = value
+                        $("#name_prompt").css('display', 'none')
+                        $("#normal_container").css('opacity', 1)
+                        $('#player_id').html(value)
+                        setTimeout(window.scrollTo(0,0),10)
+                    }
+                    return false;
+                }
+
+                $("#name_submit").bind('touchstart', handle_submit)
+                $("#name_submit").click(handle_submit)
+
+            });
         </script>
 	</head>
 	<body>
+        <div id="name_prompt">
+            <h1>What is your name?</h1>
+            <div style="margin:auto;width:200px;text-align:center">
+                <input type="text" id="name_field" />
+                <button type="submit" id="name_submit">Submit</button>
+            </div>
+        </div>
         <div id="error_message_container">
             ERROR!
         </div>
@@ -260,9 +309,9 @@
                     </div>
                     <div id="lives_title">Lives remaining:</div>
                     <div id="lives_container">
-                        <div class="life">1</div>
-                        <div class="life">2</div>
-                        <div class="life extinguished">3</div>
+                        <div class="life" id="life_0">1</div>
+                        <div class="life" id="life_1">2</div>
+                        <div class="life" id="life_2">3</div>
                         <div style="clear:both"></div>
                     </div>
                 </div>
