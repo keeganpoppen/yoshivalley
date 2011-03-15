@@ -76,4 +76,90 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         }
         return victory;
     })();
+
+    function find_laser(frame, laser_id) {
+        var laser = null
+        for(var i = 0; i < frame.particles.lasers.length; ++i) {
+            var l = frame.particles.lasers[i]
+            if(l.id != laser_id) continue
+
+            laser = l
+            break
+        }
+        return laser
+    }
+
+    function cam_pos_from_laser(laser) {
+        var trail_vec = laser.velocity.normalize().mul(new SglVec3(30. * YV.Constants.ufo.radius))
+        return laser.position.add(trail_vec.neg).add(new SglVec3(0., YV.Constants.ufo.radius * 30., 0.))
+    }
+
+    YV.AwardsCeremony = (function(){
+        var endCallback;
+        var startFrame, endFrame;
+        var laser_id;
+
+        var awards_ceremony = {
+            Reset: function(atEnd) {
+                console.log('STARTING THE REPLAY!!!')
+
+                var longest_shot = YV.Replay.ComputeAwards()
+
+                if(longest_shot !== null) {
+                    laser_id = longest_shot.laser_id
+
+                    //start and end w/the shot
+                    startFrame = longest_shot.start_frame
+                    endFrame = longest_shot.end_frame
+
+                    var frame = YV.Replay.GetFrameAt(startFrame)
+                    var laser = find_laser(frame, longest_shot.laser_id)
+
+                    if(laser == null) throw "ARGH. WTF???"
+
+                    YV.SetCameraToVec(cam_pos_from_laser(laser))
+                    YV.GetCamera().lookat = new SglVec3(laser.position)
+
+                    YV.Replay.SetPlayRange(startFrame, endFrame)
+
+                    /*
+                    YV.Replay.SetPlayRange(startFrame - YV.Constants.pre_replay_buffer,
+                                            endFrame + YV.Constants.post_replay_buffer)
+                    */
+
+                } else {
+                    //otherwise just do the whole thing
+                    startFrame = 0
+                    endFrame = YV.Replay.GetFrameNumber() - 1
+
+                    YV.SetCameraTo(YV.Constants.camera.orbitAngle,
+                                   YV.Constants.camera.azimuth,
+                                   YV.Constants.camera.orbitRadius);    
+                    YV.GetCamera().lookat = new SglVec3(0.0,0.0,0.0);
+                }
+
+                endCallback = atEnd 
+            },
+            TimeStep: function(dt) {
+                var frame = YV.Replay.GetNextFrameObj()
+
+                //frame is null after the Replay has hit the final frame
+                if(frame === null) {
+                    endCallback()
+                } else {
+                    var laser = find_laser(frame, laser_id)
+
+                    if(laser != null) {
+                        YV.SetCameraToVec(cam_pos_from_laser(laser))
+                        YV.GetCamera().lookat = new SglVec3(laser.position)
+                    }
+                    
+                    //set the data directly
+                    YV.MergeState(frame)
+                }
+            }
+        }
+
+        return awards_ceremony 
+    })();
 })();

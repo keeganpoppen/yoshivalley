@@ -35,6 +35,7 @@
         this.azimuth = 0.0;
         this.rotation = 0.0;
         this.mesh = {};
+        this.name = "keegan is awesome"
         $.extend(this,opts || {});
     };
 
@@ -76,14 +77,16 @@
         age: 0.
     })
 
+    var laser_id = 0
     var Laser = function(opts) {
         this.time_shot = Date.now()
         $.extend(this, opts || {})
+        this.id = laser_id++
     }
     Laser.prototype = Particle.prototype
     $.extend(Laser.prototype, {
         shooter_id: 0,
-        time_shot: 0,
+        start_frame: 0,
         age: 0
     })
 
@@ -124,6 +127,7 @@
            far : YV.Constants.camera.far,
            azimuth: YV.Constants.camera.azimuth,
            lookat : new SglVec3(0.0),
+           name: "camera"
         }), 
 
         background : {
@@ -137,6 +141,7 @@
             new Planet({
                 program : "sun",
                 texture : "sun.jpg",
+                name: "Sun",
                 radius: YV.Constants.planets.sun.radius,
                 mass: YV.Constants.planets.sun.mass,
             }),
@@ -144,6 +149,7 @@
             new Planet({
                 program: "earth",
                 texture : "earth.jpg",
+                name: "Earth", 
                 textureNight: "earth-night.jpg",
                 textureSpectral: "earth-spectral.jpg",
                 mass : YV.Constants.planets.earth.mass, 
@@ -156,6 +162,7 @@
 
             new Planet({
                 texture : "mars.jpg",
+                name: "Mars", 
                 mass : YV.Constants.planets.mars.mass, 
                 radius : YV.Constants.planets.mars.radius,
                 tilt : YV.Constants.planets.mars.tilt, 
@@ -166,6 +173,7 @@
 
             new Planet({
                 texture : "jupiter.jpg",
+                name: "Jupiter",
                 mass : YV.Constants.planets.jupiter.mass, 
                 radius : YV.Constants.planets.jupiter.radius,
                 tilt : YV.Constants.planets.jupiter.tilt, 
@@ -176,6 +184,7 @@
 
             new Planet({
                 texture : "saturn.jpg",
+                name: "Saturn",
                 mass : YV.Constants.planets.saturn.mass, 
                 radius : YV.Constants.planets.saturn.radius,
                 tilt : YV.Constants.planets.saturn.tilt, 
@@ -187,9 +196,10 @@
             new Planet({
                 program : "saturn",
                 texture : "saturn.jpg",
+                name: "Saturn's rings",
                 ringTexture : "saturn-ring.jpg",
                 ringTextureAlpha : "saturn-ring-alpha.gif",
-                mass : YV.Constants.planets.saturn.mass, 
+                mass : 0.1,
                 radius : YV.Constants.planets.saturn.radius,
                 tilt : YV.Constants.planets.saturn.tilt, 
                 rotationalVelocity : YV.Constants.planets.saturn.rotationalVelocity,
@@ -200,13 +210,14 @@
 
             new Planet({
                 texture : "neptune.jpg",
+                name: "Neptune",
                 mass : YV.Constants.planets.neptune.mass, 
                 radius : YV.Constants.planets.neptune.radius,
                 tilt : YV.Constants.planets.neptune.tilt, 
                 rotationalVelocity : YV.Constants.planets.neptune.rotationalVelocity,
                 orbitRadius : YV.Constants.planets.neptune.orbitRadius,
                 orbitAngle : YV.Constants.planets.neptune.orbitAngle,
-            }),
+            })
         ],
 
         players: {},
@@ -352,6 +363,24 @@
         State.camera.orbitRadius = radius;
     };
 
+    YV.SetCameraToVec = function(vec) {
+        if(!(vec instanceof SglVec3)) throw "clearly you can't read method names"
+
+        var orbit_radius = vec.length
+        var azimuth = Math.asin(vec.y / orbit_radius)
+
+        var planedist = orbit_radius * Math.cos(azimuth)
+        var orbit_angle = Math.asin(vec.x / planedist)
+        
+        State.camera.orbitAngle = sglRadToDeg(orbit_angle)
+        State.camera.azimuth = sglRadToDeg(azimuth)
+        State.camera.orbitRadius = orbit_radius
+    }
+
+    YV.SetCameraToXYZ = function(x, y, z) {
+        YV.SetCameraToVec(new SglVec3(x,y,z))
+    }
+
     YV.GetBackground = function() {
         return State.background;
     };
@@ -470,7 +499,8 @@
             State.particles.lasers.push(new Laser({
                 position: player.position.add(laser_dir.mul(new SglVec3(radius))),
                 velocity: laser_vel,
-                shooter_id: player_id
+                shooter_id: player_id,
+                start_frame: YV.Replay.GetFrameNumber()
             }));
         }
     };
@@ -485,6 +515,14 @@
             delete State.players[player_id];
         }
     };
+
+    /*
+     * The below is only useful for replays, presumably
+     */
+
+    YV.MergeState = function(merge_obj) {
+        $.extend(State, merge_obj)
+    }
 
     
 })();

@@ -19,12 +19,15 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         //winner.controler.xrot = 0.0;
         //winner.controler.zrot = 0.0;
         YV.Victory.Reset(winner, function() {
-            YV.GamePhase = 'lobby';
-            YV.SetCameraTo(YV.Constants.camera.orbitAngle,
-                           YV.Constants.camera.azimuth,
-                           YV.Constants.camera.orbitRadius);    
-            YV.GetCamera().lookat = new SglVec3(0.0,0.0,0.0);
-            $('#lobby').css('display', 'block');
+            YV.GamePhase = 'awards_ceremony'
+            YV.AwardsCeremony.Reset(function(){
+                YV.GamePhase = 'lobby';
+                YV.SetCameraTo(YV.Constants.camera.orbitAngle,
+                               YV.Constants.camera.azimuth,
+                               YV.Constants.camera.orbitRadius);    
+                YV.GetCamera().lookat = new SglVec3(0.0,0.0,0.0);
+                $('#lobby').css('display', 'block');
+            })
         });
     }
 })();

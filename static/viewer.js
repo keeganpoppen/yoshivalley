@@ -62,7 +62,7 @@ GLIB.FireWhenReady(YV.Resources, function(resources) {
 
         draw: function(gl) {
             //capture the curent frame first
-            YV.Replay.CaptureFrame()
+            if(YV.GamePhase == 'play') YV.Replay.CaptureFrame()
 
             //Draw fps
             var cur_time = Date.now()
