@@ -192,40 +192,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
     }
 
     function renderLasers(gl, laser, data) {
-        //only ever create one laser buffer
-        if(laser.buffer === undefined) laser.buffer = gl.createBuffer()
-
-        //set laser texture
-        gl.activeTexture(gl.TEXTURE0)
-        laser.texture.bind()
-        gl.uniform1i(data.tex_loc, 0)
-
-        //lasers don't age, of course
-        gl.uniform1i(data.does_age_loc, 0);
-        gl.uniform1f(data.particle_size_loc, YV.Constants.laser.particleSize);
-
-        var vertices = []
-
-        //render all the lasers
-        YV.OverLasers(function(laser_id, laserObj) {
-            var len_vec = laserObj.velocity.normalized.mul(new SglVec3(laser.length))
-            var start_pos = laserObj.position.add(len_vec.mul(new SglVec3(0.5)).neg)
-            var iter_vec = len_vec.mul(new SglVec3(1./laser.numParticles))
-
-            for(var i = 0; i < laser.numParticles; ++i) {
-                var pos = start_pos.add(iter_vec.mul(new SglVec3(i)))
-                vertices.push(pos.x, pos.y, pos.z)
-            }
-        });
-
-        var vert_buffer = laser.buffer
-        gl.bindBuffer(gl.ARRAY_BUFFER, vert_buffer)
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW)
-        gl.vertexAttribPointer(data.vertex_loc, 3, gl.FLOAT, false, 0, 0)
         
-        gl.drawArrays(gl.POINTS, 0, vertices.length/3)
-
-        laser.texture.unbind()
     }
 
     function renderExplosions(gl, explosion) {
@@ -352,36 +319,57 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         return ret
     }
 
-    function renderParticles(gl) {
+    function renderLasers(gl, laser) {
+        var present = false;
+        YV.OverLasers(function() {
+            present = true;
+        });
+        if(!present) return;
+
+        //only ever create one laser buffer
+        if(laser.buffer === undefined) laser.buffer = gl.createBuffer()
+
         enableParticleRendering(gl)
 
         var prog = gl.programs.particle.handle
         gl.programs.particle.bind()
 
-        //locations for uniforms & attribs set per particle_fn
-        var fn_data = {}
+        var data = getShaderVarLocations(gl, prog, {
+            uniforms: ["ModelViewProjectionMatrix", "particleSize", "laserTex"],
+            attributes: ["a_position"],
+        }, 'laser');
 
-        //set modelviewprojection matrix
-        var modelview_loc = gl.getUniformLocation(prog, "ModelViewProjectionMatrix")
-        gl.uniformMatrix4fv(modelview_loc, false, new Float32Array(gl.xform.viewProjectionMatrix));
+        //set modelviewprojection matrix //NOTE that this name is incorrect
+        gl.uniformMatrix4fv(data.uniforms.ModelViewProjectionMatrix, false, new Float32Array(gl.xform.viewProjectionMatrix));
+        gl.uniform1f(data.uniforms.particleSize, YV.Constants.laser.particleSize);
 
-        var particle_size_loc = gl.getUniformLocation(prog, "particleSize");
-        gl.uniform1f(particle_size_loc, 1.0);
-        fn_data.particle_size_loc = particle_size_loc;
+        //set laser texture
+        gl.activeTexture(gl.TEXTURE0)
+        laser.texture.bind()
+        gl.uniform1i(data.uniforms.laserTex, 0)
 
-        //get texture location
-        fn_data.tex_loc = gl.getUniformLocation(prog, "laserTex")
+        var vertices = []
 
-        //get position attribute location
-        fn_data.vertex_loc = gl.getAttribLocation(prog, "a_position")
+        //render all the lasers
+        YV.OverLasers(function(laser_id, laserObj) {
+            var len_vec = laserObj.velocity.normalized.mul(new SglVec3(laser.length))
+            var start_pos = laserObj.position.add(len_vec.mul(new SglVec3(0.5)).neg)
+            var iter_vec = len_vec.mul(new SglVec3(1./laser.numParticles))
 
-        //get attrib locations for particle age & uniform for whether age effects alpha
-        fn_data.age_frac_loc = gl.getAttribLocation(prog, "a_age_frac")
+            for(var i = 0; i < laser.numParticles; ++i) {
+                var pos = start_pos.add(iter_vec.mul(new SglVec3(i)))
+                vertices.push(pos.x, pos.y, pos.z)
+            }
+        });
 
-        fn_data.does_age_loc = gl.getUniformLocation(prog, "does_age") 
+        var vert_buffer = laser.buffer
+        gl.bindBuffer(gl.ARRAY_BUFFER, vert_buffer)
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW)
+        gl.vertexAttribPointer(data.attributes.a_position, 3, gl.FLOAT, false, 0, 0)
+        
+        gl.drawArrays(gl.POINTS, 0, vertices.length/3)
 
-        renderLasers(gl, YV.GetLaserData(), fn_data);
-        //renderExplosions(gl, , fn_data);
+        laser.texture.unbind()
 
         gl.programs.particle.unbind()
         disableParticleRendering(gl)
@@ -397,7 +385,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         renderPlanets(gl);
         renderUFOs(gl, YV.GetUFOData());
 
-        renderParticles(gl);
+        renderLasers(gl, YV.GetLaserData());
         renderExplosions(gl, YV.GetExplosionData());
         gl.disable(gl.DEPTH_TEST);
     }

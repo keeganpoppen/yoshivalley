@@ -3,12 +3,11 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 (function(){
     YV.GamePhase = 'lobby';
 
-
     //Called when a user initiates the current game
     YV.Begin = function() {
-        YV.GamePhase = 'play';
+        YV.GamePhase = 'intro';
+        YV.Audio.StartMusic();
         $('#lobby').css('display', 'none');
-        return;
         YV.Intro.Reset(function() {
             YV.GamePhase = 'play';
         });
