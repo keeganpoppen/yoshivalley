@@ -95,6 +95,18 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         YV.RemoveExplosions(toremove);
     }
 
+    YV.RegularUpdate = function(dt) {
+        //immune from accumulator
+        updatePlanets(dt)
+        updateExplosions(dt)
+
+        for(accumulator += dt; accumulator > GLIB.Solver.TimeStep;
+                                accumulator -= GLIB.Solver.TimeStep) {
+            updatePlayerPositions();
+            updateProjectiles();
+        }
+    }
+
     YV.Update = function(dt) {
         switch(YV.GamePhase) {
         case 'lobby':
@@ -115,16 +127,9 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
             if(numPlayersLeft === 1) {
                 YV.End(lastPlayer);
             }
-            
-            //immune from accumulator
-            updatePlanets(dt)
-            updateExplosions(dt)
 
-            for(accumulator += dt; accumulator > GLIB.Solver.TimeStep;
-                                    accumulator -= GLIB.Solver.TimeStep) {
-                updatePlayerPositions();
-                updateProjectiles();
-            }
+            YV.RegularUpdate(dt)
+            
             break;
         case 'victory':
             updateExplosions(dt)

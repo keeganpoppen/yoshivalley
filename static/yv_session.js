@@ -3,7 +3,6 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 (function(){
     YV.GamePhase = 'lobby';
 
-
     //Called when a user initiates the current game
     YV.Begin = function() {
         YV.GamePhase = 'intro';
@@ -20,6 +19,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         //winner.controler.zrot = 0.0;
         YV.Victory.Reset(winner, function() {
             YV.GamePhase = 'awards_ceremony'
+
             YV.AwardsCeremony.Reset(function(){
                 YV.GamePhase = 'lobby';
                 YV.SetCameraTo(YV.Constants.camera.orbitAngle,
