@@ -76,7 +76,7 @@ var CannonThrottle = {};
 
     function send_data(){
         timeout = null
-        if(last_sent != last_update) {
+        if(last_sent != last_update && CONNECTED) {
             socket.send({type: 'laser:update', angle: last_update, player_id: player_id})
             last_sent = last_update
 
@@ -107,7 +107,7 @@ window.addEventListener('deviceorientation', function(e) {
     var yrot = e.gamma
     var zrot = e.alpha
 
-    if(GyroThrottle.should_send_given_input([xrot,yrot,zrot]) && player_id != -1) {
+    if(GyroThrottle.should_send_given_input([xrot,yrot,zrot]) && player_id != -1 && CONNECTED) {
         var arr = GyroThrottle.get_value() 
         var data = {}
         data.xrot = arr[0]; data.yrot = arr[1]; data.zrot = arr[2];
@@ -165,7 +165,7 @@ function bind_cannon_handlers(){
     document.body.addEventListener("touchmove", send_touch_angle, false)
 
     document.getElementById("fire_button").addEventListener("touchstart", function(){
-        socket.send({'type': 'laser:fire', 'angle': prev_angle, 'player_id': player_id})
+        if(CONNECTED) socket.send({'type': 'laser:fire', 'angle': prev_angle, 'player_id': player_id})
     }, false)
 }
 
@@ -182,13 +182,13 @@ function bind_keyboard_controls(){
         zrot += z;
         var data = {}
         data.xrot = xrot; data.yrot = yrot; data.zrot = zrot;
-        socket.send({'type': 'gyro:update', 'data': data, 'player_id': player_id})
+        if(CONNECTED) socket.send({'type': 'gyro:update', 'data': data, 'player_id': player_id})
     }
 
     window.addEventListener("keypress", function(e) {
         switch(e.keyCode) {
         case 32:
-            socket.send({'type': 'laser:fire', 'angle': prev_angle, 'player_id': player_id});
+            if(CONNECTED) socket.send({'type': 'laser:fire', 'angle': prev_angle, 'player_id': player_id});
             break;
         //WASD keys
         case 119: //Up

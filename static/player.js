@@ -11,12 +11,7 @@ var player_name;
  * set up socket
  */
 
-socket.connect();
-
-//on connection, let the server know we're a player
-socket.on('connect', function() {
-    socket.send({'client_type': 'player'})             
-})
+var CONNECTED = false
 
 //set up handling messages from the server
 socket.on('message', function(message) {
@@ -27,7 +22,7 @@ socket.on('message', function(message) {
                                    Math.floor(color[1]*255) + ", " +
                                    Math.floor(color[2]*255) + ")";
         $('body').css('color', colorstring);
-        $("#player_id").html(player_id)
+        //$("#player_id").html(player_id)
 
     } else if(message.type == 'set:color') {
         if(message.color === null) {
