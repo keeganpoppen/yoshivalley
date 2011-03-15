@@ -141,8 +141,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
             gl.uniform1f(loc_obj.uniforms.cannonAngle, player.cannon_angle)
             gl.uniform3f(loc_obj.uniforms.color, player.color[0], player.color[1], player.color[2]);
 
-            gl.activeTexture(gl.TEXTURE0)
-            ufo.ring_texture.bind()
+            ufo.ring_texture.bind(0)
             gl.uniform1i(loc_obj.uniforms.ringTex, 0)
 
             var pos = player.position
@@ -191,17 +190,23 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
     }
 
     function renderLasers(gl, laser, data) {
+        var no_lasers = true
+        YV.OverLasers(function(laser_id, laserObj) {
+            no_lasers = false
+        })
+
+        if(no_lasers) return
+
         //only ever create one laser buffer
         if(laser.buffer === undefined) laser.buffer = gl.createBuffer()
 
         //set laser texture
-        gl.activeTexture(gl.TEXTURE0)
-        laser.texture.bind()
-        gl.uniform1i(data.tex_loc, 0)
+        laser.texture.bind(0)
+        gl.uniform1i(data.uniforms.laserTex, 0)
 
         //lasers don't age, of course
-        gl.uniform1i(data.does_age_loc, 0);
-        gl.uniform1f(data.particle_size_loc, YV.Constants.laser.particleSize);
+        gl.uniform1i(data.uniforms.does_age, 0);
+        gl.uniform1f(data.uniforms.particleSize, YV.Constants.laser.particleSize);
 
         var vertices = []
 
@@ -220,11 +225,9 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         var vert_buffer = laser.buffer
         gl.bindBuffer(gl.ARRAY_BUFFER, vert_buffer)
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW)
-        gl.vertexAttribPointer(data.vertex_loc, 3, gl.FLOAT, false, 0, 0)
+        gl.vertexAttribPointer(data.attributes.a_position, 3, gl.FLOAT, false, 0, 0)
         
         gl.drawArrays(gl.POINTS, 0, vertices.length/3)
-
-        laser.texture.unbind()
     }
 
     function renderExplosions(gl, explosion) {
@@ -357,30 +360,18 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         var prog = gl.programs.particle.handle
         gl.programs.particle.bind()
 
-        //locations for uniforms & attribs set per particle_fn
-        var fn_data = {}
+        var data = getShaderVarLocations(gl, prog, {
+            uniforms: ['ModelViewProjectionMatrix', 'particleSize', 'laserTex', 'does_age'],
+            attributes: ['a_position', 'a_age_frac']
+        }, 'laser')
 
         //set modelviewprojection matrix
-        var modelview_loc = gl.getUniformLocation(prog, "ModelViewProjectionMatrix")
-        gl.uniformMatrix4fv(modelview_loc, false, new Float32Array(gl.xform.viewProjectionMatrix));
+        gl.uniformMatrix4fv(data.uniforms.ModelViewProjectionMatrix, false,
+                                new Float32Array(gl.xform.viewProjectionMatrix));
 
-        var particle_size_loc = gl.getUniformLocation(prog, "particleSize");
-        gl.uniform1f(particle_size_loc, 1.0);
-        fn_data.particle_size_loc = particle_size_loc;
+        gl.uniform1f(data.uniforms.particleSize, 1.0);
 
-        //get texture location
-        fn_data.tex_loc = gl.getUniformLocation(prog, "laserTex")
-
-        //get position attribute location
-        fn_data.vertex_loc = gl.getAttribLocation(prog, "a_position")
-
-        //get attrib locations for particle age & uniform for whether age effects alpha
-        fn_data.age_frac_loc = gl.getAttribLocation(prog, "a_age_frac")
-
-        fn_data.does_age_loc = gl.getUniformLocation(prog, "does_age") 
-
-        renderLasers(gl, YV.GetLaserData(), fn_data);
-        //renderExplosions(gl, , fn_data);
+        renderLasers(gl, YV.GetLaserData(), data);
 
         gl.programs.particle.unbind()
         disableParticleRendering(gl)

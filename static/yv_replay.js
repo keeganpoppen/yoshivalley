@@ -27,6 +27,8 @@ if(!YV || YV === undefined) throw "need a YV object, dawg!";
             frame_data.particles.explosions.push($.extend(true, {}, explosion))
         })
 
+        frame_data.aggregate_time = YV.GetAggregateTime()
+
         frames.push(frame_data)
     }
 
@@ -187,7 +189,10 @@ if(!YV || YV === undefined) throw "need a YV object, dawg!";
             if(slowmo_frame_count == 0) {
                 YV.MergeState(frames[++playhead])
             } else {
-                YV.RegularUpdate(dt / YV.Constants.replay.slowmo_mult)
+                var next_frame = frames[playhead+1]
+                var real_dt = next_frame.aggregate_time - YV.GetAggregateTime()
+
+                YV.RegularUpdate(real_dt / YV.Constants.replay.slowmo_mult)
             }
             slowmo_frame_count = (slowmo_frame_count + 1) % YV.Constants.replay.slowmo_mult
 
