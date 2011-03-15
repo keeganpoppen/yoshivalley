@@ -6,8 +6,6 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
     //Called when a user initiates the current game
     YV.Begin = function() {
         YV.GamePhase = 'intro';
-        YV.Audio.StopTitleMusic();
-        YV.Audio.StartMusic();
         $('#lobby').css('display', 'none');
         YV.Intro.Reset(function() {
             YV.GamePhase = 'play';
@@ -15,6 +13,8 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
     }
     
     YV.EnterLobby = function() {
+        YV.Audio.StopTitleMusic();
+        YV.Audio.StartMusic();
         YV.GamePhase = 'lobby';
         $('#lobby').css('display', 'block');
         YV.SetCameraTo(YV.Constants.camera.orbitAngle,
