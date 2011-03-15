@@ -92,7 +92,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
                 awards = YV.Replay.ComputeAwards()
                 console.log(awards)
 
-                if(awards.length == 0) {
+                if(awards == null || awards.length == 0) {
                     console.log("NO AWARDS!")
                     atEnd()
                 }
@@ -105,6 +105,8 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
             },
             TimeStep: function(dt) {
+                if(!cur_award || cur_award === undefined) return
+
                 cur_award.SetCamera()
 
                 if(!cur_award.TimeStep()) {
