@@ -107,6 +107,9 @@ if(!YV || YV === undefined) throw "need a YV object, dawg!";
 
     //helper function for pointing the camera position given a particular laser
     function cam_pos_from_particle(particle) {
+        if(particle === undefined) {
+            throw "UNDEF!!!"
+        }
         var trail_vec = particle.velocity.normalize().mul(new SglVec3(30. * YV.Constants.ufo.radius))
         return particle.position.add(trail_vec.neg).add(new SglVec3(0., YV.Constants.ufo.radius * 30., 0.))
     }
@@ -151,13 +154,17 @@ if(!YV || YV === undefined) throw "need a YV object, dawg!";
             playhead = play_start
         }
 
+        award.Shooter = frames[1].players[longest_kill.shooter_id]
+
         award.SetCamera = function() {
             var frame = frames[playhead]
 
             var cameraPosition, lookAt;
 
-            if(playhead < startFrame) {
+            if(playhead <= startFrame) {
                 var shooter = frame.players[longest_kill.shooter_id]
+                //console.log('shoot')
+                //console.log(shooter)
 
                 cameraPosition = cam_pos_from_particle(shooter)
                 lookAt = new SglVec3(shooter.position)
@@ -170,6 +177,8 @@ if(!YV || YV === undefined) throw "need a YV object, dawg!";
             } else {
                 var last_frame = frames[endFrame]
                 var victim = last_frame.players[longest_kill.victim_id]
+                //console.log('vic')
+                //console.log(victim)
 
                 cameraPosition = cam_pos_from_particle(victim)
                 lookAt = new SglVec3(victim.position)

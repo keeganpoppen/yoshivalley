@@ -268,9 +268,23 @@
                     var value = $("#name_field").val()
                     if(value != '') {
                         player_name = value
+
                         $("#name_prompt").css('display', 'none')
                         $("#normal_container").css('opacity', 1)
                         $('#player_id').html(value)
+
+                        //on connection, let the server know we're a player
+                        socket.on('connect', function() {
+                            CONNECTED = true
+                            console.log('sending name and stuff')
+                            socket.send({
+                                            client_type: 'player',
+                                            displayName: player_name
+                                         })
+                        })
+
+                        socket.connect();
+
                         setTimeout(window.scrollTo(0,0),10)
                     }
                     return false;

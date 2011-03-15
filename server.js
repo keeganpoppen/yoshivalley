@@ -113,7 +113,7 @@ socket.on('connection', function(client) {
             //send the player his/her player_id
             client.send({'type': 'init:setid', 'player_id': client.sessionId})
 
-            broadcast_to_viewers({'type': 'player:add', 'player_id': client.sessionId})
+            broadcast_to_viewers({'type': 'player:add', 'player_id': client.sessionId, 'displayName': message.displayName})
 
             client.on('message', function(message) {
                 //util.log('last message was ' + (Date.now() - last_message) + ' ms ago')
@@ -153,6 +153,7 @@ socket.on('connection', function(client) {
             })
         } else {
             util.log('player with unknown / undefined player type tried to connect')
+            console.log(util.inspect(message))
         }
     })
 

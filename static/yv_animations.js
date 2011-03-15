@@ -134,6 +134,27 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
                 endCallback = atEnd 
 
+                if(cur_award !== undefined) {
+                    if(cur_award.Shooter && cur_award.Shooter !== undefined) {
+                        var name = cur_award.Shooter.display_name
+                        var span = $('<span id="bestshot">Best shot: '+name+'</span>');
+                        var canvasParent = $('#game_div');
+                        canvasParent.append(span);
+                        var sw = span.width();
+
+                        var h = $('canvas').height();
+                        var w = $('canvas').width();
+                        span.css({
+                            'position': 'absolute',
+                            'top': h/6,
+                            'left': (w-sw)/2,
+                            'color': 'white',
+                            'font-size': 38,
+                            'font-family': 'sans-serif',
+                        });
+                    }
+                }
+
             },
             TimeStep: function(dt) {
                 if(!cur_award || cur_award === undefined) return
@@ -144,6 +165,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
                     console.log("TIME STEP FAIL")
                     if((++award_index) == awards.length) {
                         GLIB.Solver.TimeStep = YV.Constants.solver.timestep; 
+                        $("#bestshot").remove()
                         endCallback()
                     } else {
                         cur_award = awards[award_index]
