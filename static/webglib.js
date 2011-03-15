@@ -284,7 +284,7 @@ var GLIB = {};
 })();
 
 (function(){
-    function compileProgram(gl, shaders, stem) {
+    GLIB.compileProgram = function(gl, shaders, stem) {
         p = new SglProgram(gl, [shaders[stem + '.vert.glsl']],
                                [shaders[stem + '.frag.glsl']]);
         if(!p.isValid) {
@@ -299,7 +299,7 @@ var GLIB = {};
         $.each(shaders, function(shader_name, shader_text) {
             var stem = shader_name.split('.', 1)[0];
             if(!programs[stem])
-                programs[stem] = compileProgram(gl, shaders, stem);
+                programs[stem] = GLIB.compileProgram(gl, shaders, stem);
         });
         return programs;
     };

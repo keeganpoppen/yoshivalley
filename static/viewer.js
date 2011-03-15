@@ -17,6 +17,8 @@ GLIB.FireWhenReady(YV.Resources, function(resources) {
             YV.InitTextures(gl, resources.textures);
             YV.InitMeshes(gl);
 
+            YV.Title.Init(gl, resources);
+
             gl.ui = this.ui;
 
             //We want the canvas to resize with the window
@@ -42,10 +44,14 @@ GLIB.FireWhenReady(YV.Resources, function(resources) {
                     YV.MoveCamera(0, -5, 0);
                     break;
                 case 32: //Space
-                    YV.Begin();
+                    YV.EnterLobby();
                     break;
                 };
             }
+
+            window.onclick = function(e) {
+                YV.Begin();
+            };
 
             window.addEventListener('mousewheel', function(e) {
                 YV.MoveCamera(0, 0, -e.wheelDelta / 20);

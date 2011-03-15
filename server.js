@@ -1,6 +1,7 @@
 var connect = require('connect')
 var util = require('util')
 var io = require('socket.io')
+//var dns = require('ndns')
 var MessageTimer = require('./messagetimer')
 
 var router = connect.router(function(app) {
@@ -37,7 +38,7 @@ var server = connect(
     }
 )
 
-server.listen(6969) //listen on everyone's favorite port ;)
+server.listen(80) //listen on everyone's favorite port ;)
 
 util.log('server listening on port 6969... hotly')
 

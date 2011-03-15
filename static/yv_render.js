@@ -107,7 +107,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
                     NormalMatrix : gl.xform.worldSpaceNormalMatrix,
                     sunCenter : [0.0, 0.0, 0.0],
                     cameraPosition: cameraPos,
-                    color : player.color,
+                    color : YV.GetColor(player.color),
                     halfSphere : false,
                     shininess: YV.Constants.ufo.shininess,
                 },
@@ -139,7 +139,8 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
             gl.uniform1f(loc_obj.uniforms.ringRadius, YV.Constants.ufo.ringRadius)
             gl.uniform1f(loc_obj.uniforms.numRingParticles, NUM_RING_PARTICLES)
             gl.uniform1f(loc_obj.uniforms.cannonAngle, player.cannon_angle)
-            gl.uniform3f(loc_obj.uniforms.color, player.color[0], player.color[1], player.color[2]);
+            var color = YV.GetColor(player.color);
+            gl.uniform3f(loc_obj.uniforms.color, color[0], color[1], color[2]);
 
             ufo.ring_texture.bind(0)
             gl.uniform1i(loc_obj.uniforms.ringTex, 0)
@@ -354,7 +355,16 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         return ret
     }
 
-    function renderParticles(gl) {
+    function renderLasers(gl, laser) {
+        var present = false;
+        YV.OverLasers(function() {
+            present = true;
+        });
+        if(!present) return;
+
+        //only ever create one laser buffer
+        if(laser.buffer === undefined) laser.buffer = gl.createBuffer()
+
         enableParticleRendering(gl)
 
         var prog = gl.programs.particle.handle
@@ -382,13 +392,22 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
         gl.enable(gl.DEPTH_TEST);
 
-        setCamera(gl, YV.GetCamera());
-        renderBackground(gl, YV.GetBackground());
-        renderPlanets(gl);
-        renderUFOs(gl, YV.GetUFOData());
+        switch(YV.GamePhase) {
+        case 'title':
+            YV.Title.Render(gl, function() {
+                renderBackground(gl, YV.GetBackground());
+            });
+            break;
+        default:
+            setCamera(gl, YV.GetCamera());
+            renderBackground(gl, YV.GetBackground());
+            renderPlanets(gl);
+            renderUFOs(gl, YV.GetUFOData());
 
-        renderParticles(gl);
-        renderExplosions(gl, YV.GetExplosionData());
+            renderLasers(gl, YV.GetLaserData());
+            renderExplosions(gl, YV.GetExplosionData());
+            break;
+        }
         gl.disable(gl.DEPTH_TEST);
     }
 })();
