@@ -22,7 +22,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
             },
 
             TimeStep : function(dt) {
-                if(YV.GetCamera().orbitRadius >= YV.Constants.camera.orbitRadius) {
+                if(YV.GetCamera().orbitRadius >= YV.Constants.camera.orbitRadius - radiusVelocity/16) {
                     YV.SetCameraTo(YV.Constants.camera.orbitAngle,
                                    YV.Constants.camera.azimuth,
                                    YV.Constants.camera.orbitRadius);    
@@ -116,7 +116,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
         var awards_ceremony = {
             Reset: function(atEnd) {
                 //Dynamically adjust the step time
-                GLIB.Solver.TimeStep = 0.005;
+                GLIB.Solver.TimeStep = 0.0005;
 
                 console.log('STARTING THE REPLAY!!!')
 
