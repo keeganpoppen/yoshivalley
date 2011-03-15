@@ -486,6 +486,9 @@
     };
 
     YV.ResetPlayers = function(winner) {
+        var ranking = [];
+        ranking.push(winner);
+    
         //The winner always gets to keep playing and keep her color
         resetPlayer(winner.color, winner);
         winner.lives = YV.Constants.ufo.lives;
@@ -503,6 +506,7 @@
         for(var i = State.killedPlayers.length-1; i >= 0; --i) {
             var player_id = State.killedPlayers[i][0];
             var player = State.killedPlayers[i][1];
+            ranking.push(player);
             if(numDefeateds > 0) {
                 resetPlayer(player.color, player);
                 player.lives = YV.Constants.ufo.lives;
@@ -525,7 +529,18 @@
             State.players[player_id] = player;
         }
         State.waitingPlayers.splice(0, numWaiters);
+
+        //Update the lobby div with our new ranking
+        var ol = $('#ranking');
+        $.each(ranking, function(player_id, player) {
+            var item = $("<li>" + player.display_name + "</li>");
+            ol.append(item);
+        });
     };
+
+    YV.NotifyPlayers = function() {
+        YV.SendPlayerNotifications(State.players);
+    }
 
     function bracketed(min, max, val) {
         val = Math.max(min, val)

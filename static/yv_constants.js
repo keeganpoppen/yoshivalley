@@ -25,7 +25,7 @@
         var ufoMass = 0.5 * sunMass;
 
         var fieldOfView = 60.0;
-        var cameraRadius = Math.abs(3.0 * arenaRadius / Math.tan(sglDegToRad(fieldOfView)));
+        var cameraRadius = Math.abs(3.2 * arenaRadius / Math.tan(sglDegToRad(fieldOfView)));
     
         var constants = {
             maxPlayers: 8,
@@ -75,7 +75,7 @@
                 orbitAngle: 0.0,
                 near: 0.1,
                 far: 3*cameraRadius,
-                azimuth: 85,
+                azimuth: 89.9,
             },
 
             planets : {

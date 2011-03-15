@@ -5,6 +5,7 @@ if(!YV || YV === undefined) throw "need to load yv.js first!";
 
     //Called when a user initiates the current game
     YV.Begin = function() {
+        YV.NotifyPlayers();
         YV.GamePhase = 'intro';
         $('#lobby').css('display', 'none');
         YV.Intro.Reset(function() {
