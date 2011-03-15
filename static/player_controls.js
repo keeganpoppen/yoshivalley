@@ -129,6 +129,8 @@ var send_touch_angle = function(e) {
     var angle = Math.atan2(-deviation_y, deviation_x)
     prev_angle = angle
 
+    draw(-angle - Math.PI / 2)
+
     CannonThrottle.AcceptInput(angle)
     return false
 }
