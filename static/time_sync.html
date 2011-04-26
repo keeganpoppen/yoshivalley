@@ -1,0 +1,53 @@
+<html>
+    <head>
+        <title>Time Sync Demo</title>
+		<script src="/jquery-1.5.1.min.js"></script>
+		<script src="/socket.io.js"></script>
+        <script>
+            var socket = new io.Socket()
+            var time_offset;
+            
+            var signal_div = null;
+            $(function(){
+                signal_div = $('#signal_div')
+            })
+
+            function getUTCMillis(){
+                var d  = new Date()
+                return d.getTime() + (d.getTimezoneOffset() + 60 * 1000)
+            }
+
+            socket.on('connect', function(){
+                console.log('connected to socket!')
+            })
+
+            socket.on('message', function(message) {
+                if(message.type == 'clock_sync') {
+                    message.received_time = getUTCMillis()
+
+                    socket.send(message)
+                } else if(message.type == 'offset') {
+                    time_offset = message.offset
+                } else if(message.type == 'schedule_event') {
+                    var time_dist = message.time - (getUTCMillis() + time_offset)
+
+                    //console.log("scheding event for univ time " + message.time + " in " + time_dist)
+
+                    setTimeout(function(){
+                        //console.log("TIME!!!")
+                        signal_div.css('background-color', 'red')
+                        setTimeout(function(){
+                            signal_div.css('background-color', 'white')
+                        }, 250)
+                    }, time_dist)
+                }
+            })
+
+            socket.connect()
+
+        </script>
+    </head>
+    <body>
+        <div id="signal_div" style="width:800px;height:800px;"></div>
+    </body>
+</html>

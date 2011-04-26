@@ -1,0 +1,94 @@
+<html>
+    <head>
+        <title>Object Sync Demo</title>
+        <script src="/yepnope.1.0.1-min.js"></script>
+        <!--
+		<script src="/jquery-1.5.1.min.js"></script>
+		<script src="/socket.io.js"></script>
+        <script src="/underscore-min.js"></script>
+        <script src="/microevent.js"></script>
+        -->
+        <script src="/load.js"></script>
+        <script>
+            //copied!
+            var NAMESPACE_SEPARATOR = '.'
+
+            function getUTCMillis(){
+                var d  = new Date()
+                return d.getTime() + (d.getTimezoneOffset() + 60 * 1000)
+            }
+            
+        </script>
+        <script>
+
+            Load(['/event_router.js', '/microevent.js'], function(){
+                var er = new EventRouter(SocketRouter, 'test', function(route_arr, message){
+                    console.log('fun')
+                })
+                SocketRouter.addRouter('test', er)
+                er.send({key1: 'val1'})
+
+                MicroEvent.mixin(AutoSync)
+
+                var o = new AutoSync(er, 'test', {
+                    key1: 'value1',
+                    key2: 'value2'
+                })
+
+
+
+            })
+
+
+            var AutoSync = function(socket, name, obj) {
+                var _syncName = name
+                this.history = {}
+                var data = {}
+                var that = this
+
+                function archiveValue(key){
+                    if(_.isEmpty(history[key])) history[key] = []
+
+                    history[key].push({
+                        time: getUTCMillis(),
+                        value: data[key]
+                    })
+                }
+
+                _.each(obj, function(value, key) {
+                    that.__defineGetter__(key, function(){
+                        //console.log('get')
+                        return data[key]
+                    })
+                    that.__defineSetter__(key, function(newval){
+                        //console.log('set')
+                        archiveValue(key)
+                        data[key] = newval
+                        socket.send({
+                            type:'autosync.update',
+                            key: key,
+                            value: newval,
+                            name: _syncName
+                        })
+                        return newval
+                    })
+
+                    data[key] = value
+                })
+
+                socket.send({
+                    type: 'autosync.create',
+                    value: data,
+                    name: _syncName
+                })
+            }
+        </script>
+    </head>
+    <body>
+        <div style="width:800px;margin:auto;background-color:#1aff00;padding:30px 40px;">
+            <div style="width:400px;margin:auto;font-family:'Futura';font-size:48px;">
+                <marquee>WELCOME TO OBJECT SYNC, BRAH!</marquee>
+            </div>
+        </div>
+    </body>
+</html>
