@@ -32,7 +32,7 @@ var SocketRouter = (function(socket){
     }
 
     sr.send = function(route_name, message) {
-        message.type = [_prefix, route_name].join(_namespace_separator) + (message.type||'')
+        message.type = [_prefix, route_name, (message.type||'')].join(_namespace_separator)
         socket.send(message)
     }
 
@@ -41,12 +41,7 @@ var SocketRouter = (function(socket){
         var routes_arr = message.type.split(_namespace_separator).slice(1)
         var route_name = routes_arr[0]
 
-        console.log(route_name)
-        console.log(routes_arr)
-        
-        console.log(routes)
         if(route_name == null || !(route_name in routes)) return
-
 
         routes[route_name].receive(routes_arr.slice(1), message)
     })

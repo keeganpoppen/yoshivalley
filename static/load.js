@@ -7,10 +7,6 @@ var _default_deps = [
     '/socket.io.js'
 ]
 
-
-/*
- *
- */
 Load = function(paths, callback){
     yepnope({
         load: _default_deps.concat(paths),

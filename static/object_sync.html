@@ -20,68 +20,102 @@
             
         </script>
         <script>
+            var AutoSync = (function(){
+                var autosync = function(){ return null }
 
-            Load(['/event_router.js', '/microevent.js'], function(){
-                var er = new EventRouter(SocketRouter, 'test', function(route_arr, message){
-                    console.log('fun')
-                })
-                SocketRouter.addRouter('test', er)
-                er.send({key1: 'val1'})
+                //load all them hot, hot dependencies
+                Load(['/event_router.js', '/microevent.js'], function(){
+                    var autosync_map = {}
 
-                MicroEvent.mixin(AutoSync)
+                    var autosync_router = new EventRouter(SocketRouter, 'autosync', function(route_arr, message){
+                        if(route_arr.length < 2) return
+                        if(route_arr[0] == 'create' && route_arr[1] in autosync_map) return
 
-                var o = new AutoSync(er, 'test', {
-                    key1: 'value1',
-                    key2: 'value2'
-                })
+                        var autosync_obj = autosync_map[route_arr[1]] || new autosync(route_arr[1],{})
 
+                        //to avoid an 'update' endless loop
+                        autosync_obj.chatty = false
 
+                        //getters and setters should take care of the rest
+                        $.extend(true, autosync_obj, message.data)
 
-            })
+                        console.log('object now updated to: ', autosync_obj)
 
+                        //otherwise updating is good
+                        autosync_obj.chatty = true
 
-            var AutoSync = function(socket, name, obj) {
-                var _syncName = name
-                this.history = {}
-                var data = {}
-                var that = this
-
-                function archiveValue(key){
-                    if(_.isEmpty(history[key])) history[key] = []
-
-                    history[key].push({
-                        time: getUTCMillis(),
-                        value: data[key]
+                        autosync_map[route_arr[1]] = autosync_obj
                     })
-                }
 
-                _.each(obj, function(value, key) {
-                    that.__defineGetter__(key, function(){
-                        //console.log('get')
-                        return data[key]
-                    })
-                    that.__defineSetter__(key, function(newval){
-                        //console.log('set')
-                        archiveValue(key)
-                        data[key] = newval
-                        socket.send({
-                            type:'autosync.update',
-                            key: key,
-                            value: newval,
-                            name: _syncName
+                    SocketRouter.addRouter('autosync', autosync_router)
+
+                    MicroEvent.mixin(AutoSync)
+
+                    autosync = function(name, obj) {
+                        console.log('creating new autosync obj with name: ' + name)
+                        
+                        if(name in autosync_map) throw "oops";
+                        autosync_map[name] = this
+
+                        var _syncName = name
+                        var history = {}
+                        this.getHistory = function(){ return history; }
+                        this.chatty = true
+
+                        var data = {}
+                        var that = this
+
+                        function archiveValue(key){
+                            if(_.isEmpty(history[key])) history[key] = []
+
+                            history[key].push({
+                                time: getUTCMillis(),
+                                value: data[key]
+                            })
+                        }
+
+                        _.each(obj, function(value, key) {
+                            that.__defineGetter__(key, function(){
+                                //console.log('get')
+                                return data[key]
+                            })
+                            that.__defineSetter__(key, function(newval){
+                                //console.log('set')
+                                archiveValue(key)
+                                data[key] = newval
+
+                                var update_packet = {}
+                                update_packet[key] = newval
+
+                                if(that.chatty) {
+                                    autosync_router.send({
+                                        type: ['update',name].join('.'),
+                                        data: update_packet
+                                    })
+                                }
+                                return newval
+                            })
+
+                            data[key] = value
                         })
-                        return newval
+
+                        console.log(data)
+
+                        autosync_router.send({
+                            type: ['create',name].join('.'),
+                            data: data
+                        })
+                    }
+
+                    window.awesometest = new autosync('test', {
+                        key1: 1,
+                        key2: 2
                     })
 
-                    data[key] = value
                 })
 
-                socket.send({
-                    type: 'autosync.create',
-                    value: data,
-                    name: _syncName
-                })
-            }
+                return autosync
+            })();
         </script>
     </head>
     <body>
